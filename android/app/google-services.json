@@ -1,0 +1,91 @@
+{
+  "project_info": {
+    "project_number": "174497811264",
+    "firebase_url": "https://zipgameday-6ef28.firebaseio.com",
+    "project_id": "zipgameday-6ef28",
+    "storage_bucket": "zipgameday-6ef28.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174497811264:android:99ee1df8e9afae70fd08a5",
+        "android_client_info": {
+          "package_name": "com.example.zipapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "174497811264-hjtdu98cd6vr1q4j54oggh72t9j5n19a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjOhdcrJRdwLDiu7Qf0A9yxIE5bKrOxPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "174497811264-hjtdu98cd6vr1q4j54oggh72t9j5n19a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "174497811264-1poipmtd27j2va1d4pvcqa7fr1j384er.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zipapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174497811264:android:af4179c439652ca5fd08a5",
+        "android_client_info": {
+          "package_name": "com.zipgameday.zip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zipgameday.zip",
+            "certificate_hash": "247ba990822d32db70abc2cb1a3c10664b864a20"
+          }
+        },
+        {
+          "client_id": "174497811264-hjtdu98cd6vr1q4j54oggh72t9j5n19a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjOhdcrJRdwLDiu7Qf0A9yxIE5bKrOxPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "174497811264-hjtdu98cd6vr1q4j54oggh72t9j5n19a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "174497811264-1poipmtd27j2va1d4pvcqa7fr1j384er.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zipapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

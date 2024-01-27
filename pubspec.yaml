@@ -1,0 +1,57 @@
+name: zipapp
+description: "A new Flutter project."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.2.5 <4.0.0"
+
+dependencies:
+  cloud_firestore: ^4.14.0
+  cloud_functions: ^4.6.0
+  firebase_analytics: ^10.8.0
+  firebase_auth: ^4.16.0
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.10
+  firebase_storage: ^11.6.0
+  flutter:
+    sdk: flutter
+  flutter_google_places: ^0.3.0
+  flutter_polyline_points: ^1.0.0
+  flutter_speed_dial: ^7.0.0
+  geolocator: ^10.1.0
+  google_maps_flutter: ^2.5.3
+  google_maps_webservice: ^0.0.20-nullsafety.5
+  google_sign_in: ^6.2.1
+  image_picker: ^1.0.7
+  intl: ^0.19.0
+  location_permissions: ^4.0.1
+  mailto: ^2.0.0
+  material_design_icons_flutter: ^7.0.7296
+  percent_indicator: ^4.2.3
+  shared_preferences: ^2.2.2
+  strings: ^3.0.0
+  url_launcher: ^6.2.4
+  webview_flutter: ^4.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/iTunesArtwork@1x.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/profile_default.png
+    - assets/golf_cart.png
+    - assets/ZipYellowB.png
+    - assets/iTunesArtwork@1x.png
+    - assets/map_style.txt
+    - assets/connectstripe_blurple_2x.png
+    - assets/connectstripe_blurple_4x.png
