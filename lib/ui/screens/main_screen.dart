@@ -135,7 +135,7 @@ class _MainScreenState extends State<MainScreen> {
   //       fontWeight: FontWeight.w600,
   //     ));
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
     mapScaffoldKey = GlobalKey();
     bottomSheetStatus = BottomSheetStatus.welcome;
@@ -409,9 +409,9 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
         key: _scaffoldKey,
         body: Stack(children: <Widget>[
-          TheMap(
-            key: mapScaffoldKey,
-          ),
+          // TheMap(
+          //   key: mapScaffoldKey,
+          // ),
           Align(
             alignment: Alignment.topLeft,
             child: SafeArea(
@@ -1207,7 +1207,7 @@ class MapScreen extends State<TheMap> {
   ///these three objects are used for the markers
   ///that display nearby drivers.
   final Set<Marker> _markers = {};
-  late BitmapDescriptor pinLocationIcon;
+  BitmapDescriptor pinLocationIcon = BitmapDescriptor.defaultMarker;
   Set<LatLng> driverPositions = {
     const LatLng(32.62532, -85.46849),
     const LatLng(32.62932, -85.46249)

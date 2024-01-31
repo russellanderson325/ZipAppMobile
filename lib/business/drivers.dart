@@ -29,20 +29,20 @@ class DriverService {
   // GeoFirePoint myLocation;
   late Driver driver;
   late CurrentShift currentShift;
-  late StreamSubscription<Driver> driverSub;
+  StreamSubscription<Driver>? driverSub;
   // Request specific variables
   late CollectionReference requestCollection;
-  late StreamSubscription<Request> requestSub;
+  StreamSubscription<Request>? requestSub;
   late Stream<Request> requestStream;
   late Request currentRequest;
   // Ride specific varaibles
   late Stream<Ride> rideStream;
-  late StreamSubscription<Ride> rideSub;
+  StreamSubscription<Ride>? rideSub;
   late Ride currentRide;
   //Shift specific variables
   late String shiftuid;
 
-  late Function uiCallbackFunction;
+  Function? uiCallbackFunction;
 
   HttpsCallable driverClockInFunction =
       FirebaseFunctions.instance.httpsCallable(
@@ -95,28 +95,35 @@ class DriverService {
     }).listen((driver) {
       this.driver = driver;
     });
-    locationSub.cancel();
-    // locationSub = locationService.positionStream.listen(_updatePosition);
+    //locationSub.cancel();
+    locationSub = locationService.positionStream.listen(_updatePosition);
     if (kDebugMode) {
       print("DriverService setup");
     }
     return true;
   }
 
-  // void _updatePosition(Position pos) {
-  //   if (driver.isWorking) {
-  //     this.myLocation =
-  //         geo.point(latitude: pos.latitude, longitude: pos.longitude);
-  //     print("Updating geoFirePoint to: ${myLocation.toString()}");
-  //     // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
-  //     driverReference.update(
-  //         {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
-  //   }
-  // }
+  void _updatePosition(Position pos) {
+    if (driver.isWorking) {
+      // this.myLocation =
+      //     geo.point(latitude: pos.latitude, longitude: pos.longitude);
+      // print("Updating geoFirePoint to: ${myLocation.toString()}");
+      // // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
+      // driverReference.update(
+      //     {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
+      driverReference.update({
+        'lastActivity': DateTime.now(),
+        'geoFirePoint': {
+          'geohash': 'djg1qxwqx',
+          'geopoint': const GeoPoint(0, 0)
+        }
+      });
+    }
+  }
 
   Future<void> startDriving(Function callback) async {
     uiCallbackFunction = callback;
-    uiCallbackFunction(DriverBottomSheetStatus.searching);
+    uiCallbackFunction!(DriverBottomSheetStatus.searching);
     requestStream = requestCollection
         .snapshots()
         .map((event) => event.docs
@@ -149,7 +156,7 @@ class DriverService {
       }
       declineRequest(req.id);
     });
-    uiCallbackFunction(DriverBottomSheetStatus.confirmation);
+    uiCallbackFunction!(DriverBottomSheetStatus.confirmation);
   }
 
   Future<void> declineRequest(String requestID) async {
@@ -166,7 +173,7 @@ class DriverService {
           .doc(requestID)
           .update({'status': "SEARCHING"});
       await requestCollection.doc(requestID).delete();
-      uiCallbackFunction(DriverBottomSheetStatus.searching);
+      uiCallbackFunction!(DriverBottomSheetStatus.searching);
     }
     if (kDebugMode) {
       print("Request is already deleted");
@@ -211,10 +218,18 @@ class DriverService {
       // 'isWorking': false,
       'currentRideID': ''
     });
-    requestSub.cancel();
-    driverSub.cancel();
-    rideSub.cancel();
-    uiCallbackFunction(DriverBottomSheetStatus.closed);
+    if (requestSub != null) {
+      requestSub!.cancel();
+    }
+    if (driverSub != null) {
+      driverSub!.cancel();
+    }
+    if (rideSub != null) {
+      rideSub!.cancel();
+    }
+    if (uiCallbackFunction != null) {
+      uiCallbackFunction!(DriverBottomSheetStatus.closed);
+    }
   }
 
   void completeRide() async {
@@ -292,7 +307,7 @@ class DriverService {
     currentRide = updatedRide;
     switch (updatedRide.status) {
       case 'CANCELED':
-        uiCallbackFunction(DriverBottomSheetStatus.closed);
+        uiCallbackFunction!(DriverBottomSheetStatus.closed);
         cancelRide();
         if (showDebugPrints) {
           if (kDebugMode) {
@@ -301,7 +316,7 @@ class DriverService {
         }
         break;
       case 'IN_PROGRESS':
-        uiCallbackFunction(DriverBottomSheetStatus.rideDetails);
+        uiCallbackFunction!(DriverBottomSheetStatus.rideDetails);
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride is now IN_PROGRESS");
@@ -309,7 +324,7 @@ class DriverService {
         }
         break;
       case 'ENDED':
-        uiCallbackFunction(DriverBottomSheetStatus.closed);
+        uiCallbackFunction!(DriverBottomSheetStatus.closed);
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride has ended.");

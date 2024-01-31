@@ -9,11 +9,21 @@ class LocationService {
   final Geolocator geolocator = Geolocator();
   //Geoflutterfire geo = Geoflutterfire();
   //GeolocationStatus geolocationStatus;
-  late Position position;
+  Position position = Position(
+      longitude: 0,
+      latitude: 0,
+      timestamp: DateTime(1, 1, 2024),
+      accuracy: 0.0,
+      altitude: 0.0,
+      altitudeAccuracy: 0.0,
+      heading: 0.0,
+      headingAccuracy: 0.0,
+      speed: 0.0,
+      speedAccuracy: 0.0);
   bool initizalized = false;
   LocationSettings locationOptions = const LocationSettings(
       accuracy: LocationAccuracy.high, distanceFilter: 10);
-  late Stream<Position> positionStream;
+  Stream<Position> positionStream = const Stream.empty();
   late StreamSubscription<Position> positionSub;
 
   factory LocationService() {
@@ -57,10 +67,10 @@ class LocationService {
       //       "current position is null - using geolocator to get current position now.");
       //   position = await Geolocator.getCurrentPosition();
       // }
-      if (kDebugMode) {
-        print("Latitude: ${position.latitude}");
-        print("Longitiude: ${position.longitude}");
-      }
+      // if (kDebugMode) {
+      //   print("Latitude: ${position.latitude}");
+      //   print("Longitiude: ${position.longitude}");
+      // }
       // Create position stream and subscribe to keep service's position up to date.
       positionStream =
           Geolocator.getPositionStream(locationSettings: locationOptions)
