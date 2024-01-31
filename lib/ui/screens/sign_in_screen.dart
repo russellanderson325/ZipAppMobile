@@ -49,7 +49,7 @@ class SignInScreenState extends State<SignInScreen> {
       obscureText: true,
       hint: "Password",
       validator: Validator.validatePassword,
-      customTextIcon: Icon(CustomIcons.lock, color: Colors.grey[400]),
+      customTextIcon: Icon(CustomIcons.lock, color: Colors.grey.shade400),
     );
   }
 

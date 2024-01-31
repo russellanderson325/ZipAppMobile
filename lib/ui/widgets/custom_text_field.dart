@@ -47,7 +47,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
         child: TextField(
           obscureText: widget.obscureText,
           onChanged: (text) {
-            widget.onChanged!(text);
+            if (widget.onChanged != null) {
+              widget.onChanged!(text);
+            }
             setState(() {
               if (!widget.validator(text) || text.isEmpty) {
                 currentColor = widget.errorColor;
