@@ -26,14 +26,14 @@ class User {
       required this.lastName,
       required this.phone,
       required this.email,
-      required this.credits,
-      required this.homeAddress,
+      this.credits = 0,
+      this.homeAddress = "",
       required this.lastActivity,
       required this.profilePictureURL,
-      required this.isDriver,
-      required this.defaultTip,
-      required this.acceptedtc,
-      required this.acceptedPrivPolicy,
+      this.isDriver = false,
+      this.defaultTip = 0,
+      this.acceptedtc = false,
+      this.acceptedPrivPolicy = false,
       this.pastRides,
       this.pastDrives});
 
@@ -57,7 +57,7 @@ class User {
     };
   }
 
-  factory User.fromJson(Map<String, Object> doc) {
+  factory User.fromJson(Map<String, dynamic> doc) {
     num creds = (doc['credits'] ?? 0.0) as num;
     num defTip = (doc['defaultTip'] ?? 0.0) as num;
 
@@ -108,7 +108,7 @@ class User {
   }
 
   factory User.fromDocument(DocumentSnapshot doc) {
-    return User.fromJson(doc.data() as Map<String, Object>);
+    return User.fromJson(doc.data() as Map<String, dynamic>);
   }
 
   void updateActivity() {

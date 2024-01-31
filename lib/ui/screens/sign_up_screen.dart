@@ -1,20 +1,20 @@
 import 'dart:core';
 import "package:flutter/material.dart";
-// import 'package:zip/business/auth.dart';
+import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/validator.dart';
 import 'package:flutter/services.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
-// import 'package:zip/models/user.dart';
+import 'package:zipapp/models/user.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/ui/widgets/custom_text_field.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  SignUpScreenState createState() => SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _firstname = TextEditingController();
   final TextEditingController _lastname = TextEditingController();
   final TextEditingController _number = TextEditingController();
@@ -31,7 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   var pastRides = [];
   var pastDrives = [];
 
-  // final auth = AuthService();
+  final auth = AuthService();
 
   @override
   void initState() {
@@ -159,12 +159,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         fontWeight: FontWeight.w700,
                         textColor: Colors.black,
                         onPressed: () {
-                          // _signUp(
-                          //     firstname: _firstname.text,
-                          //     lastname: _lastname.text,
-                          //     email: _email.text,
-                          //     number: _number.text,
-                          //     password: _password.text);
+                          _signUp(
+                              firstname: _firstname.text,
+                              lastname: _lastname.text,
+                              email: _email.text,
+                              number: _number.text,
+                              password: _password.text);
                         },
                         splashColor: Colors.black12,
                         borderColor: const Color.fromRGBO(59, 89, 152, 1.0),
@@ -232,46 +232,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
   If information is valid, add a new user.
   Else, have user enter new information.
 */
-  // void _signUp(
-  //     {String firstname,
-  //     String lastname,
-  //     String number,
-  //     String email,
-  //     String password,
-  //     BuildContext context}) async {
-  //   if (Validator.validateName(firstname) &&
-  //       Validator.validateName(lastname) &&
-  //       Validator.validateEmail(email) &&
-  //       Validator.validateNumber(number) &&
-  //       Validator.validatePassword(password)) {
-  //     try {
-  //       SystemChannels.textInput.invokeMethod('TextInput.hide');
-  //       _changeBlackVisible();
-  //       await auth.signUp(email, password).then((uid) {
-  //         auth.addUser(User(
-  //           uid: uid,
-  //           email: email,
-  //           firstName: firstname,
-  //           lastName: lastname,
-  //           phone: number,
-  //           profilePictureURL: '',
-  //           lastActivity: DateTime.now(),
-  //           pastRides: [],
-  //           pastDrives: [],
-  //         ));
-  //         onBackPress();
-  //       });
-  //     } catch (e) {
-  //       print("Error in sign up: $e");
-  //       String exception = auth.getExceptionText(e);
-  //       _showErrorAlert(
-  //         title: "Signup failed",
-  //         content: exception,
-  //         onPressed: _changeBlackVisible,
-  //       );
-  //     }
-  //   }
-  // }
+  void _signUp({
+    required String firstname,
+    required String lastname,
+    required String number,
+    required String email,
+    required String password,
+  }) async {
+    /// Test to see if the user has entered valid information
+    if (Validator.validateName(firstname) &&
+        Validator.validateName(lastname) &&
+        Validator.validateEmail(email) &&
+        Validator.validateNumber(number) &&
+        Validator.validatePassword(password)) {
+      try {
+        /// Hides native keyboard
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        _changeBlackVisible();
+        await auth.signUp(email, password).then((uid) {
+          auth.addUser(User(
+            uid: uid,
+            email: email,
+            firstName: firstname,
+            lastName: lastname,
+            phone: number,
+            profilePictureURL: '',
+            lastActivity: DateTime.now(),
+            pastRides: [],
+            pastDrives: [],
+          ));
+          onBackPress();
+        });
+      } catch (e) {
+        String exception = auth.getExceptionText(e as PlatformException);
+        _showErrorAlert(
+          title: "Signup failed",
+          content: exception,
+          onPressed: _changeBlackVisible,
+        );
+      }
+    }
+  }
 
   void _showErrorAlert(
       {String? title, String? content, VoidCallback? onPressed}) {

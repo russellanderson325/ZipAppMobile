@@ -7,6 +7,7 @@ import 'package:zipapp/ui/screens/sign_in_screen.dart';
 import 'package:zipapp/ui/screens/sign_up_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
@@ -21,6 +22,7 @@ void main() async {
 
 class MainApp extends StatelessWidget {
   final SharedPreferences prefs;
+
   const MainApp({super.key, required this.prefs});
 
   @override
@@ -28,6 +30,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'Zip Gameday',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       routes: <String, WidgetBuilder>{
         '/root': (BuildContext context) => const RootScreen(),
         '/signin': (BuildContext context) => const SignInScreen(),
