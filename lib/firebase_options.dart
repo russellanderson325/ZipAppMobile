@@ -56,7 +56,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCjOhdcrJRdwLDiu7Qf0A9yxIE5bKrOxPk',
-    appId: '1:174497811264:android:99ee1df8e9afae70fd08a5',
+    appId: '1:174497811264:android:dec84c8e26a0b24dfd08a5',
     messagingSenderId: '174497811264',
     projectId: 'zipgameday-6ef28',
     databaseURL: 'https://zipgameday-6ef28.firebaseio.com',
@@ -65,29 +65,25 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD9DKNhJbRu_uX3QeBcwj9DS0jxUkbSIUY',
-    appId: '1:174497811264:ios:e93fc7f7199e47effd08a5',
+    appId: '1:174497811264:ios:8241fd6026229f1afd08a5',
     messagingSenderId: '174497811264',
     projectId: 'zipgameday-6ef28',
     databaseURL: 'https://zipgameday-6ef28.firebaseio.com',
     storageBucket: 'zipgameday-6ef28.appspot.com',
-    androidClientId:
-        '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
-    iosClientId:
-        '174497811264-1poipmtd27j2va1d4pvcqa7fr1j384er.apps.googleusercontent.com',
+    androidClientId: '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
+    iosClientId: '174497811264-3tu3dvmfhvn2tnjrrhd9mudevu9fbjdo.apps.googleusercontent.com',
     iosBundleId: 'com.example.zipapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyD9DKNhJbRu_uX3QeBcwj9DS0jxUkbSIUY',
-    appId: '1:174497811264:ios:e4215dbe39433514fd08a5',
+    appId: '1:174497811264:ios:5f4a262398ce6e32fd08a5',
     messagingSenderId: '174497811264',
     projectId: 'zipgameday-6ef28',
     databaseURL: 'https://zipgameday-6ef28.firebaseio.com',
     storageBucket: 'zipgameday-6ef28.appspot.com',
-    androidClientId:
-        '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
-    iosClientId:
-        '174497811264-n47l6tqven115o62o4bjd6jp5gu25gnm.apps.googleusercontent.com',
+    androidClientId: '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
+    iosClientId: '174497811264-7q3mjjvh23vn85g43a7dhk6kgf34fnqc.apps.googleusercontent.com',
     iosBundleId: 'com.example.zipapp.RunnerTests',
   );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zipapp/firebase_options.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:zipapp/ui/screens/profile_screen.dart';
 import 'package:zipapp/ui/screens/root_screen.dart';
@@ -14,7 +15,9 @@ void main() async {
   // );
   // runApp(const MainApp());
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   SharedPreferences.getInstance().then((prefs) {
     runApp(MainApp(prefs: prefs));
   });
