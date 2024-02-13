@@ -26,6 +26,7 @@ import 'package:zipapp/ui/screens/payment_screen.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:zipapp/business/payment.dart' as payment_details;
+import 'package:zipapp/ui/widgets/map.dart' as main_map;
 //import 'package:firebase_auth/firebase_auth.dart';
 
 enum BottomSheetStatus {
@@ -412,6 +413,9 @@ class _MainScreenState extends State<MainScreen> {
           // TheMap(
           //   key: mapScaffoldKey,
           // ),
+          main_map.Map(
+            key: mapScaffoldKey,
+          ),
           Align(
             alignment: Alignment.topLeft,
             child: SafeArea(
