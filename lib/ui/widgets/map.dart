@@ -11,6 +11,7 @@ class Map extends StatefulWidget {
 }
 
 class MapSampleState extends State<Map> {
+  String mapTheme = '';
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
@@ -26,12 +27,22 @@ class MapSampleState extends State<Map> {
       zoom: 19.151926040649414);
 
   @override
+  void initState() {
+    super.initState();
+    DefaultAssetBundle.of(context)
+        .loadString('assets/mapthemes/uber_theme.json')
+        .then((value) {
+      mapTheme = value;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
-        mapType: MapType.hybrid,
         initialCameraPosition: _kGooglePlex,
         onMapCreated: (GoogleMapController controller) {
+          controller.setMapStyle(mapTheme);
           _controller.complete(controller);
         },
       ),

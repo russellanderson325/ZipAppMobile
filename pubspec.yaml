@@ -55,3 +55,4 @@ flutter:
     - assets/map_style.txt
     - assets/connectstripe_blurple_2x.png
     - assets/connectstripe_blurple_4x.png
+    - assets/mapthemes/uber_theme.json
