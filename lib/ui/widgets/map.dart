@@ -44,29 +44,40 @@ class MapSampleState extends State<Map> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: userPosition == null
-      ? const Center(child: CircularProgressIndicator())
-      : GoogleMap(
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          controller.setMapStyle(mapTheme);
-          _controller.complete(controller);
-        },
-      ),
+          ? const Center(child: CircularProgressIndicator())
+          : GoogleMap(
+              initialCameraPosition: _kGooglePlex,
+              onMapCreated: (GoogleMapController controller) {
+                controller.setMapStyle(mapTheme);
+                _controller.complete(controller);
+              },
+              markers: {
+                  Marker(
+                      markerId: const MarkerId("userPosition"),
+                      position: LatLng(
+                          userPosition!.latitude, userPosition!.longitude),
+                      infoWindow: const InfoWindow(title: "You are here"))
+                }),
       floatingActionButton: Padding(
           padding: const EdgeInsets.only(top: 8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               FloatingActionButton.extended(
                 onPressed: _goToTheLake,
                 label: const Text('To the lake!'),
                 icon: const Icon(Icons.directions_boat),
               ),
-              FloatingActionButton(
-                onPressed: _goToMe,
-                child: const Icon(Icons.my_location),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: FloatingActionButton(
+                  onPressed: _goToMe,
+                  child: const Icon(Icons.my_location),
+                ),
               )
             ],
           )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 
@@ -78,8 +89,9 @@ class MapSampleState extends State<Map> {
   Future<void> _goToMe() async {
     final GoogleMapController controller = await _controller.future;
     await controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: LatLng(userPosition!.latitude, userPosition!.longitude), zoom: 14.4746)
-    ));
+        CameraPosition(
+            target: LatLng(userPosition!.latitude, userPosition!.longitude),
+            zoom: 14.4746)));
   }
 
   void _getCurrentPosition() async {
@@ -91,7 +103,7 @@ class MapSampleState extends State<Map> {
 
   Future<Position> _determinePosition() async {
     LocationPermission permission;
-    
+
     bool serviceEnabled;
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
