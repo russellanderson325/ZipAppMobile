@@ -445,8 +445,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     children: <Widget>[
                       TextButton(
                         child: const Text('Request Ride'),
-                        // style: TextButton.styleFrom(primary: Colors.black),
-                        style: TextButton.styleFrom(),
+                        style: TextButton.styleFrom(backgroundColor: Colors.black),
                         onPressed: () async {
                           //buildShowDialog(context);
                           doc = await widget.paymentService
@@ -468,7 +467,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       TextButton(
                         child: const Text('Cancel'),
                         // style: TextButton.styleFrom(primary: Colors.black),
-                        style: TextButton.styleFrom(),
+                        style: TextButton.styleFrom(backgroundColor: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },

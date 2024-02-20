@@ -959,7 +959,7 @@ class _MainScreenState extends State<MainScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Color.fromRGBO(255, 242, 0, 1.0),
-                      // primary: const Color.fromRGBO(255, 242, 0, 1.0),,
+                      // primary: const Color.fromRGBO(255, 242, 0, 1.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       )),

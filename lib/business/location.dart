@@ -38,7 +38,7 @@ class LocationService {
 
   Future<bool> setupService({bool reinit = false}) async {
     try {
-      positionSub.cancel();
+      // positionSub.cancel();
       PermissionStatus status =
           await LocationPermissions().checkPermissionStatus();
       // Get permission from user
