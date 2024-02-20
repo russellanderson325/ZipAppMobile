@@ -16,8 +16,10 @@ dependencies:
   firebase_storage: ^11.6.0
   flutter:
     sdk: flutter
+  flutter_dotenv: ^5.1.0
   flutter_polyline_points: ^2.0.0
   flutter_speed_dial: ^7.0.0
+  flutter_stripe: ^10.0.0
   geolocator: ^10.1.0
   google_maps_flutter: ^2.5.3
   google_place_plus: ^1.0.0
@@ -55,3 +57,4 @@ flutter:
     - assets/connectstripe_blurple_2x.png
     - assets/connectstripe_blurple_4x.png
     - assets/mapthemes/uber_theme.json
+    - assets/.env

@@ -28,7 +28,7 @@ class CustomTextButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        primary: splashColor,
+        // primary: splashColor,
         backgroundColor: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
@@ -92,7 +92,7 @@ class CustomTextButtonWithUnderline extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-          primary: color,
+          // primary: color,
           onSurface: splashColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30.0),
