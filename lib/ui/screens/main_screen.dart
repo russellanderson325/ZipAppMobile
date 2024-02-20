@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-//import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_webservice/places.dart';
 import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/drivers.dart';
@@ -12,10 +9,12 @@ import 'package:zipapp/business/location.dart';
 import 'package:zipapp/business/notifications.dart';
 import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/privacy_policies.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/services/payment.dart';
+import 'package:zipapp/ui/screens/search.dart';
 import 'package:zipapp/ui/screens/settings_screen.dart';
 import 'package:zipapp/ui/screens/previous_trips_screen.dart';
 import 'package:zipapp/ui/screens/promos_screen.dart';
@@ -39,6 +38,13 @@ enum BottomSheetStatus {
   rideDetails
 }
 
+typedef MyMarkerSetter = void Function(
+    BuildContext context, void Function(LocalSearchResult) methodFromChild);
+typedef MyTapToggle = void Function(
+    BuildContext context, void Function() methodFromChild);
+typedef MyMarkerReset = void Function(
+    BuildContext context, void Function() methodFromChild);
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -52,6 +58,8 @@ class _MainScreenState extends State<MainScreen> {
   //this is the global key used for the scaffold
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late GlobalKey<MapScreen> mapScaffoldKey;
+  late GlobalKey<SearchState> searchScaffoldKey;
+  late GlobalKey<main_map.MapSampleState> mapScaffoldKey2;
   late double screenHeight, screenWidth;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late VoidCallback onBackPress;
@@ -87,13 +95,16 @@ class _MainScreenState extends State<MainScreen> {
   String termsAndConditionsStr = 'terms and conditions not found';
 
   ///maps api key used for the prediction
-  final String mapKey = "AIzaSyDsPh6P9PDFmOqxBiLXpzJ1sW4kx-2LN5g";
+  final String mapKey = Keys.map;
+
+  late void Function(LocalSearchResult) setMapMarkers;
+  late void Function() toggleTapMode;
+  late void Function() resetMarkers;
 
   ///these are for translating place details into coordinates
   ///used for creating a ride in the database
-  final GoogleMapsPlaces _places =
-      GoogleMapsPlaces(apiKey: 'AIzaSyDsPh6P9PDFmOqxBiLXpzJ1sW4kx-2LN5g');
-  late PlacesDetailsResponse details;
+  // final GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: Keys.map);
+  // late PlacesDetailsResponse details;
 
   ///these are used for controlling the bottomsheet
   ///and other things to do with creating a ride.
@@ -139,6 +150,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     mapScaffoldKey = GlobalKey();
+    mapScaffoldKey2 = GlobalKey();
     bottomSheetStatus = BottomSheetStatus.welcome;
     showDropPin = false;
     onBackPress = () {
@@ -415,6 +427,16 @@ class _MainScreenState extends State<MainScreen> {
           // ),
           main_map.Map(
             key: mapScaffoldKey,
+            markerBuilder: (BuildContext context,
+                void Function(LocalSearchResult) childMarkerSetter) {
+              setMapMarkers = childMarkerSetter;
+            },
+            tapToggle: (BuildContext context, void Function() childToggle) {
+              toggleTapMode = childToggle;
+            },
+            markerReset: (BuildContext context, void Function() childReset) {
+              resetMarkers = childReset;
+            },
           ),
           Align(
             alignment: Alignment.topLeft,
@@ -526,98 +548,166 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ],
                   ),
+                  // Row(
+                  //     mainAxisAlignment: MainAxisAlignment.center,
+                  //     children: <Widget>[
+                  GestureDetector(
+                      onTap: () => searchLocation(),
+                      child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50.0),
+                            color: Colors.white,
+                          ),
+                          height: screenHeight * 0.07,
+                          width: screenWidth * 0.8,
+                          child: const Row(children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 15.0),
+                              child: Icon(Icons.search,
+                                  color: Colors.black, size: 30.0),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 15.0),
+                              child: Text('Search Destination',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    decoration: TextDecoration.none,
+                                    fontSize: 15.0,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w400,
+                                  )),
+                            )
+                          ])
+                          // )
+                          )
+                      // child: TextField(
+                      //     onTap: () => {
+                      //       setState(() => bottomSheetStatus =
+                      //           BottomSheetStatus.closed),
+                      //       searchOverlayController.toggle()
+                      //     },
+
+                      //     // onTap: () async {
+                      //     //   setState(() {
+                      //     //     bottomSheetStatus =
+                      //     //         BottomSheetStatus.closed;
+                      //     //   });
+                      //     //   Prediction p = await PlacesAutocomplete.show(
+                      //     //           context: context,
+                      //     //           hint: 'Search Destination',
+                      //     //           startText: searchController.text == ''
+                      //     //               ? ''
+                      //     //               : searchController.text,
+                      //     //           apiKey: mapKey,
+                      //     //           language: "en",
+                      //     //           components: [
+                      //     //             Component(Component.country, "us")
+                      //     //           ],
+                      //     //           mode: Mode.overlay)
+                      //     //       .then((v) async {
+                      //     //     if (v != null) {
+                      //     //       address = v.description!;
+                      //     //       searchController.text = address;
+                      //     //       details = await _places
+                      //     //           .getDetailsByPlaceId(v.placeId!);
+                      //     //     } else {
+                      //     //       searchController.text = '';
+                      //     //       address = '';
+                      //     //       setState(() {
+                      //     //         bottomSheetStatus =
+                      //     //             BottomSheetStatus.welcome;
+                      //     //       });
+                      //     //     }
+                      //     //     searchNode.unfocus();
+                      //     //     _pickSize();
+                      //     //     return Future<Prediction>.value(v);
+                      //     //   }
+                      //     //   );
+                      //     // },
+                      //     controller: searchController,
+                      //     focusNode: searchNode,
+                      //     textInputAction: TextInputAction.go,
+                      //     onSubmitted: (s) {
+                      //       _pickSize();
+                      //     },
+                      //     decoration: InputDecoration(
+                      //       icon: Container(
+                      //         margin: const EdgeInsets.only(left: 15),
+                      //         width: 10,
+                      //         height: 10,
+                      //         child: const Icon(
+                      //           Icons.search,
+                      //           color: Colors.black,
+                      //         ),
+                      //       ),
+                      //       hintText: "Search Destination",
+                      //       border: InputBorder.none,
+                      //       contentPadding: const EdgeInsets.only(
+                      //           left: 15.0, top: 9.0),
+                      //     ))
+                      ),
+                  // ]),
                   Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
+                    key: const Key('setPinRow'),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          toggleTapMode();
+                          // print('handle tap');
+                          // mapScaffoldKey2.currentState?.toggleTapMode();
+                        },
+                        child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(50.0),
+                              color: Colors.black,
+                              border:
+                                  Border.all(color: Colors.white, width: 1.0),
                             ),
                             height: screenHeight * 0.07,
                             width: screenWidth * 0.8,
-                            child: TextField(
-                                onTap: () async {
-                                  setState(() {
-                                    bottomSheetStatus =
-                                        BottomSheetStatus.closed;
-                                  });
-                                  Prediction p = await PlacesAutocomplete.show(
-                                          context: context,
-                                          hint: 'Search Destination',
-                                          startText: searchController.text == ''
-                                              ? ''
-                                              : searchController.text,
-                                          apiKey: mapKey,
-                                          language: "en",
-                                          components: [
-                                            Component(Component.country, "us")
-                                          ],
-                                          mode: Mode.overlay)
-                                      .then((v) async {
-                                    if (v != null) {
-                                      address = v.description!;
-                                      searchController.text = address;
-                                      details = await _places
-                                          .getDetailsByPlaceId(v.placeId!);
-                                    } else {
-                                      searchController.text = '';
-                                      address = '';
-                                      setState(() {
-                                        bottomSheetStatus =
-                                            BottomSheetStatus.welcome;
-                                      });
-                                    }
-                                    searchNode.unfocus();
-                                    _pickSize();
-                                    return Future<Prediction>.value(v);
-                                  });
-                                },
-                                controller: searchController,
-                                focusNode: searchNode,
-                                textInputAction: TextInputAction.go,
-                                onSubmitted: (s) {
-                                  _pickSize();
-                                },
-                                decoration: InputDecoration(
-                                  icon: Container(
-                                    margin:
-                                        const EdgeInsets.only(left: 20, top: 5),
-                                    width: 10,
-                                    height: 10,
-                                    child: const Icon(
-                                      MyFlutterApp.golfCart,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  hintText: "Search Destination",
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.only(
-                                      left: 15.0, top: 16.0),
-                                ))),
-                      ]),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FloatingActionButton.extended(
-                        heroTag: 'setPin',
-                        backgroundColor: Colors.transparent,
-                        onPressed: () {
-                          _setPinOnMap();
-                          mapScaffoldKey.currentState?._setUserDefinedPin();
-                        },
-                        label: const Text(
-                          'Or Set On Map',
-                          style: TextStyle(
-                            color: Color.fromRGBO(255, 242, 0, 1.0),
-                            decoration: TextDecoration.none,
-                            fontSize: 15.0,
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        icon: const Icon(Icons.pin_drop, color: Colors.white),
+                            child: const Row(children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 15.0),
+                                child: Icon(Icons.pin_drop,
+                                    color: Colors.white, size: 30.0),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 15.0),
+                                child: Text('Or Set On Map',
+                                    style: TextStyle(
+                                      color: Color.fromRGBO(255, 242, 0, 1.0),
+                                      decoration: TextDecoration.none,
+                                      fontSize: 15.0,
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w400,
+                                    )),
+                              )
+                            ])),
                       )
+                      // onPressed: () =>
+                      //     mapScaffoldKey2.currentState!.toggleTapMode(),
+
+                      // FloatingActionButton.extended(
+                      //   heroTag: 'setPin',
+                      //   backgroundColor: Colors.transparent,
+                      //   onPressed: () {
+                      //     mapScaffoldKey2.currentState!.toggleTapMode();
+                      //     // _setPinOnMap();
+                      //     // mapScaffoldKey.currentState?._setUserDefinedPin();
+                      //   },
+                      //   label: const Text(
+                      //     'Or Set On Map',
+                      //     style: TextStyle(
+                      //       color: Color.fromRGBO(255, 242, 0, 1.0),
+                      //       decoration: TextDecoration.none,
+                      //       fontSize: 15.0,
+                      //       fontFamily: "Poppins",
+                      //       fontWeight: FontWeight.w400,
+                      //     ),
+                      //   ),
+                      //   icon: const Icon(Icons.pin_drop, color: Colors.white),
+                      // )
                     ],
                   ),
 
@@ -896,6 +986,24 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  void searchLocation() async {
+    final result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const Search()));
+    // MaterialPageRoute(
+    //     builder: (context) =>
+    //         const Payment()))
+    if (!context.mounted) {
+      print('returning from searchLocation() because context is not mounted.');
+      return;
+    }
+    if (result != null) {
+      setMapMarkers(result);
+    } else {
+      print('result is null');
+    }
+    // setState(() => bottomSheetStatus = BottomSheetStatus.confirmation);
+  }
+
   ///this will logout the user.
   void _logOut() async {
     AuthService().signOut();
@@ -931,11 +1039,12 @@ class _MainScreenState extends State<MainScreen> {
           pinDestination.latitude,
           pinDestination.longitude);
     } else {
-      length = Geolocator.distanceBetween(
-          locationService.position.latitude,
-          locationService.position.longitude,
-          details.result.geometry!.location.lat,
-          details.result.geometry!.location.lng);
+      length = 0;
+      // length = Geolocator.distanceBetween(
+      //     locationService.position.latitude,
+      //     locationService.position.longitude,
+      //     details.result.geometry!.location.lat,
+      //     details.result.geometry!.location.lng);
     }
     // convert meters to miles
     length = length * 0.000621371;
@@ -968,13 +1077,13 @@ class _MainScreenState extends State<MainScreen> {
   ///for a driver
   void _lookForRide() async {
     print(rideService.ride);
-    if (pinDropDestination) {
-      rideService.startRide(pinDestination.latitude, pinDestination.longitude,
-          onRideChange, price);
-    } else {
-      rideService.startRide(details.result.geometry!.location.lat,
-          details.result.geometry!.location.lng, onRideChange, price);
-    }
+    // if (pinDropDestination) {
+    //   rideService.startRide(pinDestination.latitude, pinDestination.longitude,
+    //       onRideChange, price);
+    // } else {
+    //   rideService.startRide(details.result.geometry!.location.lat,
+    //       details.result.geometry!.location.lng, onRideChange, price);
+    // }
   }
 
   void _returnToWelcome() {
