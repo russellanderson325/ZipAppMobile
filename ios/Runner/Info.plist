@@ -29,10 +29,6 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>I want to display location on map and track it.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>I want to display location on map and track it.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Scan your card to add it automatically</string>
