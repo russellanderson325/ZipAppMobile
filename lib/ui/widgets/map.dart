@@ -83,15 +83,6 @@ class MapSampleState extends State<Map> {
               },
               markers: markers.toSet(),
               polylines: polylines.toSet(),
-              // polylines: <Polyline>{
-              //   const Polyline(
-              //     polylineId: PolylineId("userRoute"),
-              //     color: Colors.blue,
-              //     points: [LatLng(53.0430, -2.9925), LatLng(53.1396, -4.2739)],
-              //     width: 5,
-              //     visible: true,
-              //   )
-              // },
               onTap: (latlng) => _maybeAddMarker(latlng),
             ),
       floatingActionButton: Padding(
@@ -116,8 +107,10 @@ class MapSampleState extends State<Map> {
   }
 
   void toggleTapMode() {
-    print("toggling tap mode");
     if (mounted) {
+      if (!tapMode) {
+        _resetMarkers();
+      }
       setState(() {
         tapMode = !tapMode;
       });
@@ -146,8 +139,8 @@ class MapSampleState extends State<Map> {
   }
 
   void _maybeAddMarker(LatLng latlng) {
+    _resetMarkers();
     if (tapMode && mounted) {
-      _resetMarkers();
       setState(() {
         markers.add(Marker(
             markerId: MarkerId(DateTime.now().toString()), position: latlng));
