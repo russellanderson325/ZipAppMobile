@@ -1,8 +1,9 @@
 import "package:flutter/material.dart";
-// import 'package:zip/business/auth.dart';
-// import 'package:flutter/services.dart';
+import 'package:zipapp/business/auth.dart';
+import 'package:flutter/services.dart';
 import 'package:zipapp/CustomIcons/custom_icons_icons.dart';
 import 'package:zipapp/business/validator.dart';
+import 'package:zipapp/main.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/ui/widgets/custom_text_field.dart';
@@ -10,10 +11,10 @@ import 'package:zipapp/ui/widgets/custom_text_field.dart';
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
   @override
-  _SignInScreenState createState() => _SignInScreenState();
+  SignInScreenState createState() => SignInScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class SignInScreenState extends State<SignInScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _forgotPass = TextEditingController();
@@ -21,7 +22,7 @@ class _SignInScreenState extends State<SignInScreen> {
   late CustomTextField _passwordField;
   bool _blackVisible = false;
   late VoidCallback onBackPress;
-  //final auth = AuthService();
+  final auth = AuthService();
 
   @override
   void initState() {
@@ -48,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
       obscureText: true,
       hint: "Password",
       validator: Validator.validatePassword,
-      customTextIcon: Icon(CustomIcons.lock, color: Colors.grey[400]),
+      customTextIcon: Icon(CustomIcons.lock, color: Colors.grey.shade400),
     );
   }
 
@@ -105,10 +106,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontWeight: FontWeight.w500,
                         textColor: Colors.black,
                         onPressed: () {
-                          // _emailLogin(
-                          //     email: _email.text,
-                          //     password: _password.text,
-                          //     context: context);
+                          _emailLogin(
+                              email: _email.text,
+                              password: _password.text,
+                              context: context);
                         },
                         splashColor: const Color.fromRGBO(255, 242, 0, 1.0),
                         borderColor: const Color.fromRGBO(212, 20, 15, 1.0),
@@ -206,27 +207,28 @@ class _SignInScreenState extends State<SignInScreen> {
     Verifies email and password, then navigates to apps main page
     if information is valid.
   */
-  // void _emailLogin(
-  //     {String? email, String? password, BuildContext? context}) async {
-  //   if (Validator.validateEmail(email!) &&
-  //       Validator.validatePassword(password!)) {
-  //     try {
-  //       SystemChannels.textInput.invokeMethod('TextInput.hide');
-  //       _changeBlackVisible();
-  //       await auth
-  //           .signIn(email, password)
-  //           .then((uid) => Navigator.of(context!).pop());
-  //     } catch (e) {
-  //       print("Error in email sign in: $e");
-  //       String exception = auth.getExceptionText(e);
-  //       _showErrorAlert(
-  //         title: "Login failed",
-  //         content: exception,
-  //         onPressed: _changeBlackVisible,
-  //       );
-  //     }
-  //   }
-  // }
+  void _emailLogin(
+      {String? email, String? password, BuildContext? context}) async {
+    /// Validates email and password fields
+    if (Validator.validateEmail(email!) &&
+        Validator.validatePassword(password!)) {
+      try {
+        /// Hides native keyboard
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        _changeBlackVisible();
+        await auth
+            .signIn(email, password)
+            .then((uid) => Navigator.of(context!).pop());
+      } catch (e) {
+        String exception = auth.getExceptionText(e as PlatformException);
+        _showErrorAlert(
+          title: "Login failed",
+          content: exception,
+          onPressed: _changeBlackVisible,
+        );
+      }
+    }
+  }
 
   void _showErrorAlert(
       {String? title, String? content, VoidCallback? onPressed}) {
@@ -288,20 +290,32 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 10.0),
-              child: CustomTextButton(
-                title: "OK",
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                textColor: Colors.black54,
-                onPressed: () async {
-                  // try {
-                  //   await auth.sendResetPassword(_forgotPass.text);
-                  // } catch (e) {}
-                  Navigator.of(context).pop();
+              child: Builder(
+                builder: (BuildContext context) {
+                  return CustomTextButton(
+                    title: "OK",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    textColor: Colors.black54,
+                    onPressed: () async {
+                      try {
+                        await auth.sendResetPassword(_forgotPass.text);
+                      } catch (e) {
+                        String exception =
+                            auth.getExceptionText(e as PlatformException);
+                        _showErrorAlert(
+                          title: "Error sending reset password email",
+                          content: exception,
+                          onPressed: _changeBlackVisible,
+                        );
+                      }
+                      navigatorKey.currentState?.pop();
+                    },
+                    splashColor: Colors.black12,
+                    borderColor: Colors.black12,
+                    borderWidth: 2,
+                  );
                 },
-                splashColor: Colors.black12,
-                borderColor: Colors.black12,
-                borderWidth: 2,
               ),
             ),
           ],

@@ -50,7 +50,7 @@ class Driver {
     };
   }
 
-  factory Driver.fromJson(Map<String, Object> doc) {
+  factory Driver.fromJson(Map<String, dynamic> doc) {
     Driver driver = Driver(
         uid: doc['uid'] as String,
         firstName: doc['firstName'] as String,
@@ -58,19 +58,18 @@ class Driver {
         lastActivity: convertStamp(doc['lastActivity'] as Timestamp),
         profilePictureURL: doc['profilePictureURL'] as String,
         // geoFirePoint: extractGeoFirePoint(doc['geoFirePoint']),
-        fcmToken: doc['fcmToken'] as String,
+        fcmToken: doc['fcmToken'] ?? "",
         isWorking: doc['isWorking'] as bool,
         isAvailable: doc['isAvailable'] as bool,
         currentRideID: doc['currentRideID'] as String,
-        daysOfWeek: doc['daysOfWeek']
-            as List<String>, //daysOfWeekConvert(doc['daysOfWeek']),
+        daysOfWeek: [], //daysOfWeekConvert(doc['daysOfWeek']),
         isOnBreak: doc['isOnBreak'] as bool);
     //totalHoursWorked: doc['totalHoursWorked']);
     return driver;
   }
 
   factory Driver.fromDocument(DocumentSnapshot doc) {
-    return Driver.fromJson(doc.data() as Map<String, Object>);
+    return Driver.fromJson(doc.data() as Map<String, dynamic>);
   }
 
   // static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
@@ -78,8 +77,8 @@ class Driver {
   //   return GeoFirePoint(point.latitude, point.longitude);
   // }
 
-  // static List<int> daysOfWeekConvert(List workDays)  {
-  //   Map dayConvert = new Map<String, int>();
+  // static List<int> daysOfWeekConvert(List workDays) {
+  //   Map dayConvert = <String, int>{};
   //   dayConvert['sunday'] = 0;
   //   dayConvert['monday'] = 1;
   //   dayConvert['tuesday'] = 2;
@@ -88,9 +87,9 @@ class Driver {
   //   dayConvert['friday'] = 5;
   //   dayConvert['saturday'] = 6;
 
-  //   for(var i=0;i<workDays.length;i++){
-  //       String temp = workDays[i].toLowerCase();
-  //       workDays[i] = dayConvert[temp];
+  //   for (var i = 0; i < workDays.length; i++) {
+  //     String temp = workDays[i].toLowerCase();
+  //     workDays[i] = dayConvert[temp];
   //   }
   //   return workDays;
   // }
@@ -129,7 +128,7 @@ class CurrentShift {
     };
   }
 
-  factory CurrentShift.fromJson(Map<String, Object> doc) {
+  factory CurrentShift.fromJson(Map<String, dynamic> doc) {
     CurrentShift shift = CurrentShift(
         shiftStart: convertStamp(doc['shiftStart'] as Timestamp),
         shiftEnd: convertStamp(doc['shiftEnd'] as Timestamp),
@@ -143,6 +142,6 @@ class CurrentShift {
   }
 
   factory CurrentShift.fromDocument(DocumentSnapshot doc) {
-    return CurrentShift.fromJson(doc.data() as Map<String, Object>);
+    return CurrentShift.fromJson(doc.data() as Map<String, dynamic>);
   }
 }

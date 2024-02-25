@@ -17,13 +17,13 @@ class UserService {
 
   UserService._internal() {
     if (kDebugMode) {
-      print("UserService Created with user: $userID");
+      // print("UserService Created with user: $userID");
     }
   }
 
   void setupService(String id) {
     if (userID != id) {
-      userSub.cancel();
+      //userSub.cancel();
       userID = id;
       userStream = _db
           .collection("users")
