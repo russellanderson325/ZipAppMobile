@@ -8,7 +8,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+// import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 // import 'package:url_launcher/url_launcher.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
@@ -919,7 +919,7 @@ class MapScreen extends State<TheMap> {
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
-  PolylinePoints polylinePoints = PolylinePoints();
+  // PolylinePoints polylinePoints = PolylinePoints();
   Completer<GoogleMapController> _controller = Completer();
   late BitmapDescriptor _sourceIcon;
   late BitmapDescriptor _destinationIcon;
@@ -995,13 +995,13 @@ class MapScreen extends State<TheMap> {
   }
 
   void setPolylines() async {
-    PolylineResult? result = await polylinePoints.getRouteBetweenCoordinates(
-        "AIzaSyDsPh6P9PDFmOqxBiLXpzJ1sW4kx-2LN5g",
-        PointLatLng(_initialPosition.latitude, _initialPosition.longitude),
-        const PointLatLng(37.430119406953, -122.0874490566));
-    for (var point in result.points) {
-      polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-    }
+    // PolylineResult? result = await polylinePoints.getRouteBetweenCoordinates(
+    //     "AIzaSyDsPh6P9PDFmOqxBiLXpzJ1sW4kx-2LN5g",
+    //     PointLatLng(_initialPosition.latitude, _initialPosition.longitude),
+    //     const PointLatLng(37.430119406953, -122.0874490566));
+    // for (var point in result.points) {
+    //   polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+    // }
 
     setState(() {
       Polyline polyline = Polyline(

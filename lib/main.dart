@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zipapp/firebase_options.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
@@ -15,6 +17,8 @@ void main() async {
   // );
   // runApp(const MainApp());
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = 'pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u';
+  await dotenv.load(fileName: 'assets/.env');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
