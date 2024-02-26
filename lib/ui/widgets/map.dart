@@ -11,14 +11,9 @@ import 'package:zipapp/ui/screens/search.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;
-  final MyTapToggle tapToggle;
   final MyMarkerReset markerReset;
 
-  const Map(
-      {Key? key,
-      required this.markerBuilder,
-      required this.tapToggle,
-      required this.markerReset})
+  const Map({Key? key, required this.markerBuilder, required this.markerReset})
       : super(key: key);
 
   @override
@@ -70,51 +65,52 @@ class MapSampleState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     widget.markerBuilder.call(context, addSearchedMarker);
-    widget.tapToggle.call(context, toggleTapMode);
     widget.markerReset.call(context, _resetMarkers);
     return Scaffold(
-      body: userLatLng == null
-          ? const Center(child: CircularProgressIndicator())
-          : GoogleMap(
-              initialCameraPosition: _kGooglePlex,
-              onMapCreated: (GoogleMapController controller) {
-                controller.setMapStyle(mapTheme);
-                _controller.complete(controller);
-              },
-              markers: markers.toSet(),
-              polylines: polylines.toSet(),
-              onTap: (latlng) => _maybeAddMarker(latlng),
-            ),
-      floatingActionButton: Padding(
-          padding: const EdgeInsets.only(top: 12.0),
-          child: FloatingActionButton(
-            onPressed: () => _moveCamera(zoom: 14.4746),
-            child: const Icon(Icons.my_location),
-          )),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      body: Column(
+        children: [
+          Search(),
+          Expanded(
+            child: userLatLng == null
+                ? const Center(child: CircularProgressIndicator())
+                : GoogleMap(
+                    initialCameraPosition:
+                        CameraPosition(target: userLatLng!, zoom: 14.4746),
+                    mapToolbarEnabled: false,
+                    markers: markers.toSet(),
+                    onMapCreated: (GoogleMapController controller) {
+                      controller.setMapStyle(mapTheme);
+                      _controller.complete(controller);
+                    },
+                    onTap: (latlng) => _maybeAddMarker(latlng),
+                    polylines: polylines.toSet(),
+                    zoomControlsEnabled: false,
+                  ),
+          ),
+        ],
+      ),
+      // floatingActionButton: Padding(
+      //     padding: const EdgeInsets.only(top: 12.0),
+      //     child: FloatingActionButton(
+      //       onPressed: () => _moveCamera(zoom: 14.4746),
+      //       child: const Icon(Icons.my_location),
+      //     )),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 
   void addSearchedMarker(LocalSearchResult searchResult) async {
     GooglePlace googlePlace = GooglePlace(Keys.map);
-    await googlePlace.details.get(searchResult.placeId).then((value) {
-      setState(() {
-        searchLatLng = LatLng(value!.result!.geometry!.location!.lat!, value.result!.geometry!.location!.lng!);
-      });
-      _addSearchResult(searchResult);
-      _moveCamera(latlng: searchLatLng);
-    },);
-  }
-
-  void toggleTapMode() {
-    if (mounted) {
-      if (!tapMode) {
-        _resetMarkers();
-      }
-      setState(() {
-        tapMode = !tapMode;
-      });
-    }
+    await googlePlace.details.get(searchResult.placeId).then(
+      (value) {
+        setState(() {
+          searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
+              value.result!.geometry!.location!.lng!);
+        });
+        _addSearchResult(searchResult);
+        _moveCamera(latlng: searchLatLng);
+      },
+    );
   }
 
   void _addSearchResult(LocalSearchResult searchResult) {

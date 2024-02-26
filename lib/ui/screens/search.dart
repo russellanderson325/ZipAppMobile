@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 
 import 'package:zipapp/constants/keys.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/services/position_service.dart';
 
 class Search extends StatefulWidget {
@@ -39,112 +40,45 @@ class SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
-    _focusNode.requestFocus();
-    return Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: 10.0,
+    return Container(
+        decoration: const BoxDecoration(
+          color: ZipColors.primaryBackground,
         ),
-        body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Column(children: <Widget>[
-              // SearchBar(
-              //   padding: MaterialStateProperty.all<EdgeInsets>(
-              //       const EdgeInsets.symmetric(horizontal: 2)),
-              //   leading: IconButton(
-              //       onPressed: () => Navigator.pop(context),
-              //       icon: const Icon(Icons.arrow_back, color: Colors.black)),
-              //   controller: searchController,
-              //   hintText: "Search Here",
-              //   trailing: <Widget>[
-              //     IconButton(
-              //         onPressed: () => searchController.clear(),
-              //         icon:
-              //             const Icon(Icons.highlight_off, color: Colors.black)),
-              //   ],
-              //   onChanged: (value) => _getPlaces(value),
-              //   onSubmitted: (text) => {
-              //     if (places.isNotEmpty &&
-              //         places
-              //             .where((element) =>
-              //                 element.name.toLowerCase() == text.toLowerCase())
-              //             .isNotEmpty)
-              //       {
-              //         Navigator.pop(
-              //             context,
-              //             places
-              //                 .where((element) =>
-              //                     element.name.toLowerCase() ==
-              //                     text.toLowerCase())
-              //                 .first)
-              //       }
-              //     else
-              //       {_focusNode.requestFocus()}
-              //   },
-              //   focusNode: _focusNode,
-              // ),
-              Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.yellow[100],
-                        borderRadius: BorderRadius.circular(50.0),
-                        boxShadow: const [
-                          BoxShadow(
-                              color: Colors.grey,
-                              blurRadius: 2.0,
-                              spreadRadius: 1)
-                        ]),
-                    child: TextField(
-                      focusNode: _focusNode,
-                      controller: searchController,
-                      onChanged: (value) => _getPlaces(value),
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Search Here",
-                          prefixIcon: IconButton(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.arrow_back,
-                                color: Colors.black),
-                          ),
-                          suffixIcon: IconButton(
-                              onPressed: () => searchController.clear(),
-                              icon: const Icon(Icons.highlight_off))),
-                    ),
-                  )),
-              places.isNotEmpty
-                  ? Expanded(
-                      child: ListView.builder(
-                      itemCount: places.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                            child: ListTile(
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                    16.0, 0.0, 6.0, 0.0),
-                                title: Text(places[index].name),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.north_west),
-                                  onPressed: () {
-                                    searchController.text = places[index].name;
-                                  },
-                                ),
-                                onTap: () =>
-                                    Navigator.pop(context, places[index])));
-                        // return ListTile(
-                        //     title: Text(places[index].name),
-                        //     trailing: IconButton(
-                        //       icon: const Icon(Icons.north_west),
-                        //       onPressed: () {
-                        //         _focusNode.unfocus();
-                        //         searchController.text = places[index].name;
-                        //       },
-                        //     ),
-                        //     onTap: () => Navigator.pop(context, places[index]));
-                      },
-                    ))
-                  : const SizedBox()
-            ])));
+        child: Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              top: 6,
+            ),
+            child: TextField(
+              controller: searchController,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search, color: Colors.black),
+                contentPadding: EdgeInsets.all(0),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.yellow, width: 1.0),
+                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.yellow, width: 1.0),
+                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                fillColor: Colors.white,
+                hintText: "Where would you like to go?",
+                hintStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16.0,
+                    fontFamily: 'Lexend',
+                    fontWeight: FontWeight.w500),
+                filled: true,
+                // suffixIcon: IconButton(
+                //     onPressed: () => {
+                //           searchController.clear(),
+                //         },
+                //     icon: const Icon(Icons.highlight_off))
+              ),
+              focusNode: _focusNode,
+              onChanged: (value) => value != "" ? _getPlaces(value) : {},
+            )));
   }
 
   void _getPlaces(String value) async {
@@ -160,25 +94,8 @@ class SearchState extends State<Search> {
 }
 
 class LocalSearchResult {
-  // final GooglePlace _googlePlace = GooglePlace(Keys.map);
   final String name;
   final String placeId;
-  // late LatLng latlng;
 
-  LocalSearchResult({required this.name, required this.placeId}) {
-    // bool? set;
-    // _setLatLng(placeId).then((value) => set = value);
-    // print(set);
-  }
-
-  // Future<bool> _setLatLng(String placeId) async {
-  //   await _googlePlace.details.get(placeId).then((value) {
-  //     if (value != null && value.result != null) {
-  //       latlng = LatLng(value.result!.geometry!.location!.lat!,
-  //           value.result!.geometry!.location!.lng!);
-  //       return true;
-  //     }
-  //   });
-  //   return false;
-  // }
+  LocalSearchResult({required this.name, required this.placeId});
 }
