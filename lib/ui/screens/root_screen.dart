@@ -3,6 +3,7 @@ import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
 // import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/welcome_screen.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -57,7 +58,8 @@ class _RootScreenState extends State<RootScreen> {
               case LoadingState.loading:
                 return _buildWaitingScreen();
               case LoadingState.done:
-                return const MainScreen();
+                // return const MainScreen();
+                return const RiderMainScreen();
               default:
                 return const WelcomeScreen();
             }

@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
+
 import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
 import 'package:zipapp/business/notifications.dart';
+import 'package:zipapp/business/payment.dart' as payment_details;
 import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/privacy_policies.dart';
+import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/services/payment.dart';
@@ -22,11 +26,7 @@ import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
 import 'package:zipapp/ui/screens/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/payment_history_screen.dart';
 import 'package:zipapp/ui/screens/payment_screen.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:zipapp/business/payment.dart' as payment_details;
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
-//import 'package:firebase_auth/firebase_auth.dart';
 
 enum BottomSheetStatus {
   closed,
@@ -40,8 +40,6 @@ enum BottomSheetStatus {
 
 typedef MyMarkerSetter = void Function(
     BuildContext context, void Function(LocalSearchResult) methodFromChild);
-typedef MyTapToggle = void Function(
-    BuildContext context, void Function() methodFromChild);
 typedef MyMarkerReset = void Function(
     BuildContext context, void Function() methodFromChild);
 
@@ -98,7 +96,6 @@ class _MainScreenState extends State<MainScreen> {
   final String mapKey = Keys.map;
 
   late void Function(LocalSearchResult) setMapMarkers;
-  late void Function() toggleTapMode;
   late void Function() resetMarkers;
 
   ///these are for translating place details into coordinates
@@ -431,9 +428,6 @@ class _MainScreenState extends State<MainScreen> {
                 void Function(LocalSearchResult) childMarkerSetter) {
               setMapMarkers = childMarkerSetter;
             },
-            tapToggle: (BuildContext context, void Function() childToggle) {
-              toggleTapMode = childToggle;
-            },
             markerReset: (BuildContext context, void Function() childReset) {
               resetMarkers = childReset;
             },
@@ -552,7 +546,12 @@ class _MainScreenState extends State<MainScreen> {
                   //     mainAxisAlignment: MainAxisAlignment.center,
                   //     children: <Widget>[
                   GestureDetector(
-                      onTap: () => searchLocation(),
+                      onTap: () => {
+                        print(''),
+                        print(userService.user.firstName),
+                        print(''),
+                        searchLocation()
+                      },
                       child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(50.0),
@@ -652,11 +651,6 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          toggleTapMode();
-                          // print('handle tap');
-                          // mapScaffoldKey2.currentState?.toggleTapMode();
-                        },
                         child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(50.0),
@@ -685,29 +679,6 @@ class _MainScreenState extends State<MainScreen> {
                               )
                             ])),
                       )
-                      // onPressed: () =>
-                      //     mapScaffoldKey2.currentState!.toggleTapMode(),
-
-                      // FloatingActionButton.extended(
-                      //   heroTag: 'setPin',
-                      //   backgroundColor: Colors.transparent,
-                      //   onPressed: () {
-                      //     mapScaffoldKey2.currentState!.toggleTapMode();
-                      //     // _setPinOnMap();
-                      //     // mapScaffoldKey.currentState?._setUserDefinedPin();
-                      //   },
-                      //   label: const Text(
-                      //     'Or Set On Map',
-                      //     style: TextStyle(
-                      //       color: Color.fromRGBO(255, 242, 0, 1.0),
-                      //       decoration: TextDecoration.none,
-                      //       fontSize: 15.0,
-                      //       fontFamily: "Poppins",
-                      //       fontWeight: FontWeight.w400,
-                      //     ),
-                      //   ),
-                      //   icon: const Icon(Icons.pin_drop, color: Colors.white),
-                      // )
                     ],
                   ),
 
