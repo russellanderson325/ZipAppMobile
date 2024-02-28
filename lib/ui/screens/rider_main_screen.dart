@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/screens/search.dart';
+import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
 
 typedef MyMarkerSetter = void Function(
@@ -46,15 +44,15 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
           resetMarkers = childReset;
         },
       ),
-      Icon(
+      const Icon(
         Icons.call,
         size: 150,
       ),
-      Icon(
+      const Icon(
         Icons.camera,
         size: 150,
       ),
-      Icon(
+      const Icon(
         Icons.chat,
         size: 150,
       ),
