@@ -111,7 +111,6 @@ class SignInScreenState extends State<SignInScreen> {
                               password: _password.text,
                               context: context);
                         },
-                        splashColor: const Color.fromRGBO(255, 242, 0, 1.0),
                         borderColor: const Color.fromRGBO(212, 20, 15, 1.0),
                         borderWidth: 0,
                         color: const Color.fromRGBO(255, 242, 0, 1.0),
@@ -139,7 +138,6 @@ class SignInScreenState extends State<SignInScreen> {
                           );
                         },
                         color: Colors.black,
-                        splashColor: Colors.grey[100] ?? Colors.grey,
                         borderColor: Colors.black,
                         borderWidth: 0.0,
                       ),
@@ -311,7 +309,6 @@ class SignInScreenState extends State<SignInScreen> {
                       }
                       navigatorKey.currentState?.pop();
                     },
-                    splashColor: Colors.black12,
                     borderColor: Colors.black12,
                     borderWidth: 2,
                   );

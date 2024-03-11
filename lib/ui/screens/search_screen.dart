@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 
 import 'package:zipapp/constants/keys.dart';
@@ -70,8 +71,10 @@ class SearchScreenState extends State<SearchScreen> {
                           prefixIcon: IconButton(
                             onPressed: () => {
                               _focusNode.unfocus(),
-                              Future.delayed(const Duration(milliseconds: 200),
-                                  () => Navigator.pop(context))
+                              SystemChannels.textInput.invokeMethod('TextInput.hide'),
+                              Navigator.pop(context)
+                              // Future.delayed(const Duration(milliseconds: 200),
+                              //     () => Navigator.pop(context))
                             },
                             icon: const Icon(Icons.arrow_back,
                                 color: Colors.black),
