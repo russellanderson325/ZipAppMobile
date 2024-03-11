@@ -55,8 +55,7 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const SizedBox(height: 16),
-                Center(
-                    child: adw.draggableIcon()),
+                Center(child: adw.draggableIcon()),
                 const SizedBox(height: 16),
                 const Center(
                     child: Text('Create an account',
@@ -88,7 +87,12 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
                         title: 'Sign up',
                         fontSize: 22,
                         fontWeight: FontWeight.w500,
-                        onPressed: () => {},
+                        onPressed: () => _signUp(
+                            firstname: _firstNameController.text,
+                            lastname: _lastNameController.text,
+                            number: _phoneController.text,
+                            email: _emailController.text,
+                            password: _passwordController.text),
                         color: ZipColors.zipYellow)),
                 // Positioned(bottom: 32, child: _buildSignInButton())
                 _buildSignInButton(),

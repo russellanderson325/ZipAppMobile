@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
+import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 
 class SignInDrawer extends StatefulWidget {
@@ -18,6 +21,7 @@ class SignInDrawer extends StatefulWidget {
 class _SignInDrawerState extends State<SignInDrawer> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _forgotPass = TextEditingController();
 
   AuthenticationDrawerWidgets adw = AuthenticationDrawerWidgets();
 
@@ -71,19 +75,64 @@ class _SignInDrawerState extends State<SignInDrawer> {
                             title: 'Log in',
                             fontSize: 22,
                             fontWeight: FontWeight.w500,
-                            onPressed: () => {},
+                            onPressed: () => _emailLogin(
+                                email: _emailController.text,
+                                password: _passwordController.text),
                             color: ZipColors.zipYellow)),
                     CustomTextButton(
                       title: 'Forgot your password?',
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       onPressed: () {},
+                      //() async {
+                      //   await showDialog(
+                      //     barrierDismissible: false,
+                      //     context: context,
+                      //     builder: (context) {
+                      //       return buildAlertTextField(
+                      //           context, "Forgot Password", _forgotPass);
+                      //     },
+                      //   );
+                      // },
                     ),
                     const SizedBox(height: 190),
                     // Positioned(bottom: 32, child: _buildCreateAccountButton()),
                     _buildCreateAccountButton(),
                     const SizedBox(height: 33)
                   ]))),
+    );
+  }
+
+  void _emailLogin({String? email, String? password}) async {
+    /// Validates email and password fields
+    if (Validator.validateEmail(email!) &&
+        Validator.validatePassword(password!)) {
+      try {
+        /// Hides native keyboard
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        await auth.signIn(email, password);
+      } catch (e) {
+        String exception = auth.getExceptionText(e as PlatformException);
+        _showErrorAlert(
+          title: "Login failed",
+          content: exception,
+        );
+      }
+    }
+  }
+
+  void _showErrorAlert(
+      {String? title, String? content, VoidCallback? onPressed}) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return CustomAlertDialog(
+          content: content,
+          title: title,
+          onPressed: onPressed,
+        );
+      },
     );
   }
 
