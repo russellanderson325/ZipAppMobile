@@ -18,7 +18,7 @@ import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/services/payment.dart';
-import 'package:zipapp/ui/screens/search.dart';
+import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/settings_screen.dart';
 import 'package:zipapp/ui/screens/previous_trips_screen.dart';
 import 'package:zipapp/ui/screens/promos_screen.dart';
@@ -56,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
   //this is the global key used for the scaffold
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late GlobalKey<MapScreen> mapScaffoldKey;
-  late GlobalKey<SearchState> searchScaffoldKey;
+  late GlobalKey<SearchScreenState> searchScaffoldKey;
   late GlobalKey<main_map.MapSampleState> mapScaffoldKey2;
   late double screenHeight, screenWidth;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -547,11 +547,11 @@ class _MainScreenState extends State<MainScreen> {
                   //     children: <Widget>[
                   GestureDetector(
                       onTap: () => {
-                        print(''),
-                        print(userService.user.firstName),
-                        print(''),
-                        searchLocation()
-                      },
+                            print(''),
+                            print(userService.user.firstName),
+                            print(''),
+                            searchLocation()
+                          },
                       child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(50.0),
@@ -959,7 +959,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void searchLocation() async {
     final result = await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const Search()));
+        context, MaterialPageRoute(builder: (context) => const SearchScreen()));
     // MaterialPageRoute(
     //     builder: (context) =>
     //         const Payment()))
