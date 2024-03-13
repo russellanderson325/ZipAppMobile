@@ -116,7 +116,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           //     context: context);
                         },
                         color: const Color.fromRGBO(255, 242, 0, 1.0),
-                        splashColor: Colors.black12,
                         borderColor: const Color.fromRGBO(212, 20, 15, 1.0),
                         borderWidth: 0,
                       ),

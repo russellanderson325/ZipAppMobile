@@ -166,7 +166,6 @@ class SignUpScreenState extends State<SignUpScreen> {
                               number: _number.text,
                               password: _password.text);
                         },
-                        splashColor: Colors.black12,
                         borderColor: const Color.fromRGBO(59, 89, 152, 1.0),
                         borderWidth: 0,
                         color: const Color.fromRGBO(255, 242, 0, 1.0),

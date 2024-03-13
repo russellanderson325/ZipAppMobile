@@ -56,7 +56,6 @@ class CustomAlertDialog extends StatelessWidget {
                   onPressed!();
                   Navigator.of(context).pop();
                 },
-                splashColor: Colors.black12,
                 borderColor: Colors.black12,
                 borderWidth: 2,
               ),

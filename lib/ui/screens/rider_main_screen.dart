@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
 
 typedef MyMarkerSetter = void Function(
@@ -52,9 +54,21 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
         Icons.camera,
         size: 150,
       ),
-      const Icon(
-        Icons.chat,
-        size: 150,
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 48),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CustomTextButton(
+              title: "Logout",
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+              onPressed: () => AuthService().signOut(),
+              color: ZipColors.zipYellow,
+            ),
+          ],
+        ),
       ),
     ];
     const List<BottomNavigationBarItem> items = [
