@@ -120,6 +120,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                               'Your average: ',
                               style: ZipDesign.labelText,
                             ),
+                            //change later.
                             Text(
                               '\$3.40',
                               style: ZipDesign.disabledBodyText,

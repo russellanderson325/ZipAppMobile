@@ -168,7 +168,7 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
             ),
             onPressed: hasChanged ? () {
 
-            } : null, // Disables the button if no change has occurred
+            } : null, // Disables the button if no change has occurred.
             child: const Text('Save changes', style: TextStyle(color: Colors.white)),
           ),
         ),
