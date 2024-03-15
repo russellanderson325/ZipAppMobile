@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
-
-import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/screens/search_screen.dart';
-import 'package:zipapp/ui/widgets/custom_flat_button.dart';
-import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
-
-typedef MyMarkerSetter = void Function(
-    BuildContext context, void Function(LocalSearchResult) methodFromChild);
-typedef MyTapToggle = void Function(
-    BuildContext context, void Function() methodFromChild);
-typedef MyMarkerReset = void Function(
-    BuildContext context, void Function() methodFromChild);
+import 'package:zipapp/ui/screens/account_screen.dart';
+import 'package:zipapp/ui/screens/home_screen.dart';
 
 class RiderMainScreen extends StatefulWidget {
   const RiderMainScreen({super.key});
@@ -22,10 +12,6 @@ class RiderMainScreen extends StatefulWidget {
 }
 
 class _RiderMainScreenState extends State<RiderMainScreen> {
-  late void Function(LocalSearchResult) setMapMarkers;
-  late void Function() toggleTapMode;
-  late void Function() resetMarkers;
-
   final UserService userService = UserService();
   int _selectedIndex = 0;
 
@@ -37,15 +23,7 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
-      mapwidget.Map(
-        markerBuilder: (BuildContext context,
-            void Function(LocalSearchResult) childMarkerSetter) {
-          setMapMarkers = childMarkerSetter;
-        },
-        markerReset: (BuildContext context, void Function() childReset) {
-          resetMarkers = childReset;
-        },
-      ),
+      const HomeScreen(),
       const Icon(
         Icons.call,
         size: 150,
@@ -54,22 +32,7 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
         Icons.camera,
         size: 150,
       ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CustomTextButton(
-              title: "Logout",
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              onPressed: () => AuthService().signOut(),
-              color: ZipColors.zipYellow,
-            ),
-          ],
-        ),
-      ),
+      const AccountScreen(),
     ];
     const List<BottomNavigationBarItem> items = [
       BottomNavigationBarItem(
@@ -91,36 +54,23 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
     ];
 
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: ZipColors.primaryBackground,
-          titleSpacing: 0.0,
-          leading: Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 0),
-              child: Image.asset(
-                'assets/two_tone_zip_black.png',
-                width: 40,
-                height: 40,
-              )),
-          title: Text('Good afternoon, ${userService.user.firstName}',
-              style: const TextStyle(
-                  fontSize: 24.0,
-                  fontFamily: 'Lexend',
-                  fontWeight: FontWeight.w500)),
-        ),
         body: Center(
           child: pages.elementAt(_selectedIndex),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          showUnselectedLabels: true,
-          selectedLabelStyle: const TextStyle(color: Colors.black),
-          selectedItemColor: Colors.black,
-          unselectedLabelStyle: const TextStyle(color: Colors.black),
-          unselectedItemColor: Colors.black,
-          backgroundColor: ZipColors.primaryBackground,
-          items: items,
-          currentIndex: _selectedIndex,
-          onTap: _onBottomBarItemTapped,
-        ));
+        bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: ZipColors.boxBorder))),
+            child: BottomNavigationBar(
+              showUnselectedLabels: true,
+              selectedLabelStyle: const TextStyle(color: Colors.black),
+              selectedItemColor: Colors.black,
+              unselectedLabelStyle: const TextStyle(color: Colors.black),
+              unselectedItemColor: Colors.black,
+              backgroundColor: ZipColors.primaryBackground,
+              items: items,
+              currentIndex: _selectedIndex,
+              onTap: _onBottomBarItemTapped,
+            )));
   }
 
   void _onBottomBarItemTapped(int index) {

@@ -3,6 +3,8 @@ import 'package:zipapp/business/validator.dart';
 
 import 'package:zipapp/constants/zip_colors.dart';
 
+/// TODO: Handle validation
+
 class AuthenticationDrawerWidgets {
   Widget promptTextLabel(String text) {
     return Padding(

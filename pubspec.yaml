@@ -27,6 +27,7 @@ dependencies:
   image_picker: ^1.0.7
   intl: ^0.19.0
   location_permissions: ^4.0.1
+  lucide_icons: ^0.257.0
   mailto: ^2.0.0
   material_design_icons_flutter: ^7.0.7296
   percent_indicator: ^4.2.3

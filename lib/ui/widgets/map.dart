@@ -67,9 +67,7 @@ class MapSampleState extends State<Map> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         searchBox(width, height),
-        SizedBox(
-          width: width,
-          height: height * 0.74,
+        Expanded(
           child: userLatLng == null
               ? const Center(child: CircularProgressIndicator())
               : GoogleMap(
