@@ -3,6 +3,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/screens/account_screen.dart';
 import 'package:zipapp/ui/screens/home_screen.dart';
+import 'package:zipapp/ui/screens/payments_screen.dart';
 
 class RiderMainScreen extends StatefulWidget {
   const RiderMainScreen({super.key});
@@ -28,10 +29,7 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
         Icons.call,
         size: 150,
       ),
-      const Icon(
-        Icons.camera,
-        size: 150,
-      ),
+      const PaymentsScreen(),
       const AccountScreen(),
     ];
     const List<BottomNavigationBarItem> items = [
