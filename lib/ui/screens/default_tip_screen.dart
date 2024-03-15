@@ -1,222 +1,177 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import "package:flutter/material.dart";
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/constants/zip_colors.dart';
+import 'package:zipapp/constants/zip_design.dart';
 
 class DefaultTipScreen extends StatefulWidget {
-  const DefaultTipScreen({super.key});
+  const DefaultTipScreen({Key? key}) : super(key: key);
 
   @override
   _DefaultTipScreenState createState() => _DefaultTipScreenState();
 }
 
-late double tipAmount;
-
 class _DefaultTipScreenState extends State<DefaultTipScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserService userService = UserService();
-  late VoidCallback onBackPress;
+  double tipAmount = 20.0; // Default value for demonstration
+  bool hasChanged = false; // Tracks if a new percentage was selected
+
   @override
   void initState() {
-    onBackPress = () {
-      Navigator.of(context).pop();
-    };
-    tipAmount = userService.user.defaultTip;
     super.initState();
   }
 
-  void updateDefaultTip(String newTip) {
-    tipAmount = double.parse(newTip);
+  void updateDefaultTip(double newTip) {
+    if (newTip != tipAmount && !hasChanged) {
+      setState(() {
+        hasChanged = true;
+      });
+    } else if (newTip == tipAmount && hasChanged) {
+      setState(() {
+        hasChanged = false;
+      });
+    }
+    setState(() {
+      tipAmount = newTip;
+    });
     print("Updating default tip to: $tipAmount");
-    _firestore
-        .collection('users')
-        .doc(userService.userID)
-        .update({'defaultTip': tipAmount});
-    setState(() {});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Padding(
-          padding: const EdgeInsets.only(
-            top: 23.0,
-            bottom: 0.0,
-            left: 0.0,
-            right: 0.0,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Container(
-                  color: Colors.black,
-                  child: Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: Color.fromRGBO(255, 242, 0, 1.0)),
-                          onPressed: onBackPress,
-                        ),
-                      ),
-                      const Text("   Default Tip",
-                          style: TextStyle(
-                              //backgroundColor: Colors.black,
-                              color: Color.fromRGBO(255, 242, 0, 1.0),
-                              fontSize: 36.0,
-                              fontWeight: FontWeight.w300,
-                              fontFamily: "Bebas"))
-                    ],
-                  ),
-                ),
-                const Padding(
-                    padding: EdgeInsets.only(top: 30.0),
-                    child: Text("Choose Default:",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Color.fromRGBO(255, 242, 0, 1.0),
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Bebas"))),
-                const Padding(
-                  padding: EdgeInsets.only(top: 30.0, right: 15.0, left: 15.0),
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          updateDefaultTip("15");
-                        },
-                        child: const CircularButton(
-                            child: Center(
-                          child: Text('15%',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 24.0)),
-                        )),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          updateDefaultTip("20");
-                        },
-                        child: const CircularButton(
-                          child: Center(
-                            child: Text('20%',
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 24.0)),
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          updateDefaultTip("25");
-                        },
-                        child: const CircularButton(
-                          child: Center(
-                            child: Text('25%',
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 24.0)),
-                          ),
-                        ),
-                      ),
-                    ]),
-                const Padding(
-                  padding: EdgeInsets.only(top: 30.0),
-                  child: Text("Create Custom Default:",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Color.fromRGBO(255, 242, 0, 1.0),
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Bebas")),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 30.0, left: 100.0, right: 100.0),
-                  child: TextFormField(
-                    decoration: const InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Color.fromRGBO(255, 242, 0, 1.0))),
-                    ),
-                    style: const TextStyle(color: Colors.white),
-                    maxLength: 4,
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => updateDefaultTip(v),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Please enter a numerical percentage';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                DisplayTip(tipAmount),
-              ],
+  void showCustomTipDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController _customTipController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Enter Custom Tip'),
+          content: TextField(
+            controller: _customTipController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              hintText: 'Custom Tip Percentage',
+              prefixText: '% ',
+              border: OutlineInputBorder(),
             ),
           ),
-        ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                double? customTip = double.tryParse(_customTipController.text);
+                if (customTip != null) {
+                  updateDefaultTip(customTip);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget percentageButton(String percentage, {bool isCustom = false}) {
+    bool isSelected = isCustom ? false : (tipAmount == double.parse(percentage));
+    return ElevatedButton(
+      onPressed: () {
+        if (isCustom) {
+          showCustomTipDialog();
+        } else {
+          updateDefaultTip(double.parse(percentage));
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected ? ZipColors.zipYellow : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: EdgeInsets.symmetric(vertical: 15),
+      ),
+      child: Text(
+        isCustom ? '     %\nCustom' : '$percentage%',
+        style: ZipDesign.bodyText.copyWith(color: isSelected ? Colors.black : Colors.grey, fontSize: 18),
       ),
     );
   }
-}
 
-class DisplayTip extends StatelessWidget {
-  const DisplayTip(tipAmount, {super.key});
-  @override
-  build(context) {
-    return Padding(
-        padding: const EdgeInsets.only(top: 30.0),
-        child: Text("Default Tip: " + tipAmount.toString() + '%',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: Color.fromRGBO(255, 242, 0, 1.0),
-                fontSize: 30.0,
-                fontWeight: FontWeight.w400,
-                fontFamily: "Bebas")));
-  }
-}
-
-class TopRectangle extends StatelessWidget {
-  final color;
-  final height;
-  final width;
-  final child;
-  final posi;
-  const TopRectangle(
-      {super.key,
-      this.posi,
-      this.child,
-      this.color,
-      this.height = 100.0,
-      this.width = 500.0});
-
-  @override
-  build(context) {
-    return Container(
-      width: width,
-      height: height,
-      color: const Color.fromRGBO(76, 86, 96, 1.0),
-      child: child,
-    );
-  }
-}
-
-class CircularButton extends StatelessWidget {
-  final child;
-  const CircularButton({super.key, this.child});
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
-      child: Container(
-        color: const Color.fromRGBO(255, 242, 0, 1.0),
-        height: 105.0, // height of the button
-        width: 105.0, // width of the button
-        child: child,
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text('Default Tip', style: ZipDesign.pageTitleText.copyWith(color: Colors.black)),
+        backgroundColor: ZipColors.primaryBackground,
+        elevation: 0,
+      ),
+      backgroundColor: ZipColors.primaryBackground,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Current', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${tipAmount.toStringAsFixed(0)}%', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)),
+                Text('Your average tip: \$3.40', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text('\nSelect Percentage', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 3,
+              childAspectRatio: 1.5 / 1,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              children: ['10', '15', '20', '25', '30'].map((percentage) {
+                return percentageButton(percentage);
+              }).toList()..add(percentageButton('Custom', isCustom: true)),
+            ),
+            const SizedBox(height: 20),
+            Text('\nSelect Custom Amount', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            TextField(
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              onChanged: (value) {
+                if (value.isNotEmpty) {
+                  updateDefaultTip(double.parse(value));
+                }
+              },
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                hintText: '\$ Enter amount...',
+                hintStyle: ZipDesign.labelText.copyWith(color: Colors.black),
+                prefix: const Text('\$ ', style: TextStyle(color: Colors.black)),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: ZipColors.zipYellow)),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: ZipColors.primaryBackground,
+        child: SafeArea(
+          child: TextButton(
+            style: TextButton.styleFrom(
+              backgroundColor: hasChanged ? ZipColors.zipYellow : Colors.grey, // Dynamically change the button color
+              minimumSize: const Size(double.infinity, 50),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+            ),
+            onPressed: hasChanged ? () {
+
+            } : null, // Disables the button if no change has occurred
+            child: const Text('Save changes', style: TextStyle(color: Colors.white)),
+          ),
+        ),
       ),
     );
   }

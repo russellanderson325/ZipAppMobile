@@ -4,6 +4,7 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/widgets/payment_list_item.dart';
+import 'package:zipapp/ui/screens/default_tip_screen.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({Key? key}) : super(key: key);
@@ -96,9 +97,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
             child: Row(children: <Widget>[
               Expanded(
                 child: TextButton(
-                  onPressed: () {
-                    /// TODO: Add the default tip page
-                  },
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const DefaultTipScreen()),
+                  ),
                   style: ButtonStyle(
                     padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
                     foregroundColor: MaterialStateProperty.all(Colors.black),
