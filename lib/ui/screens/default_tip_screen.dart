@@ -14,45 +14,76 @@ class DefaultTipScreen extends StatefulWidget {
 class _DefaultTipScreenState extends State<DefaultTipScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserService userService = UserService();
-  double tipAmount = 20.0; // Default value for demonstration
-  bool hasChanged = false; // Tracks if a new percentage was selected
+  double tipAmount = 20.0;
+  bool hasChanged = false;
+  bool isCustomAmountSelected = false;
 
   @override
   void initState() {
     super.initState();
+    loadSavedTipAmount();
+  }
+
+  Future<void> loadSavedTipAmount() async {
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(userService.userID).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        if (data.containsKey('defaultTip')) {
+          setState(() {
+            tipAmount = data['defaultTip'].toDouble();
+            // Determine whether the stored tip amount is a percentage or a dollar amount
+            isCustomAmountSelected = tipAmount >= 1.0;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error loading saved tip amount: $e");
+    }
   }
 
   void updateDefaultTip(double newTip) {
-    if (newTip != tipAmount && !hasChanged) {
+    if (newTip != tipAmount) {
       setState(() {
+        tipAmount = newTip;
         hasChanged = true;
-      });
-    } else if (newTip == tipAmount && hasChanged) {
-      setState(() {
-        hasChanged = false;
+        isCustomAmountSelected = true; // Set custom amount selected to true when updating tip amount
       });
     }
-    setState(() {
-      tipAmount = newTip;
-    });
-    print("Updating default tip to: $tipAmount");
+  }
+
+  Future<void> saveChanges() async {
+    if (hasChanged) {
+      try {
+        await _firestore.collection('users').doc(userService.userID).update({
+          'defaultTip': tipAmount,
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Changes saved successfully')),
+        );
+        setState(() {
+          hasChanged = false;
+        });
+      } catch (e) {
+        print("Error saving changes: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save changes')),
+        );
+      }
+    }
   }
 
   void showCustomTipDialog() {
+    TextEditingController _customTipController = TextEditingController();
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController _customTipController = TextEditingController();
         return AlertDialog(
-          title: const Text('Enter Custom Tip'),
+          title: const Text('Enter Custom Tip Percentage'),
           content: TextField(
             controller: _customTipController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              hintText: 'Custom Tip Percentage',
-              prefixText: '% ',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(hintText: 'Tip percentage', prefixText: '% '),
           ),
           actions: <Widget>[
             TextButton(
@@ -65,7 +96,7 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
                 double? customTip = double.tryParse(_customTipController.text);
                 if (customTip != null) {
                   updateDefaultTip(customTip);
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
                 }
               },
             ),
@@ -76,19 +107,22 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
   }
 
   Widget percentageButton(String percentage, {bool isCustom = false}) {
-    bool isSelected = isCustom ? false : (tipAmount == double.parse(percentage));
+    bool isSelected = isCustom ? tipAmount != 20.0 && tipAmount != 10.0 && tipAmount != 15.0 && tipAmount != 25.0 && tipAmount != 30.0 : tipAmount == double.tryParse(percentage);
     return ElevatedButton(
       onPressed: () {
         if (isCustom) {
           showCustomTipDialog();
         } else {
           updateDefaultTip(double.parse(percentage));
+          setState(() {
+            isCustomAmountSelected = false; // Set custom amount selected to false when selecting a percentage
+          });
         }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? ZipColors.zipYellow : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: EdgeInsets.symmetric(vertical: 15),
+        padding: EdgeInsets.symmetric(vertical: 20),
       ),
       child: Text(
         isCustom ? '     %\nCustom' : '$percentage%',
@@ -101,16 +135,13 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        leading: IconButton(icon: const Icon(Icons.close, color: Colors.black), onPressed: () => Navigator.pop(context)),
         title: Text('Default Tip', style: ZipDesign.pageTitleText.copyWith(color: Colors.black)),
         backgroundColor: ZipColors.primaryBackground,
         elevation: 0,
       ),
       backgroundColor: ZipColors.primaryBackground,
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,22 +150,23 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${tipAmount.toStringAsFixed(0)}%', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)),
+                Text(isCustomAmountSelected ?  '${tipAmount.toStringAsFixed(2)}%' : '${tipAmount.toStringAsFixed(0)}%', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)), // Display tipAmount in dollars or percentage
                 Text('Your average tip: \$3.40', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)),
               ],
             ),
             const SizedBox(height: 20),
-            Text('\nSelect Percentage', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            Text('\nSelect Percentage\n', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 3,
-              childAspectRatio: 1.5 / 1,
+              childAspectRatio: 1.5 / 1.1,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              children: ['10', '15', '20', '25', '30'].map((percentage) {
-                return percentageButton(percentage);
-              }).toList()..add(percentageButton('Custom', isCustom: true)),
+              children: ['10', '15', '20', '25', '30']
+                  .map((percentage) => percentageButton(percentage))
+                  .toList()
+                ..add(percentageButton('% Custom', isCustom: true)),
             ),
             const SizedBox(height: 20),
             Text('\nSelect Custom Amount', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
@@ -143,6 +175,13 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
               onChanged: (value) {
                 if (value.isNotEmpty) {
                   updateDefaultTip(double.parse(value));
+                  setState(() {
+                    isCustomAmountSelected = true;
+                  });
+                } else {
+                  setState(() {
+                    isCustomAmountSelected = false;
+                  });
                 }
               },
               decoration: InputDecoration(
@@ -150,7 +189,7 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
                 fillColor: Colors.white,
                 hintText: '\$ Enter amount...',
                 hintStyle: ZipDesign.labelText.copyWith(color: Colors.black),
-                prefix: const Text('\$ ', style: TextStyle(color: Colors.black)),
+                prefixText: '\$ ',
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: ZipColors.zipYellow)),
               ),
             ),
@@ -162,13 +201,11 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
         child: SafeArea(
           child: TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: hasChanged ? ZipColors.zipYellow : Colors.grey, // Dynamically change the button color
+              backgroundColor: hasChanged ? ZipColors.zipYellow : Colors.grey,
               minimumSize: const Size(double.infinity, 50),
               padding: const EdgeInsets.symmetric(vertical: 15),
             ),
-            onPressed: hasChanged ? () {
-
-            } : null, // Disables the button if no change has occurred.
+            onPressed: hasChanged ? () => saveChanges() : null,
             child: const Text('Save changes', style: TextStyle(color: Colors.white)),
           ),
         ),
