@@ -41,7 +41,11 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
       appBar: AppBar(
         backgroundColor: ZipColors.primaryBackground,
         centerTitle: false,
-        title: const Text('Payments', style: ZipDesign.pageTitleText),
+        title: const Text(
+          'Payments',
+          style: ZipDesign.pageTitleText,
+        ),
+        scrolledUnderElevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 16),

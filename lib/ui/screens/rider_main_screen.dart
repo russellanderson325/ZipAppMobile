@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/screens/account_screen.dart';
+import 'package:zipapp/ui/screens/activity_screen.dart';
 import 'package:zipapp/ui/screens/home_screen.dart';
 import 'package:zipapp/ui/screens/payments_screen.dart';
 
@@ -25,10 +26,7 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
       const HomeScreen(),
-      const Icon(
-        Icons.call,
-        size: 150,
-      ),
+      const ActivityScreen(),
       const PaymentsScreen(),
       const AccountScreen(),
     ];

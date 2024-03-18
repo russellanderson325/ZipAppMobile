@@ -43,69 +43,75 @@ class SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     _focusNode.requestFocus();
     return Scaffold(
+      backgroundColor: ZipColors.primaryBackground,
+      key: scaffoldKey,
+      appBar: AppBar(
         backgroundColor: ZipColors.primaryBackground,
-        key: scaffoldKey,
-        appBar: AppBar(
-          backgroundColor: ZipColors.primaryBackground,
-          automaticallyImplyLeading: false,
-          toolbarHeight: 10.0,
-        ),
-        body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(color: ZipColors.boxBorder),
+        automaticallyImplyLeading: false,
+        toolbarHeight: 10.0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.0),
+                  border: Border.all(color: ZipColors.boxBorder),
+                ),
+                child: TextField(
+                  focusNode: _focusNode,
+                  controller: searchController,
+                  onChanged: (value) => _getPlaces(value),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Search Here",
+                    prefixIcon: IconButton(
+                      onPressed: () => {
+                        _focusNode.unfocus(),
+                        SystemChannels.textInput.invokeMethod('TextInput.hide'),
+                        Navigator.pop(context)
+                      },
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
                     ),
-                    child: TextField(
-                      focusNode: _focusNode,
-                      controller: searchController,
-                      onChanged: (value) => _getPlaces(value),
-                      decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Search Here",
-                          prefixIcon: IconButton(
-                            onPressed: () => {
-                              _focusNode.unfocus(),
-                              SystemChannels.textInput.invokeMethod('TextInput.hide'),
-                              Navigator.pop(context)
-                              // Future.delayed(const Duration(milliseconds: 200),
-                              //     () => Navigator.pop(context))
-                            },
-                            icon: const Icon(Icons.arrow_back,
-                                color: Colors.black),
-                          ),
-                          suffixIcon: IconButton(
-                              onPressed: () => searchController.clear(),
-                              icon: const Icon(Icons.highlight_off))),
+                    suffixIcon: IconButton(
+                      onPressed: () => searchController.clear(),
+                      icon: const Icon(Icons.highlight_off),
                     ),
-                  )),
-              places.isNotEmpty
-                  ? Expanded(
-                      child: ListView.builder(
+                  ),
+                ),
+              ),
+            ),
+            places.isNotEmpty
+                ? Expanded(
+                    child: ListView.builder(
                       itemCount: places.length,
                       itemBuilder: (context, index) {
                         return Card(
-                            child: ListTile(
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                    16.0, 0.0, 6.0, 0.0),
-                                title: Text(places[index].name),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.north_west),
-                                  onPressed: () {
-                                    searchController.text = places[index].name;
-                                  },
-                                ),
-                                onTap: () =>
-                                    Navigator.pop(context, places[index])));
+                          child: ListTile(
+                            contentPadding:
+                                const EdgeInsets.fromLTRB(16.0, 0.0, 6.0, 0.0),
+                            title: Text(places[index].name),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.north_west),
+                              onPressed: () {
+                                searchController.text = places[index].name;
+                              },
+                            ),
+                            onTap: () => Navigator.pop(context, places[index]),
+                          ),
+                        );
                       },
-                    ))
-                  : const SizedBox()
-            ])));
+                    ),
+                  )
+                : const SizedBox()
+          ],
+        ),
+      ),
+    );
   }
 
   void _getPlaces(String value) async {
