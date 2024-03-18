@@ -24,6 +24,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
           'Payments',
           style: ZipDesign.pageTitleText,
         ),
+        scrolledUnderElevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
