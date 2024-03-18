@@ -4,6 +4,7 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/widgets/payment_list_item.dart';
+import 'package:zipapp/ui/screens/payment_methods_prompt_screen.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
             style: ZipDesign.sectionTitleText,
           ),
           PaymentListItem.build(
-              context: context, cardType: 'Visa', lastFourDigits: '1234'),
+              context: context, cardType: 'Visa', lastFourDigits: '1235'),
           const SizedBox(height: 16),
           PaymentListItem.build(
               context: context, cardType: 'Mastercard', lastFourDigits: '1234'),
@@ -45,19 +46,28 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
               context: context, cardType: 'Amex', lastFourDigits: '1234'),
           const SizedBox(height: 16),
           TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(LucideIcons.plus),
-              label: const Text('Add payment method'),
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8))),
-                padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
-                iconColor: MaterialStateProperty.all(Colors.black),
-                iconSize: MaterialStateProperty.all(16),
-                foregroundColor: MaterialStateProperty.all(Colors.black),
-                backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
-                textStyle: MaterialStateProperty.all(ZipDesign.labelText),
-              )),
+            onPressed: () {
+              print("Add new payment method");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PaymentMethodsPrompt()
+                ),
+            );
+            },
+            icon: const Icon(LucideIcons.plus),
+            label: const Text('Add payment method'),
+            style: ButtonStyle(
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8))),
+              padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+              iconColor: MaterialStateProperty.all(Colors.black),
+              iconSize: MaterialStateProperty.all(16),
+              foregroundColor: MaterialStateProperty.all(Colors.black),
+              backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
+              textStyle: MaterialStateProperty.all(ZipDesign.labelText),
+            )
+          ),
           const SizedBox(
             height: 32,
           ),
