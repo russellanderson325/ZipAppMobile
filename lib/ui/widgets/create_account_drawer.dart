@@ -9,10 +9,8 @@ import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 
 class CreateAccountDrawer extends StatefulWidget {
-  final Function closeDrawer;
   final Function switchDrawers;
-  const CreateAccountDrawer(
-      {super.key, required this.closeDrawer, required this.switchDrawers});
+  const CreateAccountDrawer({super.key, required this.switchDrawers});
 
   @override
   State<CreateAccountDrawer> createState() => _CreateAccountDrawerState();
@@ -32,74 +30,67 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return GestureDetector(
-      onPanEnd: (details) {
-        if (details.velocity.pixelsPerSecond.dy > 200) {
-          widget.closeDrawer.call();
-        }
-      },
-      child: Container(
-          alignment: Alignment.topCenter,
-          width: width,
-          height: 703,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-                topRight: Radius.circular(32), topLeft: Radius.circular(32)),
-          ),
-          child: SizedBox(
-            width: width - 96,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 16),
-                Center(child: adw.draggableIcon()),
-                const SizedBox(height: 16),
-                const Center(
-                    child: Text('Create an account',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Lexend',
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                        ))),
-                const SizedBox(height: 26),
-                adw.promptTextLabel('First name'),
-                adw.inputTextField(
-                    _firstNameController, false, Validator.validateName),
-                adw.promptTextLabel('Last name'),
-                adw.inputTextField(
-                    _lastNameController, false, Validator.validateName),
-                adw.promptTextLabel('Email'),
-                adw.inputTextField(
-                    _emailController, false, Validator.validateEmail),
-                adw.promptTextLabel('Phone'),
-                adw.inputTextField(
-                    _phoneController, false, Validator.validateNumber),
-                adw.promptTextLabel('Password'),
-                adw.inputTextField(
-                    _passwordController, true, Validator.validatePassword),
-                Padding(
-                    padding: const EdgeInsets.only(top: 32.0, bottom: 53.0),
-                    child: CustomTextButton(
-                        title: 'Sign up',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w500,
-                        onPressed: () => _signUp(
-                            firstname: _firstNameController.text,
-                            lastname: _lastNameController.text,
-                            number: _phoneController.text,
-                            email: _emailController.text,
-                            password: _passwordController.text),
-                        color: ZipColors.zipYellow)),
-                // Positioned(bottom: 32, child: _buildSignInButton())
-                _buildSignInButton(),
-                const SizedBox(height: 33)
-              ],
-            ),
-          )),
+    return Container(
+      alignment: Alignment.topCenter,
+      width: width,
+      height: 703,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+            topRight: Radius.circular(32), topLeft: Radius.circular(32)),
+      ),
+      child: SizedBox(
+        width: width - 96,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const SizedBox(height: 16),
+            Center(child: adw.draggableIcon()),
+            const SizedBox(height: 16),
+            const Center(
+                child: Text('Create an account',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Lexend',
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                    ))),
+            const SizedBox(height: 26),
+            adw.promptTextLabel('First name'),
+            adw.inputTextField(
+                _firstNameController, false, Validator.validateName),
+            adw.promptTextLabel('Last name'),
+            adw.inputTextField(
+                _lastNameController, false, Validator.validateName),
+            adw.promptTextLabel('Email'),
+            adw.inputTextField(
+                _emailController, false, Validator.validateEmail),
+            adw.promptTextLabel('Phone'),
+            adw.inputTextField(
+                _phoneController, false, Validator.validateNumber),
+            adw.promptTextLabel('Password'),
+            adw.inputTextField(
+                _passwordController, true, Validator.validatePassword),
+            Padding(
+                padding: const EdgeInsets.only(top: 32.0, bottom: 53.0),
+                child: CustomTextButton(
+                    title: 'Sign up',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    onPressed: () => _signUp(
+                        firstname: _firstNameController.text,
+                        lastname: _lastNameController.text,
+                        number: _phoneController.text,
+                        email: _emailController.text,
+                        password: _passwordController.text),
+                    color: ZipColors.zipYellow)),
+            _buildSignInButton(),
+            const SizedBox(height: 33)
+          ],
+        ),
+      ),
     );
   }
 

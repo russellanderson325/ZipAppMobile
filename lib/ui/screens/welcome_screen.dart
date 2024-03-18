@@ -27,6 +27,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   final int drawerDelayMS = 400;
 
+  final DraggableScrollableController _signInScrollController =
+      DraggableScrollableController();
+
+  final DraggableScrollableController _createAccountScrollController =
+      DraggableScrollableController();
+
   static final circleRows = <Widget>[
     const Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -90,10 +96,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: ZipColors.primaryBackground,
-        resizeToAvoidBottomInset: false,
-        body: Stack(alignment: Alignment.bottomCenter, children: <Widget>[
+      key: _scaffoldKey,
+      backgroundColor: ZipColors.primaryBackground,
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: <Widget>[
           ListView(
             children: <Widget>[
               const SizedBox(height: 64),
@@ -128,31 +136,35 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
             ],
           ),
-          AnimatedPositioned(
-              curve: Curves.easeInOut,
-              duration: Duration(milliseconds: drawerDelayMS),
-              left: 0,
-              bottom: showCreateAccountDrawer ? 0 : -703,
-              child: CreateAccountDrawer(
-                closeDrawer: hideDrawers,
-                switchDrawers: showSignIn,
-              )),
-          AnimatedPositioned(
-              curve: Curves.easeInOut,
-              duration: Duration(milliseconds: drawerDelayMS),
-              left: 0,
-              bottom: showSignInDrawer ? 0 : -703,
-              child: SignInDrawer(
-                closeDrawer: hideDrawers,
-                switchDrawers: showCreateAccount,
-              )),
-          // _drawerStatus == DrawerStatus.createAccount
-          //     ? const CreateAccountDrawer()
-          //     : const SizedBox(height: 0.0, width: 0.0),
-          // _drawerStatus == DrawerStatus.signIn
-          //     ? const SignInDrawer()
-          //     : const SizedBox(height: 0.0, width: 0.0)
-        ]));
+          DraggableScrollableSheet(
+            initialChildSize: 0.0,
+            controller: _createAccountScrollController,
+            minChildSize: 0.0,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return SingleChildScrollView(
+                  controller: scrollController,
+                  child: CreateAccountDrawer(
+                    switchDrawers: showSignIn,
+                  ));
+            },
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.0,
+            controller: _signInScrollController,
+            minChildSize: 0.0,
+            maxChildSize: 0.85,
+            builder: (context, scrollController) {
+              return SingleChildScrollView(
+                  controller: scrollController,
+                  child: SignInDrawer(
+                    switchDrawers: showCreateAccount,
+                  ));
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   static Widget _buildCarouselItem(String text, int dotToFill) {
@@ -196,42 +208,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void showCreateAccount() {
-    if (showSignInDrawer) {
-      setState(() {
-        showSignInDrawer = false;
-      });
-      Future.delayed(const Duration(milliseconds: 100), () {});
+    if (_signInScrollController.size > 0.0) {
+      _signInScrollController.animateTo(0.0,
+          duration: const Duration(milliseconds: 1), curve: Curves.easeInOut);
     }
-    setState(() => showCreateAccountDrawer = true);
-    // setState(() {
-    //   if (showSignInDrawer) {
-    //     showSignInDrawer = false;
-    //     // showCreateAccountDrawer = true;
-    //     Future.delayed(
-    //         Duration(milliseconds: 100), () => showCreateAccountDrawer = true);
-    //   } else {
-    //     showCreateAccountDrawer = true;
-    //   }
-    // });
+    _createAccountScrollController.animateTo(0.85,
+        duration: Duration(milliseconds: drawerDelayMS),
+        curve: Curves.easeInOut);
   }
 
   void showSignIn() {
-    if (showCreateAccountDrawer) {
-      setState(() {
-        showCreateAccountDrawer = false;
-      });
-      Future.delayed(const Duration(milliseconds: 100), () {});
+    if (_createAccountScrollController.size > 0.0) {
+      _createAccountScrollController.animateTo(0.0,
+          duration: const Duration(milliseconds: 1), curve: Curves.easeInOut);
     }
-    setState(() => showSignInDrawer = true);
-    // setState(() {
-    //   if (showCreateAccountDrawer) {
-    //     showCreateAccountDrawer = false;
-    //     // showSignInDrawer = true;
-    //     Future.delayed(
-    //         Duration(milliseconds: 100), () => showSignInDrawer = true);
-    //   } else {
-    //     showSignInDrawer = true;
-    //   }
-    // });
+    _signInScrollController.animateTo(0.85,
+        duration: Duration(milliseconds: drawerDelayMS),
+        curve: Curves.easeInOut);
   }
 }
