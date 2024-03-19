@@ -12,17 +12,17 @@ import 'dart:async';
 // import 'package:url_launcher/url_launcher.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
-import 'package:zipapp/ui/screens/previous_driver_trips.dart';
+import 'package:zipapp/ui/screens/trips/previous_driver_trips.dart';
 import 'dart:io';
-import 'package:zipapp/ui/screens/main_screen.dart';
-import '../../models/user.dart';
+import 'package:zipapp/ui/screens/main/main_screen.dart';
+import '../../../models/user.dart';
 // import 'package:unicorndial/unicorndial.dart';
 import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:zipapp/ui/screens/stripe_connect_screen.dart';
-import 'package:zipapp/ui/screens/driver_settings_screen.dart';
-import 'package:zipapp/ui/screens/earnings_screen.dart';
+import 'package:zipapp/ui/screens/payment/stripe_connect_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_settings_screen.dart';
+import 'package:zipapp/ui/screens/payment/earnings_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 enum DriverBottomSheetStatus { closed, confirmation, searching, rideDetails }

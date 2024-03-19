@@ -8,7 +8,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
+import 'package:zipapp/ui/screens/main/main_screen.dart';
 
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 

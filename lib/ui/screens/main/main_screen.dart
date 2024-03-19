@@ -18,14 +18,14 @@ import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/services/payment.dart';
-import 'package:zipapp/ui/screens/search_screen.dart';
-import 'package:zipapp/ui/screens/settings_screen.dart';
-import 'package:zipapp/ui/screens/previous_trips_screen.dart';
-import 'package:zipapp/ui/screens/promos_screen.dart';
+import 'package:zipapp/ui/screens/trips/search_screen.dart';
+import 'package:zipapp/ui/screens/account/settings_screen.dart';
+import 'package:zipapp/ui/screens/trips/previous_trips_screen.dart';
+import 'package:zipapp/ui/screens/payment/promos_screen.dart';
 import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
-import 'package:zipapp/ui/screens/driver_verification_screen.dart';
-import 'package:zipapp/ui/screens/payment_history_screen.dart';
-import 'package:zipapp/ui/screens/payment_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/payment/payment_history_screen.dart';
+import 'package:zipapp/ui/screens/payment/payment_screen.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
 
 enum BottomSheetStatus {

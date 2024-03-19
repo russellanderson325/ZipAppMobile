@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'package:stripe_payment/stripe_payment.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+
 //import 'package:stripe_sdk/stripe_sdk.dart' as stripe1;
 //import 'package:stripe_sdk/stripe_sdk_ui.dart' as Stripe2;
 
@@ -13,74 +14,33 @@ class Payment extends StatefulWidget {
   const Payment({super.key});
 
   @override
-  _PaymentState createState() => _PaymentState();
+  PaymentState createState() => PaymentState();
 }
 
-class _PaymentState extends State<Payment> {
-  //late PaymentMethod? _paymentMethod;
-  late String _error;
-  //late PaymentIntentResult? _paymentIntent;
-  List<String> ok = [];
-  //Source _source;
-  late String _customerID;
-  late String _setupSecret;
-  ScrollController _controller = ScrollController();
-  var customerData = Map();
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  //var paymentMethodList;
+class PaymentState extends State<Payment> {
+  // Variables
+  // late String _error;
+  // List<String> ok = [];
+  // late String _customerID;
+  // late String _setupSecret;
+  // ScrollController _controller = ScrollController();
+  // var customerData = Map();
+  // GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+
   @override
   initState() {
     super.initState();
-
-    // StripePayment.setOptions(StripeOptions(
-    //     publishableKey: "pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u"));
-    // //   paymentMethodList = [];
-    _getPaymentMethods();
+    // _getPaymentMethods();
   }
 
-  void setError(dynamic error) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(error.toString())));
-    setState(() {
-      _error = error.toString();
-    });
-  }
+  // Methods
 
-  // Future<void> _getCustomer() async {
-  //   print("i have been called");
-  //   var firebaseUser = auth.FirebaseAuth.instance.currentUser;
-  //   FirebaseFirestore.instance
-  //       .collection('stripe_customers')
-  //       .doc(firebaseUser?.uid)
-  //       .get()
-  //       .then((DocumentSnapshot documentSnapshot) {
-  //     if (documentSnapshot.exists) {
-  //       _customerID = documentSnapshot.data()['customer_id'];
-  //       _setupSecret = documentSnapshot.data()['setup_secret'];
-  //       customerData = documentSnapshot.data();
-  //       if (kDebugMode) {
-  //         print("hello");
-  //       }
-  //       //customerData.forEach((k, v) => print('${k}: ${v}'));
-  //     } else {
-  //       if (kDebugMode) {
-  //         print('Customer does not exist');
-  //       }
-  //     }
-  //   });
-  // }
-
-  // Future<void> _triggerCloudFunctionPaymentIntent(data) async {
-  //   var firebaseUser = await auth.FirebaseAuth.instance.currentUser;
-  //   FirebaseFirestore.instance
-  //       .collection("stripe_customers")
-  //       .doc(firebaseUser.uid)
-  //       .collection('payments')
-  //       .add(data);
-  // }
-
-//Add Payment method to user
-  void _setPaymentMethodID(paymentmethod) async {
+  /*
+  / Sets the Payment Method ID to the user's account
+  / @param paymentmethod
+  / @return void
+  */
+  static void setPaymentMethodID(paymentmethod) async {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     FirebaseFirestore.instance
         .collection("stripe_customers")
@@ -89,8 +49,33 @@ class _PaymentState extends State<Payment> {
         .add({"id": paymentmethod.id});
   }
 
-//Functionality that deletes the Payment Method
-  Future<void> deletePaymentMethod(paymentListID) {
+  /*
+  * Functionality that creates the Payment Method
+  * @return void
+  */
+static Future<PaymentMethod?> createPaymentMethod() async {
+  try {
+    // Create a payment method
+    final paymentMethod = await Stripe.instance.createPaymentMethod(
+      params: const PaymentMethodParams.card(
+        paymentMethodData: PaymentMethodData(),
+      ),
+    );
+
+    return paymentMethod;
+  } catch (e) {
+    print("Error creating payment method: $e");
+    return null;
+  }
+}
+
+
+  /*
+  * Functionality that deletes the Payment Method
+  * @param paymentListID
+  * @return void
+  */
+  static Future<void> deletePaymentMethod(paymentListID) {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     CollectionReference paymentsMethods = FirebaseFirestore.instance
         .collection('stripe_customers')
@@ -103,8 +88,11 @@ class _PaymentState extends State<Payment> {
         .catchError((error) => "Failed to delete Payment Method");
   }
 
-  //This function will return a Query snapshot of payment method cards
-  Stream<QuerySnapshot> _getPaymentMethods() {
+  /*
+  * Functionality that gets the Payment Methods
+  * @return Stream<QuerySnapshot>
+  */
+  static Stream<QuerySnapshot> getPaymentMethods() {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     CollectionReference paymentsMethods = FirebaseFirestore.instance
         .collection('stripe_customers')
@@ -115,33 +103,13 @@ class _PaymentState extends State<Payment> {
     return paymentsMethods.snapshots();
   }
 
-  /*Future<void> createPaymentMethod() async {
-    StripePayment.setStripeAccount(null);
-    //tax = ((totalCost * taxPercent) * 100).ceil() / 100;
-    //amount = ((totalCost + tip + tax) * 100).toInt();
-    //print('amount in pence/cent which will be charged = $amount');
-    //step 1: add card
-    PaymentMethod paymentMethod = PaymentMethod();
-    paymentMethod = await StripePayment.paymentRequestWithCardForm(
-      CardFormPaymentRequest(),
-    ).then((PaymentMethod paymentMethod) {
-      return paymentMethod;
-    }).catchError((e) {
-      print('Errore Card: ${e.toString()}');
-    });
-    paymentMethod != null
-        ? processPaymentAsDirectCharge(paymentMethod)
-        : showDialog(
-            context: context,
-            builder: (BuildContext context) => ShowDialogToDismiss(
-                title: 'Error',
-                content:
-                    'It is not possible to pay with this card. Please try again with a different card',
-                buttonText: 'CLOSE'));
-} */
-  //Dialog that makes sure that User wants to Delete this payment method
-  //if User clicks yes, then this method calls the _deletePaymentMethod() method
-  Future<void> _showDeleteAlertDialog(paymentListID) async {
+ 
+  /*
+  * Functionality that shows the Delete Alert Dialog
+  * @param paymentListID
+  * @return Future<void>
+  */
+  Future<void> showDeleteAlertDialog(paymentListID) async {
     return showCupertinoDialog(
       context: context,
       barrierDismissible: false,
@@ -208,7 +176,8 @@ class _PaymentState extends State<Payment> {
   }
 
   //Dialog if the Payment Method was added succesfully
-  Future<void> _addPaymentMethodDialog() async {
+  static Future<void> addPaymentMethodDialog(context) async {
+    print("I have been called");
     return showCupertinoDialog(
       context: context,
       barrierDismissible: true,
@@ -231,7 +200,7 @@ class _PaymentState extends State<Payment> {
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: Colors.grey[800],
-      key: _scaffoldKey,
+      // key: _scaffoldKey,
       appBar: AppBar(
         title: const Text(
           'Payment Methods',
@@ -250,137 +219,138 @@ class _PaymentState extends State<Payment> {
         ],
       ),
       body: ListView(
-        controller: _controller,
-        padding: EdgeInsets.zero,
-        children: <Widget>[
+        // controller: _controller,
+        // padding: EdgeInsets.zero,
+        // children: <Widget>[
           //Gets Payment Methods
-          Card(
-            child: ExpansionTile(
-              leading: const Icon(Icons.view_headline),
-              title: const Text("Payment Methods"),
-              children: [
-                StreamBuilder<QuerySnapshot>(
-                  stream: _getPaymentMethods(),
-                  builder: (context, snapshot) {
-                    /* Timer(Duration(seconds: 2), () {
-                      print("Yeah, this line is printed after 2 seconds");
-                    });*/
-                    /*if (snapshot.hasError) {
-                      return CircularProgressIndicator();
-                    }*/
-                    if (snapshot.hasData) {
-                      debugPrint("build widget: ${snapshot.data}");
-                      List<QueryDocumentSnapshot> paymentList =
-                          snapshot.data!.docs;
-                      return DataTable(
-                        columnSpacing: 50,
-                        columns: const <DataColumn>[
-                          DataColumn(
-                            label: Text(
-                              'Brand',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Last4',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Ending',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          //Column for trash icon
-                          DataColumn(
-                            label: Text(""),
-                          ),
-                        ],
-                        rows: List<DataRow>.generate(
-                          paymentList.length,
-                          (index) => DataRow(
-                              /*onSelectChanged: (bool selected) {
-                                if (selected) {
-                                  log.add('row-selected: ${itemRow.index}');
-                                }
-                              },*/
-                              cells: [
-                                DataCell(
-                                    Text(paymentList[index]["card"]["brand"]),
-                                    onTap: () {
-                                  print(
-                                      "TESTING ID: ${paymentList[index]['id']})");
-                                  //ONLY FOR PAYMENT ONLY //MUST DELETE THIS***************
-                                  Navigator.pop(
-                                      context, paymentList[index]['id']);
-                                }),
-                                DataCell(
-                                    Text(paymentList[index]["card"]["last4"]),
-                                    onTap: () {
-                                  //ONLY FOR PAYMNET ONLY! MUST DELETE THIS******************
-                                  Navigator.pop(
-                                      context, paymentList[index]['id']);
-                                }),
-                                DataCell(
-                                    //(var number = 5);
-                                    Text(
-                                        '${paymentList[index]["card"]["exp_month"]}/${paymentList[index]["card"]["exp_year"]}'),
-                                    onTap: () {
-                                  Navigator.pop(context,
-                                      paymentList[index]['card']['id']);
-                                }),
-                                DataCell(
-                                  const Icon(Icons.delete_outline),
-                                  onTap: () async {
-                                    print("TEST: ${paymentList[index].id}");
-                                    await _showDeleteAlertDialog(
-                                        paymentList[index].id);
-                                  },
-                                )
-                              ]),
-                        ),
-                      );
-                    } else {
-                      // We can show the loading view until the data comes back.
-                      debugPrint('build loading widget');
-                      return const CircularProgressIndicator();
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.add_circle_outline),
-              title: Text("Add new credit/debit card"),
-              // onTap: () {
-              //   StripePayment.paymentRequestWithCardForm(
-              //           CardFormPaymentRequest())
-              //       .then((paymentMethod) {
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //         SnackBar(content: Text('Received ${paymentMethod.id}')));
-              //     setState(() {
-              //       //_getCustomer();
-              //       _paymentMethod = paymentMethod;
-              //       _setPaymentMethodID(_paymentMethod);
-              //       _addPaymentMethodDialog();
-              //     });
-              //   }).catchError(setError);
-              //   //_addPaymentMethodDialog();
-              // },
-            ),
-          ),
-          /* Divider(),
-          Text('Customer data method:'),
-          Text(
-            JsonEncoder.withIndent('  ')
-                .convert(_paymentMethod?.toJson() ?? {}),
-            style: TextStyle(fontFamily: "Monospace"),
-          ),*/
-        ],
+        //   Card(
+        //     child: ExpansionTile(
+        //       leading: const Icon(Icons.view_headline),
+        //       title: const Text("Payment Methods"),
+        //       children: [
+        //         StreamBuilder<QuerySnapshot>(
+        //           stream: _getPaymentMethods(),
+        //           builder: (context, snapshot) {
+        //             /* Timer(Duration(seconds: 2), () {
+        //               print("Yeah, this line is printed after 2 seconds");
+        //             });*/
+        //             /*if (snapshot.hasError) {
+        //               return CircularProgressIndicator();
+        //             }*/
+        //             if (snapshot.hasData) {
+        //               debugPrint("build widget: ${snapshot.data}");
+        //               List<QueryDocumentSnapshot> paymentList =
+        //                   snapshot.data!.docs;
+        //               return DataTable(
+        //                 columnSpacing: 50,
+        //                 columns: const <DataColumn>[
+        //                   DataColumn(
+        //                     label: Text(
+        //                       'Brand',
+        //                       style: TextStyle(fontStyle: FontStyle.italic),
+        //                     ),
+        //                   ),
+        //                   DataColumn(
+        //                     label: Text(
+        //                       'Last4',
+        //                       style: TextStyle(fontStyle: FontStyle.italic),
+        //                     ),
+        //                   ),
+        //                   DataColumn(
+        //                     label: Text(
+        //                       'Ending',
+        //                       style: TextStyle(fontStyle: FontStyle.italic),
+        //                     ),
+        //                   ),
+        //                   //Column for trash icon
+        //                   DataColumn(
+        //                     label: Text(""),
+        //                   ),
+        //                 ],
+        //                 rows: List<DataRow>.generate(
+        //                   paymentList.length,
+        //                   (index) => DataRow(
+        //                       /*onSelectChanged: (bool selected) {
+        //                         if (selected) {
+        //                           log.add('row-selected: ${itemRow.index}');
+        //                         }
+        //                       },*/
+        //                       cells: [
+        //                         DataCell(
+        //                             Text(paymentList[index]["card"]["brand"]),
+        //                             onTap: () {
+        //                           print(
+        //                               "TESTING ID: ${paymentList[index]['id']})");
+        //                           //ONLY FOR PAYMENT ONLY //MUST DELETE THIS***************
+        //                           Navigator.pop(
+        //                               context, paymentList[index]['id']);
+        //                         }),
+        //                         DataCell(
+        //                             Text(paymentList[index]["card"]["last4"]),
+        //                             onTap: () {
+        //                           //ONLY FOR PAYMNET ONLY! MUST DELETE THIS******************
+        //                           Navigator.pop(
+        //                               context, paymentList[index]['id']);
+        //                         }),
+        //                         DataCell(
+        //                             //(var number = 5);
+        //                             Text(
+        //                                 '${paymentList[index]["card"]["exp_month"]}/${paymentList[index]["card"]["exp_year"]}'),
+        //                             onTap: () {
+        //                           Navigator.pop(context,
+        //                               paymentList[index]['card']['id']);
+        //                         }),
+        //                         DataCell(
+        //                           const Icon(Icons.delete_outline),
+        //                           onTap: () async {
+        //                             print("TEST: ${paymentList[index].id}");
+        //                             await _showDeleteAlertDialog(
+        //                                 paymentList[index].id);
+        //                           },
+        //                         )
+        //                       ]),
+        //                 ),
+        //               );
+        //             } else {
+        //               // We can show the loading view until the data comes back.
+        //               debugPrint('build loading widget');
+        //               return const CircularProgressIndicator();
+        //             }
+        //           },
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+
+        //   // const Card(
+        //   //   child: ListTile(
+        //   //     leading: Icon(Icons.add_circle_outline),
+        //   //     title: Text("Add new credit/debit card"),
+        //   //     // onTap: () {
+        //   //     //   StripePayment.paymentRequestWithCardForm(
+        //   //     //           CardFormPaymentRequest())
+        //   //     //       .then((paymentMethod) {
+        //   //     //     ScaffoldMessenger.of(context).showSnackBar(
+        //   //     //         SnackBar(content: Text('Received ${paymentMethod.id}')));
+        //   //     //     setState(() {
+        //   //     //       //_getCustomer();
+        //   //     //       _paymentMethod = paymentMethod;
+        //   //     //       _setPaymentMethodID(_paymentMethod);
+        //   //     //       _addPaymentMethodDialog();
+        //   //     //     });
+        //   //     //   }).catchError(setError);
+        //   //     //   //_addPaymentMethodDialog();
+        //   //     // },
+        //   //   ),
+        //   // ),
+        //   /* Divider(),
+        //   Text('Customer data method:'),
+        //   Text(
+        //     JsonEncoder.withIndent('  ')
+        //         .convert(_paymentMethod?.toJson() ?? {}),
+        //     style: TextStyle(fontFamily: "Monospace"),
+        //   ),*/
+        // ],
       ),
     );
   }
@@ -549,3 +519,69 @@ class _PaymentState extends State<Payment> {
                           }
                         }).toList(),
                       );*/
+
+
+/*Future<void> createPaymentMethod() async {
+    StripePayment.setStripeAccount(null);
+    //tax = ((totalCost * taxPercent) * 100).ceil() / 100;
+    //amount = ((totalCost + tip + tax) * 100).toInt();
+    //print('amount in pence/cent which will be charged = $amount');
+    //step 1: add card
+    PaymentMethod paymentMethod = PaymentMethod();
+    paymentMethod = await StripePayment.paymentRequestWithCardForm(
+      CardFormPaymentRequest(),
+    ).then((PaymentMethod paymentMethod) {
+      return paymentMethod;
+    }).catchError((e) {
+      print('Errore Card: ${e.toString()}');
+    });
+    paymentMethod != null
+        ? processPaymentAsDirectCharge(paymentMethod)
+        : showDialog(
+            context: context,
+            builder: (BuildContext context) => ShowDialogToDismiss(
+                title: 'Error',
+                content:
+                    'It is not possible to pay with this card. Please try again with a different card',
+                buttonText: 'CLOSE'));
+} */
+// Future<void> _getCustomer() async {
+  //   print("i have been called");
+  //   var firebaseUser = auth.FirebaseAuth.instance.currentUser;
+  //   FirebaseFirestore.instance
+  //       .collection('stripe_customers')
+  //       .doc(firebaseUser?.uid)
+  //       .get()
+  //       .then((DocumentSnapshot documentSnapshot) {
+  //     if (documentSnapshot.exists) {
+  //       _customerID = documentSnapshot.data()['customer_id'];
+  //       _setupSecret = documentSnapshot.data()['setup_secret'];
+  //       customerData = documentSnapshot.data();
+  //       if (kDebugMode) {
+  //         print("hello");
+  //       }
+  //       //customerData.forEach((k, v) => print('${k}: ${v}'));
+  //     } else {
+  //       if (kDebugMode) {
+  //         print('Customer does not exist');
+  //       }
+  //     }
+  //   });
+  // }
+
+// Future<void> _triggerCloudFunctionPaymentIntent(data) async {
+  //   var firebaseUser = await auth.FirebaseAuth.instance.currentUser;
+  //   FirebaseFirestore.instance
+  //       .collection("stripe_customers")
+  //       .doc(firebaseUser.uid)
+  //       .collection('payments')
+  //       .add(data);
+  // }
+
+// void setError(dynamic error) {
+  //   ScaffoldMessenger.of(context)
+  //       .showSnackBar(SnackBar(content: Text(error.toString())));
+  //   setState(() {
+  //     _error = error.toString();
+  //   });
+  // }

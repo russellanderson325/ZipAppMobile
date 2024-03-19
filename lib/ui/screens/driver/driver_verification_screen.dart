@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import "package:zipapp/ui/widgets/custom_text_field.dart";
 import 'package:zipapp/business/validator.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
+import 'package:zipapp/ui/screens/main/main_screen.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/CustomIcons/custom_icons_icons.dart';
-import 'package:zipapp/ui/screens/driver_main_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_main_screen.dart';
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});

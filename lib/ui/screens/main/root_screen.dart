@@ -3,8 +3,8 @@ import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
 // import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
-import 'package:zipapp/ui/screens/rider_main_screen.dart';
-import 'package:zipapp/ui/screens/welcome_screen.dart';
+import 'package:zipapp/ui/screens/trips/rider_main_screen.dart';
+import 'package:zipapp/ui/screens/main/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class RootScreen extends StatefulWidget {

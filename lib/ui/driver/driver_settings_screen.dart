@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 //import 'package:zip/ui/screens/profile_screen.dart';
 //import 'package:zip/ui/screens/defaultTip_screen.dart';
-import 'package:zipapp/ui/screens/profile_screen.dart';
-import 'package:zipapp/ui/screens/legal_info_screen.dart';
-import 'package:zipapp/ui/screens/vehicles_screen.dart';
-import 'package:zipapp/ui/screens/documents_screen.dart';
+import 'package:zipapp/ui/screens/account/profile_screen.dart';
+import 'package:zipapp/ui/screens/account/legal_info_screen.dart';
+import 'package:zipapp/ui/screens/rider/vehicles_screen.dart';
+import 'package:zipapp/ui/screens/account/documents_screen.dart';
 //import 'package:zip/services/payment_screen.dart';
 import 'package:zipapp/business/auth.dart';
 

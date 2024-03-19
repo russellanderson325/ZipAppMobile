@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart';
+import 'package:zipapp/ui/screens/payment/stripe_card_info_prompt_screen.dart';
 
 class PaymentMethodsPrompt extends StatelessWidget {
   const PaymentMethodsPrompt({Key? key}) : super(key: key);

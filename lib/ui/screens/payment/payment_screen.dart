@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 // import 'package:stripe_payment/stripe_payment.dart';
 import 'package:zipapp/business/payment.dart';
 
-import 'package:zipapp/ui/screens/payment_history_screen.dart';
+import 'package:zipapp/ui/screens/payment/payment_history_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   final paymentService;
