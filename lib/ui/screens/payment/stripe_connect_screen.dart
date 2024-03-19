@@ -51,10 +51,6 @@ class _StripeScreenState extends State<StripeScreen> {
                     children: [
                       const Text(
                         "Set up Stripe Connect to recieve payouts.",
-                        //Place holder text. Place holder text.Place holder text.Place holder text.Place holder text.Place holder text."
-                        //  + "Place holder text. Place holder text. Place holder text.Place holder text. Place holder text."
-                        //  + "Place holder text.Place holder text.Place holder text.Place holder text.Place holder text.Place holder text."
-                        //  + "Place holder text.Place holder text.Place holder text.Place holder text.Place holder text.Place holder text.",
                         softWrap: true,
                       ),
                       Row(
