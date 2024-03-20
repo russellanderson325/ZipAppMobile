@@ -4,7 +4,7 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/widgets/payment_list_item.dart';
-import 'package:zipapp/ui/screens/payment/payment_methods_prompt_screen.dart';
+import 'package:zipapp/ui/screens/payment_methods_prompt_screen.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

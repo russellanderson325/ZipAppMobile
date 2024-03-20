@@ -21,10 +21,10 @@ import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/settings_screen.dart';
 import 'package:zipapp/ui/screens/previous_trips_screen.dart';
-import 'package:zipapp/ui/screens/payment/promos_screen.dart';
+import 'package:zipapp/ui/screens/promos_screen.dart';
 import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
 import 'package:zipapp/ui/screens/driver_verification_screen.dart';
-import 'package:zipapp/ui/screens/payment/payment_history_screen.dart';
+import 'package:zipapp/ui/screens/payment_history_screen.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
 
 enum BottomSheetStatus {

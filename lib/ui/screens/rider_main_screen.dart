@@ -3,7 +3,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/screens/account_screen.dart';
 import 'package:zipapp/ui/screens/home_screen.dart';
-import 'package:zipapp/ui/screens/payment/payments_screen.dart';
+import 'package:zipapp/ui/screens/payments_screen.dart';
 
 class RiderMainScreen extends StatefulWidget {
   const RiderMainScreen({super.key});

@@ -45,9 +45,9 @@ class StripeCardInfoPromptScreen extends StatelessWidget {
 
                       Navigator.pop(context); // Navigate back to the previous screen
                     }).catchError((e) {
-                      // print("Error creating payment method: $e");
+                      print('failed to add card');
                       MessageOverlay(
-                        message: "Error adding card",
+                        message: "Error adding card, please try again.",
                         duration: const Duration(seconds: 3),
                         color: "#f5272b",
                       ).show(context);

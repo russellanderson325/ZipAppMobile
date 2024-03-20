@@ -20,9 +20,9 @@ import '../../models/user.dart';
 import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:zipapp/ui/screens/payment/stripe_connect_screen.dart';
+import 'package:zipapp/ui/screens/stripe_connect_screen.dart';
 import 'package:zipapp/ui/screens/driver_settings_screen.dart';
-import 'package:zipapp/ui/screens/payment/earnings_screen.dart';
+import 'package:zipapp/ui/screens/earnings_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 enum DriverBottomSheetStatus { closed, confirmation, searching, rideDetails }

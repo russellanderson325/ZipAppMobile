@@ -36,7 +36,7 @@ class Payment {
       );
       return paymentMethod;
     } catch (e) {
-      print("Error creating payment method");
+      print("Error creating payment method...");
       rethrow;
     }
   }
