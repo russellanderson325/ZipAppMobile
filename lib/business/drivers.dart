@@ -9,7 +9,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
-import 'package:zipapp/ui/screens/driver/driver_main_screen.dart';
+import 'package:zipapp/ui/screens/driver_main_screen.dart';
 import 'package:intl/intl.dart';
 
 class DriverService {

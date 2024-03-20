@@ -42,7 +42,7 @@ class ZipDesign {
     ),
     padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
     foregroundColor: MaterialStateProperty.all(Colors.black),
-    backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
+    backgroundColor: MaterialStateProperty.all(Colors.yellow),
     textStyle: MaterialStateProperty.all(ZipDesign.labelText),
   );
 }

@@ -37,24 +37,39 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
               'Payment methods',
               style: ZipDesign.sectionTitleText,
             ),
-            StreamBuilder<QuerySnapshot>(
-              stream: PaymentState.getPaymentMethods(),
+            // FutureBuilder for Payment Methods List
+            FutureBuilder<List<Map<String, dynamic>?>>(
+              future: Payment.getPaymentMethodsDetails(), // Your future function
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (snapshot.hasData) {
+                  // Data is fetched successfully, now build the UI
+                  print('Data: ${snapshot.data}'); // Print the data (for debugging purposes
+                  List<Widget> listItems = snapshot.data!
+                      .map((paymentMethod) => PaymentListItem.build(
+                            context: context,
+                            cardType: paymentMethod?['brand'] ?? 'Unknown',
+                            lastFourDigits: paymentMethod?['last4'] ?? '0000',
+                          ))
+                      .toList();
+                  // Add spacing after each item
+                  for (var i = listItems.length - 1; i > 0; i--) {
+                    listItems.insert(i, const SizedBox(height: 16));
+                  }
+                  return Column(
+                    children: listItems,
+                  );
+                } else {
+                  return const Text('No data available'); // Show this text if there is no data
                 }
-                return Column(
-                  children: snapshot.data!.docs.map((document) {
-                    print(document['id']);
-                    const cardBrand = 'Visa'; // Example: 'Visa'
-                    const lastFourDigits = '1234'; // Example: '1234'
-                    return PaymentListItem.build(
-                      context: context,
-                      cardType: cardBrand,
-                      lastFourDigits: lastFourDigits,
-                    );
-                  }).toList(),
-                );
               },
             ),
             // Add Payment Method Button

@@ -1,7 +1,12 @@
+/*
+ * This file contains the screen for the user to select a payment method,
+ * such as a debit/credit card, Apple Pay, or Google Pay.
+*/
 import 'package:flutter/material.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:zipapp/ui/screens/payment/stripe_card_info_prompt_screen.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 
 class PaymentMethodsPrompt extends StatelessWidget {
   const PaymentMethodsPrompt({Key? key}) : super(key: key);
@@ -9,9 +14,11 @@ class PaymentMethodsPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ZipColors.primaryBackground,
       appBar: AppBar(
         // This will place the title in the app's top bar
         title: const Text('Payment Methods'),
+        backgroundColor: ZipColors.primaryBackground,
         centerTitle: true, // Optionally center the title
       ),
       body: Center(
