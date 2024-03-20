@@ -4,6 +4,7 @@ import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
+import 'package:zipapp/ui/screens/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
 import 'package:zipapp/ui/screens/terms_screen.dart';
@@ -18,6 +19,13 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final UserService userService = UserService();
+  static const bool _isCustomer = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -195,6 +203,24 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ZipDesign.labelText),
                             ))),
                     const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Switch(
+                        value: _isCustomer,
+                        onChanged: (value) {
+                          setState(() {
+                            Navigator.of(context).pop();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const VerificationScreen()));
+                          });
+                        },
+                        activeColor: Colors.blue[400],
+                        activeTrackColor: Colors.blue[100],
+                      ),
+                    ),
                     Align(
                         alignment: Alignment.topLeft,
                         child: TextButton.icon(
