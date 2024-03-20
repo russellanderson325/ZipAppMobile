@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:zipapp/ui/screens/documents_screen.dart';
-import 'package:zipapp/ui/screens/payment/default_tip_screen.dart';
+import 'package:zipapp/ui/screens/default_tip_screen.dart';
 import 'package:zipapp/ui/screens/legal_info_screen.dart';
 import 'package:zipapp/ui/screens/safety_features_screen.dart';
 import 'package:zipapp/business/auth.dart';

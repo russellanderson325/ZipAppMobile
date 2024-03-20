@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/payment/payment_info_screen.dart';
+import 'package:zipapp/ui/screens/payment_info_screen.dart';
 
 class PaymentListItem {
   static Widget build(

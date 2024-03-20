@@ -39,21 +39,21 @@ class PaymentMethodsPrompt extends StatelessWidget {
               child: const Text('Add Debit/Credit Card'),
             ),
             // Button for adding Apple Pay
-            ElevatedButton(
-              onPressed: () {
-                // Action for adding a different payment method
-              },
-              style: ZipDesign.yellowButtonStyle,
-              child: const Text('Use Apple Pay'),
-            ),
-            // Button for adding Google Pay
-            ElevatedButton(
-              onPressed: () {
-                // Action for adding a different payment method
-              },
-              style: ZipDesign.yellowButtonStyle,
-              child: const Text('Use Google Pay'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     // Action for adding a different payment method
+            //   },
+            //   style: ZipDesign.yellowButtonStyle,
+            //   child: const Text('Use Apple Pay'),
+            // ),
+            // // Button for adding Google Pay
+            // ElevatedButton(
+            //   onPressed: () {
+            //     // Action for adding a different payment method
+            //   },
+            //   style: ZipDesign.yellowButtonStyle,
+            //   child: const Text('Use Google Pay'),
+            // ),
             // The go back button remains here, allowing users to navigate back from this screen
             // TextButton(
             //   onPressed: () {

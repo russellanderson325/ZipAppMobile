@@ -4,9 +4,10 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/widgets/payment_list_item.dart';
-import 'package:zipapp/ui/screens/payment_methods_prompt_screen.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:zipapp/utils.dart';
+import 'package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({Key? key}) : super(key: key);
@@ -56,7 +57,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                   List<Widget> listItems = snapshot.data!
                       .map((paymentMethod) => PaymentListItem.build(
                             context: context,
-                            cardType: paymentMethod?['brand'] ?? 'Unknown',
+                            cardType: capitalizeFirstLetter(paymentMethod?['brand']),
                             lastFourDigits: paymentMethod?['last4'] ?? '0000',
                           ))
                       .toList();
@@ -79,9 +80,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PaymentMethodsPrompt()
+                    builder: (context) => const StripeCardInfoPromptScreen(),
                   ),
-              );
+                );
               },
               icon: const Icon(LucideIcons.plus),
               label: const Text('Add payment method'),
