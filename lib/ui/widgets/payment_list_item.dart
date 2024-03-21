@@ -8,7 +8,9 @@ class PaymentListItem {
   static Widget build(
       {required BuildContext context,
       required String cardType,
-      required String lastFourDigits}) {
+      required String lastFourDigits,
+      required String paymentMethodId,
+      required Function refreshKey}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       alignment: Alignment.centerLeft,
@@ -22,7 +24,13 @@ class PaymentListItem {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PaymentInfo()),
+                MaterialPageRoute(
+                  builder: (context) => PaymentInfo(
+                    paymentMethodId: paymentMethodId,
+                    cardType: cardType,
+                    lastFourDigits: lastFourDigits,
+                    refreshKey: refreshKey,
+                  )),
               );
             },
             style: ButtonStyle(

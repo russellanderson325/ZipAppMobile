@@ -3,30 +3,55 @@
   It contains methods to create, delete, and retrieve payment methods, as well as to create payment intents.
   It also contains a method to show an alert dialog to confirm the deletion of a payment method.
 */
-
 import 'dart:async';
 import 'dart:ffi';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 class Payment {
   static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
+  static final FirebaseFunctions functions = FirebaseFunctions.instance;
+  static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
+  static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
+  /*
+  * This method adds the payment method id to the firebase database.
+  * @param paymentMethodId - the id of the payment method
+  * @return Future<void> - a future that resolves when the payment method id is added
+  */
+  static Future<void> setPaymentMethodIdAndFingerprint(String paymentMethodId, String fingerprint) async {
+    // First check to see if finger print already exists in users payment methods
+    var querySnapshot = await FirebaseFirestore.instance
+        .collection('stripe_customers')
+        .doc(_firebaseUser?.uid)
+        .collection('payment_methods')
+        .where('fingerprint', isEqualTo: fingerprint)
+        .get();
 
-  // Sets the Payment Method Id to the user's account
-  static Future<void> setPaymentMethodId(String paymentMethodId) async {
+    // If the fingerprint exists, we don't want to add it again and we delete the payment method from the Stripe API
+    if (querySnapshot.docs.isNotEmpty) {
+      await removePaymentMethod(paymentMethodId);
+      throw Exception('Payment method already exists');
+    }
+    // If the fingerprint doesn't exist, we add the payment method to the database
     if (_firebaseUser != null) {
       await FirebaseFirestore.instance
           .collection("stripe_customers")
           .doc(_firebaseUser?.uid)
           .collection('payment_methods')
-          .add({"id": paymentMethodId});
+          .add({
+            "id": paymentMethodId,
+            "fingerprint": fingerprint,
+          });
     }
   }
 
-  // Creates the Payment Method
+  /*
+  * This method is used to create a payment method. It creates the payment method 
+  * and stores it in the Stripe server.
+  * @return Future<PaymentMethod?> - a future that resolves to the payment method
+  */
   static Future<PaymentMethod?> createPaymentMethod() async {
     try {
       final paymentMethod = await Stripe.instance.createPaymentMethod(
@@ -41,18 +66,41 @@ class Payment {
     }
   }
 
-  // Deletes the Payment Method
-  Future<void> deletePaymentMethod(String paymentListId) async {
+  /*
+  * This method is used to delete a payment method Id from the firebase database.
+  * We also delete the payment method from the Stripe API (!!!IMPORTANT!!!).
+  * @param paymentListId - the id of the payment method
+  * @return Future<void> - a future that resolves when the payment method is deleted
+  */
+  static Future<void> removePaymentMethod(String paymentMethodId) async {
     if (_firebaseUser != null) {
-      await FirebaseFirestore.instance
-          .collection('stripe_customers')
-          .doc(_firebaseUser?.uid)
-          .collection('payment_methods')
-          .doc(paymentListId)
-          .delete();
+      try {
+        // First we call the cloud function to remove the payment method from the Stripe API
+        // If it fails, we don't want to delete the payment method from the database
+        await removePaymentMethodCallable.call({'paymentMethodId': paymentMethodId});
+
+        // Get the payment method document from the database where the id matches the paymentMethodId
+        var querySnapshot = await FirebaseFirestore.instance
+            .collection('stripe_customers')
+            .doc(_firebaseUser?.uid)
+            .collection('payment_methods')
+            .where('id', isEqualTo: paymentMethodId)
+            .get();
+
+        // Loop through the documents and delete each one
+        for (var doc in querySnapshot.docs) {
+          await doc.reference.delete();
+        }
+      } catch (e) {
+        print('Error calling function: $e');
+      }
     }
   }
 
+  /*
+  * This method retrieves all payment method Ids that we store for the current user.
+  * @return List<String> - a list of payment method ids
+  */
   static Future<List<String>> getPaymentMethodIds() async {
     if (_firebaseUser != null) {
       try {
@@ -79,20 +127,27 @@ class Payment {
     }
   }
   
-  // Retrieves Payment Methods
+  /*
+  * This method is used to get the payment method details by the payment method id.
+  * @param paymentMethodId - the id of the payment method
+  * @return Map<String, dynamic>? - the payment method details
+  */
   static Future<Map<String, dynamic>?> getPaymentMethodById(String paymentMethodId) async {
     try {
-      FirebaseFunctions functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('getPaymentMethodDetails');
-      final results = await callable.call({'paymentMethodId': paymentMethodId});
-
-      return results.data as Map<String, dynamic>?;
+      final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
+      Map<String, dynamic> data = results.data;
+      data['id'] = paymentMethodId; // Add the payment method id to the data
+      return data;
     } catch (e) {
       print('Error calling function: $e');
       return null;
     }
   }
 
+  /*
+  * This method retrieves all payment methods and their details for the current user.
+  * @return List<Map<String, dynamic>?> - a list of payment method details
+  */
   static Future<List<Map<String, dynamic>?>> getPaymentMethodsDetails() async {
     List<String> paymentMethodIds = await getPaymentMethodIds();
     // Wait for all futures to complete and collect their results
@@ -100,58 +155,59 @@ class Payment {
     // Filter out nulls if necessary, depending on whether you want to keep or discard failed lookups
     return results.where((result) => result != null).toList();
   }
-
-  // Shows the Delete Alert Dialog (needs a BuildContext to be passed if used within a widget)
-  static Future<void> showDeleteAlertDialog(BuildContext context, String paymentListId, Function onDelete) async {
-    return showCupertinoDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text("Delete?"),
-          content: const Text("Are you sure?"),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: const Text("No"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            CupertinoDialogAction(
-              child: const Text("Yes"),
-              onPressed: () {
-                onDelete().then(() {
-                  Navigator.of(context).pop();
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Adds a Payment Method Dialog (static context needed)
-  static Future<void> addPaymentMethodDialog(BuildContext context) async {
-    return showCupertinoDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text("Payment Added Successfully!"),
-          actions: <Widget>[
-            CupertinoDialogAction(
-                child: const Text("OK"),
-                onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
-
+// Graveyard of old methods
 // Ignore the code/comments below here, it's just for reference or in case it's needed later
 
+// Shows the Delete Alert Dialog (needs a BuildContext to be passed if used within a widget)
+// I don't think this is used anywhere, but it's here just in case (Jordyn Lewis 3/20/24)
+// static Future<void> showDeleteAlertDialog(BuildContext context, String paymentListId, Function onDelete) async {
+//   return showCupertinoDialog(
+//     context: context,
+//     barrierDismissible: false,
+//     builder: (BuildContext context) {
+//       return CupertinoAlertDialog(
+//         title: const Text("Delete?"),
+//         content: const Text("Are you sure?"),
+//         actions: <Widget>[
+//           CupertinoDialogAction(
+//             child: const Text("No"),
+//             onPressed: () => Navigator.of(context).pop(),
+//           ),
+//           CupertinoDialogAction(
+//             child: const Text("Yes"),
+//             onPressed: () {
+//               onDelete().then(() {
+//                 Navigator.of(context).pop();
+//               });
+//             },
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
+
+// Adds a Payment Method Dialog (static context needed)
+// I don't think this is used anywhere, but it's here just in case (Jordyn Lewis 3/20/24)
+// static Future<void> addPaymentMethodDialog(BuildContext context) async {
+//   return showCupertinoDialog(
+//     context: context,
+//     barrierDismissible: true,
+//     builder: (BuildContext context) {
+//       return CupertinoAlertDialog(
+//         title: const Text("Payment Added Successfully!"),
+//         actions: <Widget>[
+//           CupertinoDialogAction(
+//               child: const Text("OK"),
+//               onPressed: () => Navigator.of(context).pop(),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
 // @override
 // Widget build(BuildContext context) {
 //   return Scaffold(
@@ -290,7 +346,7 @@ class Payment {
 //       //   //     //     setState(() {
 //       //   //     //       //_getCustomer();
 //       //   //     //       _paymentMethod = paymentMethod;
-//       //   //     //       _setPaymentMethodId(_paymentMethod);
+//       //   //     //       _setPaymentMethodIdAndFingerprint(_paymentMethod);
 //       //   //     //       _addPaymentMethodDialog();
 //       //   //     //     });
 //       //   //     //   }).catchError(setError);

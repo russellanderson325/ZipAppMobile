@@ -13,10 +13,47 @@ class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({Key? key}) : super(key: key);
 
   @override
-  State<PaymentsScreen> createState() => _PaymentsScreenState();
+  State<PaymentsScreen> createState() => PaymentsScreenState();
 }
 
-class _PaymentsScreenState extends State<PaymentsScreen> {
+class PaymentMethodsCache {
+  static List<Map<String, dynamic>?>? cachedPaymentMethods;
+
+  static void updateCache(List<Map<String, dynamic>?> methods) {
+    cachedPaymentMethods = methods;
+  }
+}
+
+class PaymentsScreenState extends State<PaymentsScreen> {
+  UniqueKey uniqueKey = UniqueKey(); // For refreshing the FutureBuilder
+  bool forceUpdate = false; // Flag for forcing the FutureBuilder to update
+
+  Future<List<Map<String, dynamic>?>> fetchPaymentMethodsIfNeeded() async {
+    if (PaymentMethodsCache.cachedPaymentMethods == null || forceUpdate) {
+      forceUpdate = false;
+      // Fetch from Stripe API
+      var fetchedMethods = await Payment.getPaymentMethodsDetails();
+      PaymentMethodsCache.updateCache(fetchedMethods);
+      return fetchedMethods;
+    } else {  
+      return PaymentMethodsCache.cachedPaymentMethods!;
+    }
+  }
+
+  /*
+   * Refreshes the FutureBuilder by changing the key
+   * This is useful when we want to refresh the FutureBuilder
+   * after a new payment method is added~
+   * or after a payment method is deleted
+   * @return void
+   */
+  void refreshKey() {
+    setState(() {
+      forceUpdate = true;
+      uniqueKey = UniqueKey();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,27 +77,32 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
             ),
             // FutureBuilder for Payment Methods List
             FutureBuilder<List<Map<String, dynamic>?>>(
-              future: Payment.getPaymentMethodsDetails(), // Your future function
+              key: uniqueKey,
+              future: fetchPaymentMethodsIfNeeded(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
                     child: Container(
                       padding: const EdgeInsets.all(20),
-                      child: const CircularProgressIndicator(),
+                      child: const CircularProgressIndicator(
+                        color: Colors.black,
+                      ),
                     ),
                   );
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else if (snapshot.hasData) {
-                  // Data is fetched successfully, now build the UI
-                  print('Data: ${snapshot.data}'); // Print the data (for debugging purposes
+                  // Create a list of PaymentListItem widgets
                   List<Widget> listItems = snapshot.data!
-                      .map((paymentMethod) => PaymentListItem.build(
+                      .map((paymentMethod) {
+                        return PaymentListItem.build(
                             context: context,
                             cardType: capitalizeFirstLetter(paymentMethod?['brand']),
                             lastFourDigits: paymentMethod?['last4'] ?? '0000',
-                          ))
-                      .toList();
+                            paymentMethodId: paymentMethod?['id'],
+                            refreshKey: refreshKey
+                          );
+                      }).toList();
                   // Add spacing after each item
                   for (var i = listItems.length - 1; i > 0; i--) {
                     listItems.insert(i, const SizedBox(height: 16));
@@ -69,7 +111,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                     children: listItems,
                   );
                 } else {
-                  return const Text('No data available'); // Show this text if there is no data
+                  return const Text('No data available');
                 }
               },
             ),
@@ -80,7 +122,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const StripeCardInfoPromptScreen(),
+                    builder: (context) => StripeCardInfoPromptScreen(refreshKey: refreshKey),
                   ),
                 );
               },
@@ -93,7 +135,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                 iconColor: MaterialStateProperty.all(Colors.black),
                 iconSize: MaterialStateProperty.all(16),
                 foregroundColor: MaterialStateProperty.all(Colors.black),
-                backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
+                backgroundColor: MaterialStateProperty.all(Colors.yellow),
                 textStyle: MaterialStateProperty.all(ZipDesign.labelText),
               )
             ),
@@ -117,7 +159,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                   iconColor: MaterialStateProperty.all(Colors.black),
                   iconSize: MaterialStateProperty.all(16),
                   foregroundColor: MaterialStateProperty.all(Colors.black),
-                  backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
+                  backgroundColor: MaterialStateProperty.all(Colors.yellow),
                   textStyle: MaterialStateProperty.all(ZipDesign.labelText),
                 )),
             const SizedBox(
