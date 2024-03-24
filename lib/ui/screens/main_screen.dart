@@ -25,6 +25,7 @@ import 'package:zipapp/ui/screens/promos_screen.dart';
 import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
 import 'package:zipapp/ui/screens/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/payment_history_screen.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
 
 enum BottomSheetStatus {
@@ -43,7 +44,7 @@ typedef MyMarkerReset = void Function(
     BuildContext context, void Function() methodFromChild);
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const  MainScreen({super.key});
 
   /*final GlobalKey<MapScreen> mapScaffoldKey;
   MainScreen(this.mapScaffoldKey);*/
@@ -916,7 +917,7 @@ class _MainScreenState extends State<MainScreen> {
                 const Padding(
                   padding: EdgeInsets.only(bottom: 20.0),
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
+                    valueColor: AlwaysStoppedAnimation<Color>(ZipColors.zipYellow),
                   ),
                 ),
                 const Text("Looking for driver",

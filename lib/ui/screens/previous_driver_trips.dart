@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/rides.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 
 class DriverHistoryScreen extends StatefulWidget {
   const DriverHistoryScreen({super.key});
@@ -61,7 +62,7 @@ class _DriverHistoryScreenState extends State<DriverHistoryScreen> {
                     }
                     return Container(
                       height: 50,
-                      color: Colors.yellow,
+                      color: ZipColors.zipYellow,
                       child: Center(
                           child: Text('past drive: ${pastDriveIDs[index]}')),
                     );

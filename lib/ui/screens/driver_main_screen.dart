@@ -24,6 +24,7 @@ import 'package:zipapp/ui/screens/stripe_connect_screen.dart';
 import 'package:zipapp/ui/screens/driver_settings_screen.dart';
 import 'package:zipapp/ui/screens/earnings_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 
 enum DriverBottomSheetStatus { closed, confirmation, searching, rideDetails }
 
@@ -568,7 +569,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   FloatingActionButton.extended(
-                    backgroundColor: Colors.yellow,
+                    backgroundColor: ZipColors.zipYellow,
                     onPressed: () {
                       // _openRoute(currentRequest.destinationAddress.latitude,
                       //     currentRequest.destinationAddress.longitude);

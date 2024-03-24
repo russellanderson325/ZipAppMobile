@@ -4,6 +4,7 @@ import "package:zipapp/business/auth.dart";
 import "package:zipapp/business/user.dart";
 import "package:zipapp/business/payment.dart";
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 
 class EarningsScreen extends StatefulWidget {
   const EarningsScreen({super.key});
@@ -65,7 +66,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                         child: Text(
                           "Cash Amount",
                           style:
-                              TextStyle(color: Colors.yellow, fontSize: 22.0),
+                              TextStyle(color: ZipColors.zipYellow, fontSize: 22.0),
                           textAlign: TextAlign.center,
                         )),
                     Padding(

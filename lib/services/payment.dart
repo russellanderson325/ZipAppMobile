@@ -2,29 +2,121 @@
   This file contains the Payment class which is used to handle all the payment methods and payment intents.
   It contains methods to create, delete, and retrieve payment methods, as well as to create payment intents.
   It also contains a method to show an alert dialog to confirm the deletion of a payment method.
+  Apple Pay and Google Pay are also supported in this class.
+
+  We use Firebase Functions for all secret key handling and payment method stuff.
 */
 import 'dart:async';
 import 'dart:ffi';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 
 class Payment {
   static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
   static final FirebaseFunctions functions = FirebaseFunctions.instance;
+  
+  // Firebase Functions
   static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
   static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
+  static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
+  static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
+
+  /*
+   * This method is used to create a payment intent. It basically declares the intention
+   * to make a payment and returns the payment intent (sort of).
+   * @param amount - the amount to be paid
+   * @param currency - the currency code for the payment
+   * @return Future<String> - a future that resolves to the payment intent
+   */
+  static Future<String> createPaymentIntent(int amount, String currency) async {
+    try {
+      final HttpsCallableResult result = await createPaymentIntentCallable.call(
+        {
+          'amount': amount,
+          'currency': currency,
+        }
+      );
+      return result.data;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  /*
+   * This method is used to show the payment sheet to make a payment.
+   * It should show the Apple Pay sheet for iOS and the Google Pay sheet 
+   * for Android (hopefully -- Android still needs testing).
+   * @param label - the label for the payment
+   * @param amount - the amount to be paid
+   * @param currencyCode - the currency code for the payment
+   * @param merchantCountryCode - the merchant country code
+   */
+  static void showPaymentSheetToMakePayment(label, amount, currencyCode, merchantCountryCode) async {
+    String paymentIntent = await createPaymentIntent(amount, currencyCode);
+    DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
+        .collection('stripe_customers')
+        .doc(_firebaseUser?.uid);
+
+    var documentSnapshot = await stripeCustomer.get();
+    var customerId = documentSnapshot.data()?['customer_id'];
+
+    // Initialize the payment sheets for iOS and Andriod
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: SetupPaymentSheetParameters(
+        customerId: customerId,
+        customFlow: false,
+        paymentIntentClientSecret: paymentIntent.toString(),
+        allowsDelayedPaymentMethods: false,
+        removeSavedPaymentMethodMessage: 'Remove Payment Method',
+        primaryButtonLabel: 'Pay',
+        style: ThemeMode.system,
+        applePay: PaymentSheetApplePay(
+          merchantCountryCode: merchantCountryCode,
+          cartItems: [
+            ApplePayCartSummaryItem.immediate(label: label, amount: (amount / 100).toString()),
+          ],
+          buttonType: PlatformButtonType.pay,
+        ),
+        googlePay: PaymentSheetGooglePay(
+          merchantCountryCode: merchantCountryCode,
+          currencyCode: currencyCode,
+          label: label,
+          amount: (amount / 100).toString(),
+        ),
+      ),
+    );
+
+    try {
+      // Present the Payment Sheet
+      await Stripe.instance.presentPaymentSheet();
+      print("Payment successful");
+    } catch (error) {
+      print("Payment failed: $error");
+    }
+  }
+
+  // Card Payment Functionality via Stripe
+
   /*
   * This method adds the payment method id to the firebase database.
   * @param paymentMethodId - the id of the payment method
   * @return Future<void> - a future that resolves when the payment method id is added
   */
   static Future<void> setPaymentMethodIdAndFingerprint(String paymentMethodId, String fingerprint) async {
+    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
+          .collection('stripe_customers')
+          .doc(_firebaseUser?.uid);
+    
+    var documentSnapshot = await stripeCustomer.get();
+    var customerId = documentSnapshot.data()?['customer_id'];
+          
     // First check to see if finger print already exists in users payment methods
-    var querySnapshot = await FirebaseFirestore.instance
-        .collection('stripe_customers')
-        .doc(_firebaseUser?.uid)
+    var querySnapshot = await stripeCustomer
         .collection('payment_methods')
         .where('fingerprint', isEqualTo: fingerprint)
         .get();
@@ -36,15 +128,21 @@ class Payment {
     }
     // If the fingerprint doesn't exist, we add the payment method to the database
     if (_firebaseUser != null) {
-      await FirebaseFirestore.instance
-          .collection("stripe_customers")
-          .doc(_firebaseUser?.uid)
+      await stripeCustomer
           .collection('payment_methods')
           .add({
             "id": paymentMethodId,
             "fingerprint": fingerprint,
           });
     }
+
+    // Attach the payment method to the customer in the Stripe API
+    attachPaymentMethodToCustomerCallable.call(
+      {
+        'paymentMethodId': paymentMethodId,
+        'customerId': customerId,
+      }
+    );
   }
 
   /*

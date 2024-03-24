@@ -6,6 +6,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:zipapp/ui/screens/main_screen.dart';
 
 class RootScreen extends StatefulWidget {
   const RootScreen({Key? key}) : super(key: key);

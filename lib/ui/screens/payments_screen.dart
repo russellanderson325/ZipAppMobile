@@ -157,7 +157,7 @@ class PaymentsScreenState extends State<PaymentsScreen> {
                 iconColor: MaterialStateProperty.all(Colors.black),
                 iconSize: MaterialStateProperty.all(16),
                 foregroundColor: MaterialStateProperty.all(Colors.black),
-                backgroundColor: MaterialStateProperty.all(Colors.yellow),
+                backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
                 textStyle: MaterialStateProperty.all(ZipDesign.labelText),
               )
             ),

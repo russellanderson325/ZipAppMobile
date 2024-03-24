@@ -16,7 +16,7 @@ class StripeCardInfoPromptScreen extends StatefulWidget {
 }
 
 class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> {
-  String errorMessage = " ";
+  String statusMessage = " ";
   static DateTime lastButtonPress = DateTime.now();
   
   @override
@@ -39,9 +39,17 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
                 ),
                 const SizedBox(height: 20),
                 Visibility(
-                  child: Text(
-                    errorMessage,
+                  child: (statusMessage != "loading" ? Text(
+                    statusMessage,
                     style: const TextStyle(color: Colors.red),
+                  ) : 
+                  const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.black,
+                      ),
+                    )
                   ),
                 ),
               ],
@@ -55,7 +63,9 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
                   // If button has been pressed in the last 1 second, do nothing
                   if (DateTime.now().difference(lastButtonPress).inSeconds < 1) return;
                   lastButtonPress = DateTime.now();
-                  
+                  setState(() {
+                    statusMessage = "loading";
+                  });
                   // Attempt to create the payment method using Stripe
                   Payment.createPaymentMethod().then((paymentMethod) async {
                     // Get the payment method with the fingerprint
@@ -74,12 +84,12 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
                     switch (e.toString()) {
                       case "Exception: Payment method already exists":
                         setState(() {
-                          errorMessage = "Payment method already exists.";
+                          statusMessage = "Payment method already exists.";
                         });
                         break;
                       default:
                         setState(() {
-                          errorMessage = "Please enter valid card information.";
+                          statusMessage = "Please enter valid card information.";
                         });
                         break;
                     }
