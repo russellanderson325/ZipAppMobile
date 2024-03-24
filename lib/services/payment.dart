@@ -1,391 +1,468 @@
-import 'dart:async';
+/*
+  This file contains the Payment class which is used to handle all the payment methods and payment intents.
+  It contains methods to create, delete, and retrieve payment methods, as well as to create payment intents.
+  It also contains a method to show an alert dialog to confirm the deletion of a payment method.
+  Apple Pay and Google Pay are also supported in this class.
 
+  We use Firebase Functions for all secret key handling and payment method stuff.
+*/
+import 'dart:async';
+import 'dart:ffi';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'package:stripe_payment/stripe_payment.dart';
-//import 'package:stripe_sdk/stripe_sdk.dart' as stripe1;
-//import 'package:stripe_sdk/stripe_sdk_ui.dart' as Stripe2;
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-class Payment extends StatefulWidget {
-  const Payment({super.key});
 
-  @override
-  _PaymentState createState() => _PaymentState();
-}
+class Payment {
+  static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
+  static final FirebaseFunctions functions = FirebaseFunctions.instance;
+  
+  // Firebase Functions
+  static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
+  static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
+  static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
+  static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
 
-class _PaymentState extends State<Payment> {
-  //late PaymentMethod? _paymentMethod;
-  late String _error;
-  //late PaymentIntentResult? _paymentIntent;
-  List<String> ok = [];
-  //Source _source;
-  late String _customerID;
-  late String _setupSecret;
-  ScrollController _controller = ScrollController();
-  var customerData = Map();
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  //var paymentMethodList;
-  @override
-  initState() {
-    super.initState();
-
-    // StripePayment.setOptions(StripeOptions(
-    //     publishableKey: "pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u"));
-    // //   paymentMethodList = [];
-    _getPaymentMethods();
+  /*
+   * This method is used to create a payment intent. It basically declares the intention
+   * to make a payment and returns the payment intent (sort of).
+   * @param amount - the amount to be paid
+   * @param currency - the currency code for the payment
+   * @return Future<String> - a future that resolves to the payment intent
+   */
+  static Future<String> createPaymentIntent(int amount, String currency) async {
+    try {
+      final HttpsCallableResult result = await createPaymentIntentCallable.call(
+        {
+          'amount': amount,
+          'currency': currency,
+        }
+      );
+      return result.data;
+    } catch (e) {
+      return '';
+    }
   }
 
-  void setError(dynamic error) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(error.toString())));
-    setState(() {
-      _error = error.toString();
-    });
-  }
-
-  // Future<void> _getCustomer() async {
-  //   print("i have been called");
-  //   var firebaseUser = auth.FirebaseAuth.instance.currentUser;
-  //   FirebaseFirestore.instance
-  //       .collection('stripe_customers')
-  //       .doc(firebaseUser?.uid)
-  //       .get()
-  //       .then((DocumentSnapshot documentSnapshot) {
-  //     if (documentSnapshot.exists) {
-  //       _customerID = documentSnapshot.data()['customer_id'];
-  //       _setupSecret = documentSnapshot.data()['setup_secret'];
-  //       customerData = documentSnapshot.data();
-  //       if (kDebugMode) {
-  //         print("hello");
-  //       }
-  //       //customerData.forEach((k, v) => print('${k}: ${v}'));
-  //     } else {
-  //       if (kDebugMode) {
-  //         print('Customer does not exist');
-  //       }
-  //     }
-  //   });
-  // }
-
-  // Future<void> _triggerCloudFunctionPaymentIntent(data) async {
-  //   var firebaseUser = await auth.FirebaseAuth.instance.currentUser;
-  //   FirebaseFirestore.instance
-  //       .collection("stripe_customers")
-  //       .doc(firebaseUser.uid)
-  //       .collection('payments')
-  //       .add(data);
-  // }
-
-//Add Payment method to user
-  void _setPaymentMethodID(paymentmethod) async {
-    var firebaseUser = auth.FirebaseAuth.instance.currentUser;
-    FirebaseFirestore.instance
-        .collection("stripe_customers")
-        .doc(firebaseUser?.uid)
-        .collection('payment_methods')
-        .add({"id": paymentmethod.id});
-  }
-
-//Functionality that deletes the Payment Method
-  Future<void> deletePaymentMethod(paymentListID) {
-    var firebaseUser = auth.FirebaseAuth.instance.currentUser;
-    CollectionReference paymentsMethods = FirebaseFirestore.instance
+  /*
+   * This method is used to show the payment sheet to make a payment.
+   * It should show the Apple Pay sheet for iOS and the Google Pay sheet 
+   * for Android (hopefully -- Android still needs testing).
+   * @param label - the label for the payment
+   * @param amount - the amount to be paid
+   * @param currencyCode - the currency code for the payment
+   * @param merchantCountryCode - the merchant country code
+   */
+  static void showPaymentSheetToMakePayment(label, amount, currencyCode, merchantCountryCode) async {
+    String paymentIntent = await createPaymentIntent(amount, currencyCode);
+    DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
         .collection('stripe_customers')
-        .doc(firebaseUser?.uid)
-        .collection('payment_methods');
-    return paymentsMethods
-        .doc(paymentListID)
-        .delete()
-        .then((value) => "Payment Method Succesfully Deleted")
-        .catchError((error) => "Failed to delete Payment Method");
-  }
+        .doc(_firebaseUser?.uid);
 
-  //This function will return a Query snapshot of payment method cards
-  Stream<QuerySnapshot> _getPaymentMethods() {
-    var firebaseUser = auth.FirebaseAuth.instance.currentUser;
-    CollectionReference paymentsMethods = FirebaseFirestore.instance
-        .collection('stripe_customers')
-        .doc(firebaseUser?.uid)
-        .collection('payment_methods');
-    print("list of payment methods:");
-    print(paymentsMethods.snapshots());
-    return paymentsMethods.snapshots();
-  }
+    var documentSnapshot = await stripeCustomer.get();
+    var customerId = documentSnapshot.data()?['customer_id'];
 
-  /*Future<void> createPaymentMethod() async {
-    StripePayment.setStripeAccount(null);
-    //tax = ((totalCost * taxPercent) * 100).ceil() / 100;
-    //amount = ((totalCost + tip + tax) * 100).toInt();
-    //print('amount in pence/cent which will be charged = $amount');
-    //step 1: add card
-    PaymentMethod paymentMethod = PaymentMethod();
-    paymentMethod = await StripePayment.paymentRequestWithCardForm(
-      CardFormPaymentRequest(),
-    ).then((PaymentMethod paymentMethod) {
-      return paymentMethod;
-    }).catchError((e) {
-      print('Errore Card: ${e.toString()}');
-    });
-    paymentMethod != null
-        ? processPaymentAsDirectCharge(paymentMethod)
-        : showDialog(
-            context: context,
-            builder: (BuildContext context) => ShowDialogToDismiss(
-                title: 'Error',
-                content:
-                    'It is not possible to pay with this card. Please try again with a different card',
-                buttonText: 'CLOSE'));
-} */
-  //Dialog that makes sure that User wants to Delete this payment method
-  //if User clicks yes, then this method calls the _deletePaymentMethod() method
-  Future<void> _showDeleteAlertDialog(paymentListID) async {
-    return showCupertinoDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text("Delete?"),
-          content: const Text("Are you sure?"),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: const Text("No"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            CupertinoDialogAction(
-              child: const Text("Yes"),
-              onPressed: () {
-                try {
-                  deletePaymentMethod(paymentListID);
-                  showDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: const Text('Succesfully Deleted'),
-                        actions: <Widget>[
-                          CupertinoDialogAction(
-                            child: const Text('Ok'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } catch (error) {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: const Text('Error Occured'),
-                        actions: <Widget>[
-                          CupertinoDialogAction(
-                            child: const Text('Ok'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-            ),
+    // Initialize the payment sheets for iOS and Andriod
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: SetupPaymentSheetParameters(
+        customerId: customerId,
+        customFlow: false,
+        paymentIntentClientSecret: paymentIntent.toString(),
+        allowsDelayedPaymentMethods: false,
+        removeSavedPaymentMethodMessage: 'Remove Payment Method',
+        primaryButtonLabel: 'Pay',
+        style: ThemeMode.system,
+        applePay: PaymentSheetApplePay(
+          merchantCountryCode: merchantCountryCode,
+          cartItems: [
+            ApplePayCartSummaryItem.immediate(label: label, amount: (amount / 100).toString()),
           ],
-        );
-      },
-    );
-  }
-
-  //Dialog if the Payment Method was added succesfully
-  Future<void> _addPaymentMethodDialog() async {
-    return showCupertinoDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: const Text("Payment Added Successfully!"),
-          actions: <Widget>[
-            CupertinoDialogAction(
-                child: const Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                }),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: Colors.grey[800],
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text(
-          'Payment Methods',
+          buttonType: PlatformButtonType.pay,
         ),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                // _paymentIntent = null;
-                // _paymentMethod = null;
-              });
-              Navigator.pop(context);
-            },
-          )
-        ],
-      ),
-      body: ListView(
-        controller: _controller,
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          //Gets Payment Methods
-          Card(
-            child: ExpansionTile(
-              leading: const Icon(Icons.view_headline),
-              title: const Text("Payment Methods"),
-              children: [
-                StreamBuilder<QuerySnapshot>(
-                  stream: _getPaymentMethods(),
-                  builder: (context, snapshot) {
-                    /* Timer(Duration(seconds: 2), () {
-                      print("Yeah, this line is printed after 2 seconds");
-                    });*/
-                    /*if (snapshot.hasError) {
-                      return CircularProgressIndicator();
-                    }*/
-                    if (snapshot.hasData) {
-                      debugPrint("build widget: ${snapshot.data}");
-                      List<QueryDocumentSnapshot> paymentList =
-                          snapshot.data!.docs;
-                      return DataTable(
-                        columnSpacing: 50,
-                        columns: const <DataColumn>[
-                          DataColumn(
-                            label: Text(
-                              'Brand',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Last4',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Ending',
-                              style: TextStyle(fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          //Column for trash icon
-                          DataColumn(
-                            label: Text(""),
-                          ),
-                        ],
-                        rows: List<DataRow>.generate(
-                          paymentList.length,
-                          (index) => DataRow(
-                              /*onSelectChanged: (bool selected) {
-                                if (selected) {
-                                  log.add('row-selected: ${itemRow.index}');
-                                }
-                              },*/
-                              cells: [
-                                DataCell(
-                                    Text(paymentList[index]["card"]["brand"]),
-                                    onTap: () {
-                                  print(
-                                      "TESTING ID: ${paymentList[index]['id']})");
-                                  //ONLY FOR PAYMENT ONLY //MUST DELETE THIS***************
-                                  Navigator.pop(
-                                      context, paymentList[index]['id']);
-                                }),
-                                DataCell(
-                                    Text(paymentList[index]["card"]["last4"]),
-                                    onTap: () {
-                                  //ONLY FOR PAYMNET ONLY! MUST DELETE THIS******************
-                                  Navigator.pop(
-                                      context, paymentList[index]['id']);
-                                }),
-                                DataCell(
-                                    //(var number = 5);
-                                    Text(
-                                        '${paymentList[index]["card"]["exp_month"]}/${paymentList[index]["card"]["exp_year"]}'),
-                                    onTap: () {
-                                  Navigator.pop(context,
-                                      paymentList[index]['card']['id']);
-                                }),
-                                DataCell(
-                                  const Icon(Icons.delete_outline),
-                                  onTap: () async {
-                                    print("TEST: ${paymentList[index].id}");
-                                    await _showDeleteAlertDialog(
-                                        paymentList[index].id);
-                                  },
-                                )
-                              ]),
-                        ),
-                      );
-                    } else {
-                      // We can show the loading view until the data comes back.
-                      debugPrint('build loading widget');
-                      return const CircularProgressIndicator();
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.add_circle_outline),
-              title: Text("Add new credit/debit card"),
-              // onTap: () {
-              //   StripePayment.paymentRequestWithCardForm(
-              //           CardFormPaymentRequest())
-              //       .then((paymentMethod) {
-              //     ScaffoldMessenger.of(context).showSnackBar(
-              //         SnackBar(content: Text('Received ${paymentMethod.id}')));
-              //     setState(() {
-              //       //_getCustomer();
-              //       _paymentMethod = paymentMethod;
-              //       _setPaymentMethodID(_paymentMethod);
-              //       _addPaymentMethodDialog();
-              //     });
-              //   }).catchError(setError);
-              //   //_addPaymentMethodDialog();
-              // },
-            ),
-          ),
-          /* Divider(),
-          Text('Customer data method:'),
-          Text(
-            JsonEncoder.withIndent('  ')
-                .convert(_paymentMethod?.toJson() ?? {}),
-            style: TextStyle(fontFamily: "Monospace"),
-          ),*/
-        ],
+        googlePay: PaymentSheetGooglePay(
+          merchantCountryCode: merchantCountryCode,
+          currencyCode: currencyCode,
+          label: label,
+          amount: (amount / 100).toString(),
+        ),
       ),
     );
+
+    try {
+      // Present the Payment Sheet
+      await Stripe.instance.presentPaymentSheet();
+      print("Payment successful");
+    } catch (error) {
+      print("Payment failed: $error");
+    }
+  }
+
+  // Card Payment Functionality via Stripe
+
+  /*
+  * This method adds the payment method id to the firebase database.
+  * @param paymentMethodId - the id of the payment method
+  * @return Future<void> - a future that resolves when the payment method id is added
+  */
+  static Future<void> setPaymentMethodIdAndFingerprint(String paymentMethodId, String fingerprint) async {
+    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
+          .collection('stripe_customers')
+          .doc(_firebaseUser?.uid);
+    
+    var documentSnapshot = await stripeCustomer.get();
+    var customerId = documentSnapshot.data()?['customer_id'];
+          
+    // First check to see if finger print already exists in users payment methods
+    var querySnapshot = await stripeCustomer
+        .collection('payment_methods')
+        .where('fingerprint', isEqualTo: fingerprint)
+        .get();
+
+    // If the fingerprint exists, we don't want to add it again and we delete the payment method from the Stripe API
+    if (querySnapshot.docs.isNotEmpty) {
+      await removePaymentMethod(paymentMethodId);
+      throw Exception('Payment method already exists');
+    }
+    // If the fingerprint doesn't exist, we add the payment method to the database
+    if (_firebaseUser != null) {
+      await stripeCustomer
+          .collection('payment_methods')
+          .add({
+            "id": paymentMethodId,
+            "fingerprint": fingerprint,
+          });
+    }
+
+    // Attach the payment method to the customer in the Stripe API
+    attachPaymentMethodToCustomerCallable.call(
+      {
+        'paymentMethodId': paymentMethodId,
+        'customerId': customerId,
+      }
+    );
+  }
+
+  /*
+  * This method is used to create a payment method. It creates the payment method 
+  * and stores it in the Stripe server.
+  * @return Future<PaymentMethod?> - a future that resolves to the payment method
+  */
+  static Future<PaymentMethod?> createPaymentMethod() async {
+    try {
+      final paymentMethod = await Stripe.instance.createPaymentMethod(
+        params: const PaymentMethodParams.card(
+          paymentMethodData: PaymentMethodData(),
+        ),
+      );
+      return paymentMethod;
+    } catch (e) {
+      print("Error creating payment method...");
+      rethrow;
+    }
+  }
+
+  /*
+  * This method is used to delete a payment method Id from the firebase database.
+  * We also delete the payment method from the Stripe API (!!!IMPORTANT!!!).
+  * @param paymentListId - the id of the payment method
+  * @return Future<void> - a future that resolves when the payment method is deleted
+  */
+  static Future<void> removePaymentMethod(String paymentMethodId) async {
+    if (_firebaseUser != null) {
+      try {
+        // First we call the cloud function to remove the payment method from the Stripe API
+        // If it fails, we don't want to delete the payment method from the database
+        await removePaymentMethodCallable.call({'paymentMethodId': paymentMethodId});
+
+        // Get the payment method document from the database where the id matches the paymentMethodId
+        var querySnapshot = await FirebaseFirestore.instance
+            .collection('stripe_customers')
+            .doc(_firebaseUser?.uid)
+            .collection('payment_methods')
+            .where('id', isEqualTo: paymentMethodId)
+            .get();
+
+        // Loop through the documents and delete each one
+        for (var doc in querySnapshot.docs) {
+          await doc.reference.delete();
+        }
+      } catch (e) {
+        print('Error calling function: $e');
+      }
+    }
+  }
+
+  /*
+  * This method retrieves all payment method Ids that we store for the current user.
+  * @return List<String> - a list of payment method ids
+  */
+  static Future<List<String>> getPaymentMethodIds() async {
+    if (_firebaseUser != null) {
+      try {
+        QuerySnapshot snapshot = await FirebaseFirestore.instance
+            .collection('stripe_customers')
+            .doc(_firebaseUser!.uid)
+            .collection('payment_methods')
+            .get();
+
+        // Process data into a list
+        List<String> paymentMethodIds = snapshot.docs
+          .map((doc) => (doc.data() as Map<String, dynamic>)['id'])
+          .where((id) => id.length > 0) // Filter out empty ids
+          .map((id) => id as String) // Cast remaining ids to String
+          .toList();
+
+        return paymentMethodIds;
+      } catch (e) {
+        print("Error fetching payment method IDs: $e");
+        return [];
+      }
+    } else {
+      return [];
+    }
+  }
+  
+  /*
+  * This method is used to get the payment method details by the payment method id.
+  * @param paymentMethodId - the id of the payment method
+  * @return Map<String, dynamic>? - the payment method details
+  */
+  static Future<Map<String, dynamic>?> getPaymentMethodById(String paymentMethodId) async {
+    try {
+      final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
+      Map<String, dynamic> data = results.data;
+      data['id'] = paymentMethodId; // Add the payment method id to the data
+      return data;
+    } catch (e) {
+      print('Error calling function: $e');
+      return null;
+    }
+  }
+
+  /*
+  * This method retrieves all payment methods and their details for the current user.
+  * @return List<Map<String, dynamic>?> - a list of payment method details
+  */
+  static Future<List<Map<String, dynamic>?>> getPaymentMethodsDetails() async {
+    List<String> paymentMethodIds = await getPaymentMethodIds();
+    // Wait for all futures to complete and collect their results
+    final results = await Future.wait(paymentMethodIds.map(getPaymentMethodById));
+    // Filter out nulls if necessary, depending on whether you want to keep or discard failed lookups
+    return results.where((result) => result != null).toList();
   }
 }
 
+// Graveyard of old methods
+// Ignore the code/comments below here, it's just for reference or in case it's needed later
+
+// Shows the Delete Alert Dialog (needs a BuildContext to be passed if used within a widget)
+// I don't think this is used anywhere, but it's here just in case (Jordyn Lewis 3/20/24)
+// static Future<void> showDeleteAlertDialog(BuildContext context, String paymentListId, Function onDelete) async {
+//   return showCupertinoDialog(
+//     context: context,
+//     barrierDismissible: false,
+//     builder: (BuildContext context) {
+//       return CupertinoAlertDialog(
+//         title: const Text("Delete?"),
+//         content: const Text("Are you sure?"),
+//         actions: <Widget>[
+//           CupertinoDialogAction(
+//             child: const Text("No"),
+//             onPressed: () => Navigator.of(context).pop(),
+//           ),
+//           CupertinoDialogAction(
+//             child: const Text("Yes"),
+//             onPressed: () {
+//               onDelete().then(() {
+//                 Navigator.of(context).pop();
+//               });
+//             },
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
+
+// Adds a Payment Method Dialog (static context needed)
+// I don't think this is used anywhere, but it's here just in case (Jordyn Lewis 3/20/24)
+// static Future<void> addPaymentMethodDialog(BuildContext context) async {
+//   return showCupertinoDialog(
+//     context: context,
+//     barrierDismissible: true,
+//     builder: (BuildContext context) {
+//       return CupertinoAlertDialog(
+//         title: const Text("Payment Added Successfully!"),
+//         actions: <Widget>[
+//           CupertinoDialogAction(
+//               child: const Text("OK"),
+//               onPressed: () => Navigator.of(context).pop(),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
+// @override
+// Widget build(BuildContext context) {
+//   return Scaffold(
+//     // backgroundColor: Colors.grey[800],
+//     // key: _scaffoldKey,
+//     appBar: AppBar(
+//       title: const Text(
+//         'Payment Methods',
+//       ),
+//       actions: <Widget>[
+//         IconButton(
+//           icon: const Icon(Icons.clear),
+//           onPressed: () {
+//             setState(() {
+//               // _paymentIntent = null;
+//               // _paymentMethod = null;
+//             });
+//             Navigator.pop(context);
+//           },
+//         )
+//       ],
+//     ),
+//     body: ListView(
+//       // controller: _controller,
+//       // padding: EdgeInsets.zero,
+//       // children: <Widget>[
+//         //Gets Payment Methods
+//       //   Card(
+//       //     child: ExpansionTile(
+//       //       leading: const Icon(Icons.view_headline),
+//       //       title: const Text("Payment Methods"),
+//       //       children: [
+//       //         StreamBuilder<QuerySnapshot>(
+//       //           stream: _getPaymentMethods(),
+//       //           builder: (context, snapshot) {
+//       //             /* Timer(Duration(seconds: 2), () {
+//       //               print("Yeah, this line is printed after 2 seconds");
+//       //             });*/
+//       //             /*if (snapshot.hasError) {
+//       //               return CircularProgressIndicator();
+//       //             }*/
+//       //             if (snapshot.hasData) {
+//       //               debugPrint("build widget: ${snapshot.data}");
+//       //               List<QueryDocumentSnapshot> paymentList =
+//       //                   snapshot.data!.docs;
+//       //               return DataTable(
+//       //                 columnSpacing: 50,
+//       //                 columns: const <DataColumn>[
+//       //                   DataColumn(
+//       //                     label: Text(
+//       //                       'Brand',
+//       //                       style: TextStyle(fontStyle: FontStyle.italic),
+//       //                     ),
+//       //                   ),
+//       //                   DataColumn(
+//       //                     label: Text(
+//       //                       'Last4',
+//       //                       style: TextStyle(fontStyle: FontStyle.italic),
+//       //                     ),
+//       //                   ),
+//       //                   DataColumn(
+//       //                     label: Text(
+//       //                       'Ending',
+//       //                       style: TextStyle(fontStyle: FontStyle.italic),
+//       //                     ),
+//       //                   ),
+//       //                   //Column for trash icon
+//       //                   DataColumn(
+//       //                     label: Text(""),
+//       //                   ),
+//       //                 ],
+//       //                 rows: List<DataRow>.generate(
+//       //                   paymentList.length,
+//       //                   (index) => DataRow(
+//       //                       /*onSelectChanged: (bool selected) {
+//       //                         if (selected) {
+//       //                           log.add('row-selected: ${itemRow.index}');
+//       //                         }
+//       //                       },*/
+//       //                       cells: [
+//       //                         DataCell(
+//       //                             Text(paymentList[index]["card"]["brand"]),
+//       //                             onTap: () {
+//       //                           print(
+//       //                               "TESTING Id: ${paymentList[index]['id']})");
+//       //                           //ONLY FOR PAYMENT ONLY //MUST DELETE THIS***************
+//       //                           Navigator.pop(
+//       //                               context, paymentList[index]['id']);
+//       //                         }),
+//       //                         DataCell(
+//       //                             Text(paymentList[index]["card"]["last4"]),
+//       //                             onTap: () {
+//       //                           //ONLY FOR PAYMNET ONLY! MUST DELETE THIS******************
+//       //                           Navigator.pop(
+//       //                               context, paymentList[index]['id']);
+//       //                         }),
+//       //                         DataCell(
+//       //                             //(var number = 5);
+//       //                             Text(
+//       //                                 '${paymentList[index]["card"]["exp_month"]}/${paymentList[index]["card"]["exp_year"]}'),
+//       //                             onTap: () {
+//       //                           Navigator.pop(context,
+//       //                               paymentList[index]['card']['id']);
+//       //                         }),
+//       //                         DataCell(
+//       //                           const Icon(Icons.delete_outline),
+//       //                           onTap: () async {
+//       //                             print("TEST: ${paymentList[index].id}");
+//       //                             await _showDeleteAlertDialog(
+//       //                                 paymentList[index].id);
+//       //                           },
+//       //                         )
+//       //                       ]),
+//       //                 ),
+//       //               );
+//       //             } else {
+//       //               // We can show the loading view until the data comes back.
+//       //               debugPrint('build loading widget');
+//       //               return const CircularProgressIndicator();
+//       //             }
+//       //           },
+//       //         ),
+//       //       ],
+//       //     ),
+//       //   ),
+//       //   // const Card(
+//       //   //   child: ListTile(
+//       //   //     leading: Icon(Icons.add_circle_outline),
+//       //   //     title: Text("Add new credit/debit card"),
+//       //   //     // onTap: () {
+//       //   //     //   StripePayment.paymentRequestWithCardForm(
+//       //   //     //           CardFormPaymentRequest())
+//       //   //     //       .then((paymentMethod) {
+//       //   //     //     ScaffoldMessenger.of(context).showSnackBar(
+//       //   //     //         SnackBar(content: Text('Received ${paymentMethod.id}')));
+//       //   //     //     setState(() {
+//       //   //     //       //_getCustomer();
+//       //   //     //       _paymentMethod = paymentMethod;
+//       //   //     //       _setPaymentMethodIdAndFingerprint(_paymentMethod);
+//       //   //     //       _addPaymentMethodDialog();
+//       //   //     //     });
+//       //   //     //   }).catchError(setError);
+//       //   //     //   //_addPaymentMethodDialog();
+//       //   //     // },
+//       //   //   ),
+//       //   // ),
+//       //   /* Divider(),
+//       //   Text('Customer data method:'),
+//       //   Text(
+//       //     JsonEncoder.withIndent('  ')
+//       //         .convert(_paymentMethod?.toJson() ?? {}),
+//       //     style: TextStyle(fontFamily: "Monospace"),
+//       //   ),*/
+//       // ],
+//     ),
+//   );
+// }
 /* Expanded(
                       child: SizedBox(
                         height: 400.0,
@@ -449,7 +526,6 @@ class _PaymentState extends State<Payment> {
                   }
                 },
               ),*/
-
 /*  FutureBuilder(
             future: _getPaymentMethods(),
             builder: (context, snapshot) {
@@ -507,7 +583,6 @@ class _PaymentState extends State<Payment> {
       });
     });
     return paymentMethodList;*/
-
 //POtential GetPaymethod methods screen
 /*
                       return ExpansionTile(
@@ -549,3 +624,65 @@ class _PaymentState extends State<Payment> {
                           }
                         }).toList(),
                       );*/
+/*Future<void> createPaymentMethod() async {
+    StripePayment.setStripeAccount(null);
+    //tax = ((totalCost * taxPercent) * 100).ceil() / 100;
+    //amount = ((totalCost + tip + tax) * 100).toInt();
+    //print('amount in pence/cent which will be charged = $amount');
+    //step 1: add card
+    PaymentMethod paymentMethod = PaymentMethod();
+    paymentMethod = await StripePayment.paymentRequestWithCardForm(
+      CardFormPaymentRequest(),
+    ).then((PaymentMethod paymentMethod) {
+      return paymentMethod;
+    }).catchError((e) {
+      print('Errore Card: ${e.toString()}');
+    });
+    paymentMethod != null
+        ? processPaymentAsDirectCharge(paymentMethod)
+        : showDialog(
+            context: context,
+            builder: (BuildContext context) => ShowDialogToDismiss(
+                title: 'Error',
+                content:
+                    'It is not possible to pay with this card. Please try again with a different card',
+                buttonText: 'CLOSE'));
+} */
+// Future<void> _getCustomer() async {
+  //   print("i have been called");
+  //   var firebaseUser = auth.FirebaseAuth.instance.currentUser;
+  //   FirebaseFirestore.instance
+  //       .collection('stripe_customers')
+  //       .doc(firebaseUser?.uid)
+  //       .get()
+  //       .then((DocumentSnapshot documentSnapshot) {
+  //     if (documentSnapshot.exists) {
+  //       _customerId = documentSnapshot.data()['customer_id'];
+  //       _setupSecret = documentSnapshot.data()['setup_secret'];
+  //       customerData = documentSnapshot.data();
+  //       if (kDebugMode) {
+  //         print("hello");
+  //       }
+  //       //customerData.forEach((k, v) => print('${k}: ${v}'));
+  //     } else {
+  //       if (kDebugMode) {
+  //         print('Customer does not exist');
+  //       }
+  //     }
+  //   });
+  // }
+// Future<void> _triggerCloudFunctionPaymentIntent(data) async {
+  //   var firebaseUser = await auth.FirebaseAuth.instance.currentUser;
+  //   FirebaseFirestore.instance
+  //       .collection("stripe_customers")
+  //       .doc(firebaseUser.uid)
+  //       .collection('payments')
+  //       .add(data);
+  // }
+// void setError(dynamic error) {
+  //   ScaffoldMessenger.of(context)
+  //       .showSnackBar(SnackBar(content: Text(error.toString())));
+  //   setState(() {
+  //     _error = error.toString();
+  //   });
+  // }

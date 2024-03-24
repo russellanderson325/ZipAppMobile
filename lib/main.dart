@@ -17,7 +17,10 @@ void main() async {
   // );
   // runApp(const MainApp());
   WidgetsFlutterBinding.ensureInitialized();
-  Stripe.publishableKey = 'pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u';
+  Stripe.publishableKey = 'pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u'; // For Stripe
+  Stripe.merchantIdentifier = 'merchant.com.zipgameday.zip'; // For Apple Pay
+  await Stripe.instance.applySettings();
+
   await dotenv.load(fileName: 'assets/.env');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

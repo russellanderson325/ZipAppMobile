@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 
 class ZipDesign {
   /// TextStyles
@@ -33,5 +34,15 @@ class ZipDesign {
     fontSize: 12,
     fontWeight: FontWeight.w300,
     fontFamily: 'Lexend',
+  );
+  // ButtonStyles
+  static final ButtonStyle yellowButtonStyle = ButtonStyle(
+    shape: MaterialStateProperty.all(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
+    foregroundColor: MaterialStateProperty.all(Colors.black),
+    backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
+    textStyle: MaterialStateProperty.all(ZipDesign.labelText),
   );
 }

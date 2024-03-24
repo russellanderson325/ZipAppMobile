@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
           markerBuilder: (BuildContext context,
               void Function(LocalSearchResult) childMarkerSetter) {
             setMapMarkers = childMarkerSetter;
-          },
+          }, 
           markerReset: (BuildContext context, void Function() childReset) {
             resetMarkers = childReset;
           },

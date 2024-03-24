@@ -196,7 +196,7 @@ class Payment {
   }*/
 
 //Add Payment method to user
-  Future<void> setPaymentMethodID(paymentmethod) async {
+  Future<void> setPaymentMethodId(paymentmethod) async {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     cardDocumentID = await FirebaseFirestore.instance
         .collection("stripe_customers")
