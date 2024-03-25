@@ -5,13 +5,13 @@ import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class PaymentInfo extends StatefulWidget {
+class PaymentSelectionInfo extends StatefulWidget {
   final String paymentMethodId;
   final Function refreshKey;
   final String cardType;
   final String lastFourDigits;
 
-  const PaymentInfo({
+  const PaymentSelectionInfo({
     Key? key, 
     required this.paymentMethodId,
     required this.cardType, 
@@ -20,10 +20,10 @@ class PaymentInfo extends StatefulWidget {
     }) : super(key: key);
 
   @override
-  State<PaymentInfo> createState() => _PaymentInfoState();
+  State<PaymentSelectionInfo> createState() => _PaymentSelectionInfoState();
 }
 
-class _PaymentInfoState extends State<PaymentInfo> {
+class _PaymentSelectionInfoState extends State<PaymentSelectionInfo> {
   bool removeButtonPressed = false;
 
   @override
@@ -32,24 +32,39 @@ class _PaymentInfoState extends State<PaymentInfo> {
       backgroundColor: ZipColors.primaryBackground,
       appBar: AppBar(
         backgroundColor: ZipColors.primaryBackground,
-        title: const Text("Payment Info")
+        title: const Text("")
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: <Widget>[
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
                   "Card Brand: ${widget.cardType}",
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 30,
+                  ),
                 ),
                 Text(
                   "Card Number: •••• ${widget.lastFourDigits}",
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
                 )
               ]
+            ),
+            const SizedBox(height: 300),
+            TextButton.icon(
+              onPressed: () async {
+                print("Payment Method ID: ${widget.paymentMethodId}");
+              },
+              icon: const Icon(LucideIcons.forward),
+              style: ZipDesign.yellowButtonStyle,
+              label: const Text('Proceed with Payment Method')
             ),
             const SizedBox(height: 20),
             TextButton.icon(
@@ -64,7 +79,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                 });
               },
               icon: const Icon(LucideIcons.trash),
-              style: ZipDesign.redButtonStyle,
+              style: ZipDesign.yellowButtonStyle,
               label: const Text('Remove Payment Method')
             )
           ],

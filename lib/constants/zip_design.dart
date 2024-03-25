@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 
@@ -37,12 +38,21 @@ class ZipDesign {
   );
   // ButtonStyles
   static final ButtonStyle yellowButtonStyle = ButtonStyle(
-    shape: MaterialStateProperty.all(
-      RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-    padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 12, horizontal: 16)),
+    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+    padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+    iconColor: MaterialStateProperty.all(Colors.black),
+    iconSize: MaterialStateProperty.all(16),
     foregroundColor: MaterialStateProperty.all(Colors.black),
     backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
+    textStyle: MaterialStateProperty.all(ZipDesign.labelText),
+  );
+  static final ButtonStyle redButtonStyle = ButtonStyle(
+    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+    padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+    iconColor: MaterialStateProperty.all(Colors.black),
+    iconSize: MaterialStateProperty.all(16),
+    foregroundColor: MaterialStateProperty.all(Colors.black),
+    backgroundColor: MaterialStateProperty.all(Colors.redAccent),
     textStyle: MaterialStateProperty.all(ZipDesign.labelText),
   );
 }

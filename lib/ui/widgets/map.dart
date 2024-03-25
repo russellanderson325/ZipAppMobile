@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/screens/test_vehicles_screen.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;
@@ -141,18 +142,25 @@ class MapSampleState extends State<Map> {
   void addSearchedMarker(LocalSearchResult searchResult) async {
     GooglePlace googlePlace = GooglePlace(Keys.map);
     await googlePlace.details.get(searchResult.placeId).then(
-      (value) {
+      (value) async {
         setState(() {
           searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
               value.result!.geometry!.location!.lng!);
         });
-        _addSearchResult(searchResult);
+        PolylineResult? result = await _addSearchResult(searchResult);
         _moveCamera(latlng: searchLatLng);
+        // Present the vehicle selection screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TestVehiclesScreen(distanceInMeters: (result!.distanceValue)!.toDouble())
+          ),
+        );
       },
     );
   }
 
-  void _addSearchResult(LocalSearchResult searchResult) {
+  Future<PolylineResult?> _addSearchResult(LocalSearchResult searchResult) async {
     if (mounted) {
       _resetMarkers();
       setState(() {
@@ -161,7 +169,7 @@ class MapSampleState extends State<Map> {
             position: searchLatLng!,
             infoWindow: InfoWindow(title: searchResult.name)));
       });
-      _updatePolylines();
+      return await _updatePolylines();
     }
   }
 
@@ -182,7 +190,8 @@ class MapSampleState extends State<Map> {
     _updatePolylines();
   }
 
-  void _updatePolylines() async {
+
+   Future<PolylineResult> _updatePolylines() async {
     if (markers.length > 1) {
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Keys.map,
@@ -209,12 +218,15 @@ class MapSampleState extends State<Map> {
           });
         }
       }
+      return result;
     } else {
       if (mounted) {
         setState(() {
           polylines.clear();
         });
       }
+      return PolylineResult();
     }
   }
+
 }

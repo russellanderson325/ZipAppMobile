@@ -19,13 +19,28 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class Payment {
   static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
   static final FirebaseFunctions functions = FirebaseFunctions.instance;
-  
+
   // Firebase Functions
   static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
   static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
   static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
+  static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
 
+
+  static Future<double> getAmmount(bool zipXL, double length, int currentNumberOfRequests) async {
+    double amount;
+    HttpsCallableResult result = await getAmmountFunctionCallable
+        .call(<String, dynamic>{
+      'miles': length,
+      'zipXL': zipXL,
+      'customerRequests': currentNumberOfRequests
+    });
+    amount = result.data['cost'];
+    //set ammount so that it can be used in payment_screen.dart
+    //multiply by 100 cause the payment service moves the decimal place over twice.
+    return amount;
+  }
   /*
    * This method is used to create a payment intent. It basically declares the intention
    * to make a payment and returns the payment intent (sort of).

@@ -3,8 +3,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/payment_info_screen.dart';
+import 'package:zipapp/ui/screens/payment_selection_info_screen.dart';
 
-class PaymentListItem {
+class PaymentSelectListItem {
   Widget build(
       {required BuildContext context,
       required String cardType,
@@ -23,14 +24,13 @@ class PaymentListItem {
         Expanded(
           child: TextButton(
             onPressed: () {
-              print(togglePaymentInfo);
               if (!togglePaymentInfo) {
                 return;
               }
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PaymentInfo(
+                  builder: (context) => PaymentSelectionInfo(
                     paymentMethodId: paymentMethodId,
                     cardType: cardType,
                     lastFourDigits: lastFourDigits,

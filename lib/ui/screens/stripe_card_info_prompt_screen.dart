@@ -17,8 +17,9 @@ class StripeCardInfoPromptScreen extends StatefulWidget {
 
 class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> {
   String statusMessage = " ";
-  static DateTime lastButtonPress = DateTime.now();
-  
+  static DateTime lastButtonPress = DateTime(0);
+  static bool stripeButtonPressed = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,15 +30,15 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
       ),
       body: Container(
         margin: const EdgeInsets.all(40.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: ListView(
           children: [
+            const SizedBox(height: 150),
             Column(
               children: [
                 const CardField(
                   cursorColor: Color.fromARGB(255, 54, 54, 54),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
                 Visibility(
                   child: (statusMessage != "loading" ? Text(
                     statusMessage,
@@ -54,58 +55,61 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
                 ),
               ],
             ),
+            const SizedBox(height: 40),
+            InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () {
+                // If button has been pressed in the last 1 second, do nothing
+                if (DateTime.now().difference(lastButtonPress).inSeconds < 3) return;
+                lastButtonPress = DateTime.now();
 
-            Container(
-              margin: const EdgeInsets.all(20.0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () {
-                  // If button has been pressed in the last 1 second, do nothing
-                  if (DateTime.now().difference(lastButtonPress).inSeconds < 1) return;
-                  lastButtonPress = DateTime.now();
-                  setState(() {
-                    statusMessage = "loading";
-                  });
-                  // Attempt to create the payment method using Stripe
-                  Payment.createPaymentMethod().then((paymentMethod) async {
-                    // Get the payment method with the fingerprint
-                    Map<String, dynamic>? paymentMethodWithFingerprint = await Payment.getPaymentMethodById(paymentMethod!.id);
-                    // Get the fingerprint
-                    String fingerprint = await paymentMethodWithFingerprint!['fingerprint'];
-                    // Save the payment method to the Firestore database
-                    // Note: If the finger print already exists in the users payment methods, it will not be added
-                    // and the payment method will be removed from the Stripe API
-                    await Payment.setPaymentMethodIdAndFingerprint(paymentMethod.id, fingerprint);
-                    // Navigate back to the previous screen
+                setState(() {
+                  statusMessage = "loading";
+                });
+                // Attempt to create the payment method using Stripe
+                Payment.createPaymentMethod().then((paymentMethod) async {
+                  // Get the payment method with the fingerprint
+                  Map<String, dynamic>? paymentMethodWithFingerprint = await Payment.getPaymentMethodById(paymentMethod!.id);
+                  // Get the fingerprint
+                  String fingerprint = await paymentMethodWithFingerprint!['fingerprint'];
+                  // Save the payment method to the Firestore database
+                  // Note: If the finger print already exists in the users payment methods, it will not be added
+                  // and the payment method will be removed from the Stripe API
+                  await Payment.setPaymentMethodIdAndFingerprint(paymentMethod.id, fingerprint);
+                  
+                  // // Navigate back to the previous screen
+                  // if (stripeButtonPressed) return;
+                  // stripeButtonPressed = true;
+                  // if (mounted) {
                     Navigator.pop(context);
-                    // Refresh the FutureBuilder Payment Method list
-                    widget.refreshKey();
-                  }).catchError((e) {
-                    switch (e.toString()) {
-                      case "Exception: Payment method already exists":
-                        setState(() {
-                          statusMessage = "Payment method already exists.";
-                        });
-                        break;
-                      default:
-                        setState(() {
-                          statusMessage = "Please enter valid card information.";
-                        });
-                        break;
-                    }
-                  });
-                },
-                // icon: Image.asset('assets/connectstripe_blurple_4x.png'),
-                child: Ink(
-                  height: 60, // Set the height of your image button
-                  width: double.infinity, // Set the width of your image button
-                  decoration: BoxDecoration(
-                    image: const DecorationImage(
-                      image: AssetImage("assets/connectstripe_blurple_4x.png"), // Path to your image asset
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(10), // Optional: if you want rounded corners for the image
+                  // }
+                  // Refresh the FutureBuilder Payment Method list
+                  widget.refreshKey();
+                }).catchError((e) {
+                  switch (e.toString()) {
+                    case "Exception: Payment method already exists":
+                      setState(() {
+                        statusMessage = "Payment method already exists.";
+                      });
+                      break;
+                    default:
+                      setState(() {
+                        statusMessage = "Please enter valid card information.";
+                      });
+                      break;
+                  }
+                });
+              },
+              // icon: Image.asset('assets/connectstripe_blurple_4x.png'),
+              child: Ink(
+                height: 60, // Set the height of your image button
+                width: double.infinity, // Set the width of your image button
+                decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    image: AssetImage("assets/connectstripe_blurple_4x.png"), // Path to your image asset
+                    fit: BoxFit.cover,
                   ),
+                  borderRadius: BorderRadius.circular(10), // Optional: if you want rounded corners for the image
                 ),
               ),
             ),

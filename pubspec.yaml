@@ -60,3 +60,4 @@ flutter:
     - assets/connectstripe_blurple_4x.png
     - assets/mapthemes/uber_theme.json
     - assets/.env
+    - assets/apple_pay.png
