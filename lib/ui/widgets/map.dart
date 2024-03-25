@@ -11,6 +11,7 @@ import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/test_vehicles_screen.dart';
+import 'package:zipapp/ui/screens/vehicles_screen.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;
@@ -148,14 +149,10 @@ class MapSampleState extends State<Map> {
               value.result!.geometry!.location!.lng!);
         });
         PolylineResult? result = await _addSearchResult(searchResult);
-        _moveCamera(latlng: searchLatLng);
-        // Present the vehicle selection screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TestVehiclesScreen(distanceInMeters: (result!.distanceValue)!.toDouble())
-          ),
-        );
+        _moveCamera(latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0075,
+              value.result!.geometry!.location!.lng!));
+        // Show the vehicle request screen
+        TestVehiclesScreenState.showTestVehiclesScreen(context, (result!.distanceValue)!.toDouble());
       },
     );
   }
@@ -207,7 +204,7 @@ class MapSampleState extends State<Map> {
         });
         Polyline polyline = Polyline(
           polylineId: const PolylineId("userRoute"),
-          color: Colors.blue,
+          color: const Color.fromARGB(255, 255, 193, 21),
           points: polylineCoordinates,
           width: 5,
           visible: true,

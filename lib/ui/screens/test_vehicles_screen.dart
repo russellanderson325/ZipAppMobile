@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 import "package:flutter_stripe/flutter_stripe.dart";
 import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/constants/zip_design.dart";
@@ -22,8 +23,8 @@ class TestVehiclesScreen extends StatefulWidget {
 class TestVehiclesScreenState extends State<TestVehiclesScreen> {
   UniqueKey uniqueKey = UniqueKey();
   bool forceUpdate = false;
-  String label = "Normal Golf Cart";
-  String cartSize = "Normal";
+  String label = "X Golf Cart";
+  String cartSize = "X";
   bool zipXL = false;
   double price = 0.0;
   String currencyCode = "USD";
@@ -57,69 +58,95 @@ class TestVehiclesScreenState extends State<TestVehiclesScreen> {
       ),
       backgroundColor: ZipColors.primaryBackground,
       body: Container(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+        padding: const EdgeInsets.only(left: 24, right: 24, top: 16),
         child: ListView(
           children: <Widget>[
+            // const SizedBox(height: 8),
             Container(
               alignment: Alignment.topCenter,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 // List of cart sizes
                 children: [
-                  DropdownButton(
-                    hint: const Text("Select Cart Size"),
-                    isExpanded: true,
-                    icon: const Icon(LucideIcons.goal),
-                    iconSize: 20,
-                    items: const [
-                      DropdownMenuItem(
-                        value: (
-                          label: "Normal Golf Cart",
-                          size: "Normal",
-                          zipXL: false,
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        clipBehavior: Clip.none,
+                        onPressed: () {
+                          setCartValues("X Golf Cart", "X", false);
+                        },
+                        style: ButtonStyle(
+                          padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                          foregroundColor: MaterialStateProperty.all(Colors.black),
+                          backgroundColor: MaterialStateProperty.all(const Color.fromARGB(128, 255, 255, 255)),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          )),
+                          side: MaterialStateProperty.all(const BorderSide(color: Colors.black)),
+                          fixedSize: MaterialStateProperty.all(const Size(160, 100)),
                         ),
-                        child: Text("Normal Golf Cart")
+                        child: const Image(
+                          image: ResizeImage(
+                            AssetImage("assets/XCart.png"),
+                            height: 100,
+                          ),
+                        ),
                       ),
-                      DropdownMenuItem(
-                        value: (
-                          label: "XL Golf Cart",
-                          size: "XL",
-                          zipXL: true,
+                      TextButton(
+                        onPressed: () {
+                          setCartValues("XL Golf Cart", "XL", true);
+                        },
+                        style: ButtonStyle(
+                          padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+                          foregroundColor: MaterialStateProperty.all(Colors.black),
+                          backgroundColor: MaterialStateProperty.all(const Color.fromARGB(128, 255, 255, 255)),
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          )),
+                          side: MaterialStateProperty.all(const BorderSide(color: Colors.black)),
+                          fixedSize: MaterialStateProperty.all(const Size(160, 100)),
                         ),
-                        child: Text("XL Golf Cart")
+                        child: const Image(
+                          image: ResizeImage(
+                            AssetImage("assets/XLCart.png"),
+                            height: 100,
+                          ),
+                        ),
                       ),
                     ],
-                    onChanged: (value) async {
-                      setCartValues(value!.label, value.size, value.zipXL);
-                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Size: $cartSize",
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                    ),
                   ),
                   Text(
                     "Trip Length: ${distanceInMiles.toStringAsFixed(2)} miles",
                     style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 16,
+                      fontSize: 18,
                     ),
                   ),
+                  const SizedBox(height: 16),
                   Text(
-                    "Size: $cartSize",
+                    "\$$price",
                     style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    "Cart Price: \$$price",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ]
               ),
             ),
 
-            const SizedBox(height: 48),
-
+            const SizedBox(height: 16),
+          
             const Text('Payment Methods', style: ZipDesign.sectionTitleText),
 
             const SizedBox(height: 16),
@@ -151,6 +178,7 @@ class TestVehiclesScreenState extends State<TestVehiclesScreen> {
             const Center(child: Text("OR")),
             const SizedBox(height: 16),
             TextButton(
+              clipBehavior: Clip.hardEdge,
               onPressed: () {
                 if (DateTime.now().difference(lastApplePayButtonPress).inSeconds < 3) return;
                 lastApplePayButtonPress = DateTime.now();
@@ -159,7 +187,10 @@ class TestVehiclesScreenState extends State<TestVehiclesScreen> {
               },
               style: ButtonStyle(
                 padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
-                foregroundColor: MaterialStateProperty.all(Colors.black),
+                // foregroundColor: MaterialStateProperty.all(Colors.black),
+                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                )),
               ),
               child: const Image(
                 image: AssetImage("assets/apple_pay.png"),
@@ -179,5 +210,27 @@ class TestVehiclesScreenState extends State<TestVehiclesScreen> {
       forceUpdate = true;
       uniqueKey = UniqueKey();
     });
+  }
+
+  static void showTestVehiclesScreen(BuildContext context, double distanceInMeters) {
+    // Show the bottom sheet
+    showModalBottomSheet(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.6,
+      
+      ),
+      clipBehavior: Clip.hardEdge,
+      context: context,
+      isScrollControlled: true, // Set to true if your content might not fit
+      shape: const RoundedRectangleBorder( // Optional: to style the top corners
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.9, // Adjust the height factor as needed, e.g., 0.9 for 90% of screen height
+          child: TestVehiclesScreen(distanceInMeters: distanceInMeters), // Pass the required parameters
+        );
+      },
+    );
   }
 }
