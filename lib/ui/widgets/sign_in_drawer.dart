@@ -19,7 +19,7 @@ class SignInDrawer extends StatefulWidget {
 class _SignInDrawerState extends State<SignInDrawer> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _forgotPass = TextEditingController();
+  // final TextEditingController _forgotPass = TextEditingController();
 
   AuthenticationDrawerWidgets adw = AuthenticationDrawerWidgets();
 
@@ -28,10 +28,11 @@ class _SignInDrawerState extends State<SignInDrawer> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Container(
       alignment: Alignment.topCenter,
       width: width,
-      height: 703,
+      height: height * 0.85,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(

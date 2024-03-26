@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:strings/strings.dart';
 import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/validator.dart';
 
@@ -30,10 +31,11 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Container(
       alignment: Alignment.topCenter,
       width: width,
-      height: 703,
+      height: height * 0.85,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -80,8 +82,8 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
                     onPressed: () => _signUp(
-                        firstname: _firstNameController.text,
-                        lastname: _lastNameController.text,
+                        firstname: _firstNameController.text.toProperCase(),
+                        lastname: _lastNameController.text.toProperCase(),
                         number: _phoneController.text,
                         email: _emailController.text,
                         password: _passwordController.text),
@@ -144,6 +146,7 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
             pastDrives: [],
           ));
         });
+        await auth.signIn(email, password);
       } catch (e) {
         String exception = auth.getExceptionText(e as PlatformException);
         print('The error is $exception');
