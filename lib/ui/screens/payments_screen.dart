@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/current_user.dart';
@@ -60,7 +61,24 @@ class PaymentsScreenState extends State<PaymentsScreen> {
     });
   }
 
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   UserService userService = UserService();
+
+  Future<double> fetchDefaultTipAmount() async {
+    try {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userService.userID).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        if (data.containsKey('defaultTip')) {
+          return data['defaultTip'].toDouble();
+        }
+      }
+    } catch (e) {
+      print("Error fetching default tip amount: $e");
+    }
+    return 20.0; // Default value if none is found
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +189,7 @@ class PaymentsScreenState extends State<PaymentsScreen> {
             const SizedBox(height: 32),
             const Text('Default tip', style: ZipDesign.sectionTitleText),
             FutureBuilder<double>(
-              future: currentUserService.fetchDefaultTipAmount(),
+              future: fetchDefaultTipAmount(),
               builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
                 String defaultTipText = "Loading...";
                 if (snapshot.connectionState == ConnectionState.done) {
@@ -181,7 +199,6 @@ class PaymentsScreenState extends State<PaymentsScreen> {
                     defaultTipText = "20%";
                   }
                 }
-
                 return Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   alignment: Alignment.centerLeft,
