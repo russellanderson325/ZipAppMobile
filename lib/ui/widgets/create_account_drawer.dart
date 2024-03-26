@@ -37,7 +37,9 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-            topRight: Radius.circular(32), topLeft: Radius.circular(32)),
+          topRight: Radius.circular(32),
+          topLeft: Radius.circular(32),
+        ),
       ),
       child: SizedBox(
         width: width - 96,
