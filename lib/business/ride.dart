@@ -8,7 +8,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/main_screen.dart';
 
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 
@@ -194,17 +194,17 @@ class RideService {
     goToNextDriver = false;
   }
 
-  void _retrievePickupRadius() async {
-    // pickup radius is retrieved from config settings in firestore
-    // double check with sponsors as to how the pickup radius should be implemented
-    DocumentReference adminSettingsRef =
-        _firestore.collection('config_settings').doc('admin_settings');
-    pickupRadius =
-        (await adminSettingsRef.get()).get('PickupRadius').toDouble();
-    if (kDebugMode) {
-      print('Pickup Radius retrieved from admin settings: $pickupRadius');
-    }
-  }
+  // void _retrievePickupRadius() async {
+  //   // pickup radius is retrieved from config settings in firestore
+  //   // double check with sponsors as to how the pickup radius should be implemented
+  //   DocumentReference adminSettingsRef =
+  //       _firestore.collection('config_settings').doc('admin_settings');
+  //   pickupRadius =
+  //       (await adminSettingsRef.get()).get('PickupRadius').toDouble();
+  //   if (kDebugMode) {
+  //     print('Pickup Radius retrieved from admin settings: $pickupRadius');
+  //   }
+  // }
 
   // This method is attached to the ride stream and run every time the ride document in firestore changes.
   // Use it to keep the UI state in sync and the local Ride object updated.

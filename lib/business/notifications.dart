@@ -1,17 +1,16 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+// import 'dart:io';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart' as auth;
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 
 class NotificationService {
   // static final NotificationService _instance = NotificationService._internal();
   late BuildContext currentContext;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  // final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   UserService userService = UserService();
   late StreamSubscription iosSubscription;
 
@@ -81,19 +80,19 @@ class NotificationService {
   }
 
   /// Get the token, save it to the database for current user
-  _saveDeviceToken() async {
-    auth.User? user = auth.FirebaseAuth.instance
-        .currentUser; //await auth.FirebaseAuth.instance.currentUser();
-    String? fcmToken = await _fcm.getToken();
-    var tokens = _db
-        .collection('users')
-        .doc(user?.uid)
-        .collection('tokens')
-        .doc(fcmToken);
-    await tokens.set({
-      'token': fcmToken,
-      'createdAt': FieldValue.serverTimestamp(), // optional
-      'platform': Platform.operatingSystem // optional
-    });
-  }
+  // _saveDeviceToken() async {
+  //   auth.User? user = auth.FirebaseAuth.instance
+  //       .currentUser; //await auth.FirebaseAuth.instance.currentUser();
+  //   String? fcmToken = await _fcm.getToken();
+  //   var tokens = _db
+  //       .collection('users')
+  //       .doc(user?.uid)
+  //       .collection('tokens')
+  //       .doc(fcmToken);
+  //   await tokens.set({
+  //     'token': fcmToken,
+  //     'createdAt': FieldValue.serverTimestamp(), // optional
+  //     'platform': Platform.operatingSystem // optional
+  //   });
+  // }
 }

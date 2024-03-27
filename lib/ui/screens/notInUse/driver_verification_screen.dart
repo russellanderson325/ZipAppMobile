@@ -1,23 +1,23 @@
 import "package:flutter/material.dart";
 import "package:zipapp/ui/widgets/custom_text_field.dart";
 import 'package:zipapp/business/validator.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/main_screen.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/CustomIcons/custom_icons_icons.dart';
-import 'package:zipapp/ui/screens/driver_main_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/driver_main_screen.dart';
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});
 
   @override
-  _VerificationScreenState createState() => _VerificationScreenState();
+  State<VerificationScreen> createState() => _VerificationScreenState();
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
   final TextEditingController _password = TextEditingController();
   late CustomTextField _passwordField;
-  bool _blackVisible = false;
+  final bool _blackVisible = false;
   late VoidCallback onBackPress;
   late VoidCallback backHome;
 
@@ -175,11 +175,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
     );
   }
 
-  void _changeBlackVisible() {
-    setState(() {
-      _blackVisible = !_blackVisible;
-    });
-  }
+  // void _changeBlackVisible() {
+  //   setState(() {
+  //     _blackVisible = !_blackVisible;
+  //   });
+  // }
 
   void _retryVerify() {
     onBackPress();

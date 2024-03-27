@@ -7,24 +7,25 @@
   We use Firebase Functions for all secret key handling and payment method stuff.
 */
 import 'dart:async';
-import 'dart:ffi';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 
 class Payment {
   static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
   static final FirebaseFunctions functions = FirebaseFunctions.instance;
-  
+
   // Firebase Functions
-  static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
-  static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
-  static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
-  static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
+  static final getPaymentMethodDetailsCallable =
+      functions.httpsCallable('getPaymentMethodDetails');
+  static final removePaymentMethodCallable =
+      functions.httpsCallable('removePaymentMethod');
+  static final attachPaymentMethodToCustomerCallable =
+      functions.httpsCallable('attachPaymentMethodToCustomer');
+  static final createPaymentIntentCallable =
+      functions.httpsCallable('createPaymentIntent');
 
   /*
    * This method is used to create a payment intent. It basically declares the intention
@@ -35,12 +36,11 @@ class Payment {
    */
   static Future<String> createPaymentIntent(int amount, String currency) async {
     try {
-      final HttpsCallableResult result = await createPaymentIntentCallable.call(
-        {
-          'amount': amount,
-          'currency': currency,
-        }
-      );
+      final HttpsCallableResult result =
+          await createPaymentIntentCallable.call({
+        'amount': amount,
+        'currency': currency,
+      });
       return result.data;
     } catch (e) {
       return '';
@@ -56,9 +56,11 @@ class Payment {
    * @param currencyCode - the currency code for the payment
    * @param merchantCountryCode - the merchant country code
    */
-  static void showPaymentSheetToMakePayment(label, amount, currencyCode, merchantCountryCode) async {
+  static void showPaymentSheetToMakePayment(
+      label, amount, currencyCode, merchantCountryCode) async {
     String paymentIntent = await createPaymentIntent(amount, currencyCode);
-    DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
+    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore
+        .instance
         .collection('stripe_customers')
         .doc(_firebaseUser?.uid);
 
@@ -78,7 +80,8 @@ class Payment {
         applePay: PaymentSheetApplePay(
           merchantCountryCode: merchantCountryCode,
           cartItems: [
-            ApplePayCartSummaryItem.immediate(label: label, amount: (amount / 100).toString()),
+            ApplePayCartSummaryItem.immediate(
+                label: label, amount: (amount / 100).toString()),
           ],
           buttonType: PlatformButtonType.pay,
         ),
@@ -107,14 +110,16 @@ class Payment {
   * @param paymentMethodId - the id of the payment method
   * @return Future<void> - a future that resolves when the payment method id is added
   */
-  static Future<void> setPaymentMethodIdAndFingerprint(String paymentMethodId, String fingerprint) async {
-    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
-          .collection('stripe_customers')
-          .doc(_firebaseUser?.uid);
-    
+  static Future<void> setPaymentMethodIdAndFingerprint(
+      String paymentMethodId, String fingerprint) async {
+    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore
+        .instance
+        .collection('stripe_customers')
+        .doc(_firebaseUser?.uid);
+
     var documentSnapshot = await stripeCustomer.get();
     var customerId = documentSnapshot.data()?['customer_id'];
-          
+
     // First check to see if finger print already exists in users payment methods
     var querySnapshot = await stripeCustomer
         .collection('payment_methods')
@@ -128,21 +133,17 @@ class Payment {
     }
     // If the fingerprint doesn't exist, we add the payment method to the database
     if (_firebaseUser != null) {
-      await stripeCustomer
-          .collection('payment_methods')
-          .add({
-            "id": paymentMethodId,
-            "fingerprint": fingerprint,
-          });
+      await stripeCustomer.collection('payment_methods').add({
+        "id": paymentMethodId,
+        "fingerprint": fingerprint,
+      });
     }
 
     // Attach the payment method to the customer in the Stripe API
-    attachPaymentMethodToCustomerCallable.call(
-      {
-        'paymentMethodId': paymentMethodId,
-        'customerId': customerId,
-      }
-    );
+    attachPaymentMethodToCustomerCallable.call({
+      'paymentMethodId': paymentMethodId,
+      'customerId': customerId,
+    });
   }
 
   /*
@@ -175,7 +176,8 @@ class Payment {
       try {
         // First we call the cloud function to remove the payment method from the Stripe API
         // If it fails, we don't want to delete the payment method from the database
-        await removePaymentMethodCallable.call({'paymentMethodId': paymentMethodId});
+        await removePaymentMethodCallable
+            .call({'paymentMethodId': paymentMethodId});
 
         // Get the payment method document from the database where the id matches the paymentMethodId
         var querySnapshot = await FirebaseFirestore.instance
@@ -210,10 +212,10 @@ class Payment {
 
         // Process data into a list
         List<String> paymentMethodIds = snapshot.docs
-          .map((doc) => (doc.data() as Map<String, dynamic>)['id'])
-          .where((id) => id.length > 0) // Filter out empty ids
-          .map((id) => id as String) // Cast remaining ids to String
-          .toList();
+            .map((doc) => (doc.data() as Map<String, dynamic>)['id'])
+            .where((id) => id.length > 0) // Filter out empty ids
+            .map((id) => id as String) // Cast remaining ids to String
+            .toList();
 
         return paymentMethodIds;
       } catch (e) {
@@ -224,15 +226,17 @@ class Payment {
       return [];
     }
   }
-  
+
   /*
   * This method is used to get the payment method details by the payment method id.
   * @param paymentMethodId - the id of the payment method
   * @return Map<String, dynamic>? - the payment method details
   */
-  static Future<Map<String, dynamic>?> getPaymentMethodById(String paymentMethodId) async {
+  static Future<Map<String, dynamic>?> getPaymentMethodById(
+      String paymentMethodId) async {
     try {
-      final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
+      final results = await getPaymentMethodDetailsCallable
+          .call({'paymentMethodId': paymentMethodId});
       Map<String, dynamic> data = results.data;
       data['id'] = paymentMethodId; // Add the payment method id to the data
       return data;
@@ -249,7 +253,8 @@ class Payment {
   static Future<List<Map<String, dynamic>?>> getPaymentMethodsDetails() async {
     List<String> paymentMethodIds = await getPaymentMethodIds();
     // Wait for all futures to complete and collect their results
-    final results = await Future.wait(paymentMethodIds.map(getPaymentMethodById));
+    final results =
+        await Future.wait(paymentMethodIds.map(getPaymentMethodById));
     // Filter out nulls if necessary, depending on whether you want to keep or discard failed lookups
     return results.where((result) => result != null).toList();
   }

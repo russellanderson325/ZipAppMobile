@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 //import 'package:zip/ui/screens/profile_screen.dart';
 //import 'package:zip/ui/screens/defaultTip_screen.dart';
-import 'package:zipapp/ui/screens/profile_screen.dart';
-import 'package:zipapp/ui/screens/legal_info_screen.dart';
-import 'package:zipapp/ui/screens/vehicles_screen.dart';
-import 'package:zipapp/ui/screens/documents_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/profile_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/legal_info_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/vehicles_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/documents_screen.dart';
 //import 'package:zip/services/payment_screen.dart';
 import 'package:zipapp/business/auth.dart';
 
@@ -12,7 +12,7 @@ class DriverSettingsScreen extends StatefulWidget {
   const DriverSettingsScreen({super.key});
 
   @override
-  _DriverSettingsScreenState createState() => _DriverSettingsScreenState();
+  State<DriverSettingsScreen> createState() => _DriverSettingsScreenState();
 }
 
 class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
@@ -174,14 +174,14 @@ void _logOut() async {
 }
 
 class TopRectangle extends StatelessWidget {
-  final color;
-  final height;
-  final width;
-  final child;
+  final Color? color;
+  final double height;
+  final double width;
+  final Widget child;
 
   const TopRectangle(
       {super.key,
-      this.child,
+      required this.child,
       this.color,
       this.height = 100.0,
       this.width = 500.0});
@@ -198,15 +198,15 @@ class TopRectangle extends StatelessWidget {
 }
 
 class SettingRec extends StatelessWidget {
-  final color;
+  final Color? color;
   final decoration;
-  final width;
-  final height;
+  final double width;
+  final double height;
   // final borderWidth;
-  final child;
+  final Widget child;
   const SettingRec(
       {super.key,
-      this.child,
+      required this.child,
       this.color,
       this.width = 500.0,
       this.decoration,

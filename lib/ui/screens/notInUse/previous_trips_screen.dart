@@ -9,7 +9,7 @@ class PreviousTripsScreen extends StatefulWidget {
   const PreviousTripsScreen({super.key});
 
   @override
-  _PreviousTripsScreenState createState() => _PreviousTripsScreenState();
+  State<PreviousTripsScreen> createState() => _PreviousTripsScreenState();
 }
 
 class _PreviousTripsScreenState extends State<PreviousTripsScreen> {

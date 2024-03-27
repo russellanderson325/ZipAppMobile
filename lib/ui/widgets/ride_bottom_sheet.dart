@@ -10,21 +10,17 @@ class RideDetails extends StatelessWidget {
   final DriverService driverService = DriverService();
   final UserService userService = UserService();
   final RideService rideService = RideService();
-  double screenHeight, screenWidth;
 
   RideDetails({
     super.key,
     required this.driver,
     required this.ride,
-    required this.screenHeight,
-    required this.screenWidth,
   });
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.3,
+      height: screenHeight * 0.3,
       child: Stack(
         children: <Widget>[
           Column(

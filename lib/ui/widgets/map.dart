@@ -8,8 +8,8 @@ import 'package:google_place_plus/google_place_plus.dart';
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/services/position_service.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
-import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/main_screen.dart';
+import 'package:zipapp/ui/screens/rider/search_screen.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;

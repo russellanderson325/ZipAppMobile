@@ -17,14 +17,13 @@ import 'package:zipapp/constants/privacy_policies.dart';
 import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/models/driver.dart';
-import 'package:zipapp/services/payment.dart';
-import 'package:zipapp/ui/screens/search_screen.dart';
-import 'package:zipapp/ui/screens/settings_screen.dart';
-import 'package:zipapp/ui/screens/previous_trips_screen.dart';
-import 'package:zipapp/ui/screens/promos_screen.dart';
+import 'package:zipapp/ui/screens/rider/search_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/settings_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/previous_trips_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/promos_screen.dart';
 import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
-import 'package:zipapp/ui/screens/driver_verification_screen.dart';
-import 'package:zipapp/ui/screens/payment_history_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/payment_history_screen.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
 
@@ -44,12 +43,12 @@ typedef MyMarkerReset = void Function(
     BuildContext context, void Function() methodFromChild);
 
 class MainScreen extends StatefulWidget {
-  const  MainScreen({super.key});
+  const MainScreen({super.key});
 
   /*final GlobalKey<MapScreen> mapScaffoldKey;
   MainScreen(this.mapScaffoldKey);*/
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
@@ -251,14 +250,12 @@ class _MainScreenState extends State<MainScreen> {
                     _firestore.collection('users').doc(userService.user.uid);
                 bool acceptedPolicy = (await termsandConditionsReference.get())
                     .get('acceptedPrivPolicy');
-                ;
                 if (acceptedPolicy == true) {
                   Navigator.of(context).pop();
                   _showAlert(context);
                 } else {
                   null;
                 }
-                ;
               },
             ),
           ],
@@ -343,14 +340,12 @@ class _MainScreenState extends State<MainScreen> {
                 bool acceptedTerms =
                     (await termsandConditionsAcceptanceRef.get())
                         .get('acceptedtc');
-                ;
                 if (acceptedTerms == true) {
                   Navigator.of(context).pop();
                   _privacyAlert(context);
                 } else {
                   null;
                 }
-                ;
               },
             ),
           ],
@@ -917,7 +912,8 @@ class _MainScreenState extends State<MainScreen> {
                 const Padding(
                   padding: EdgeInsets.only(bottom: 20.0),
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(ZipColors.zipYellow),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(ZipColors.zipYellow),
                   ),
                 ),
                 const Text("Looking for driver",
@@ -929,7 +925,7 @@ class _MainScreenState extends State<MainScreen> {
                         fontFamily: "Bebas")),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(255, 242, 0, 1.0),
+                      backgroundColor: const Color.fromRGBO(255, 242, 0, 1.0),
                       // primary: const Color.fromRGBO(255, 242, 0, 1.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -946,8 +942,6 @@ class _MainScreenState extends State<MainScreen> {
         return RideDetails(
           driver: false,
           ride: rideService.ride,
-          screenHeight: 0,
-          screenWidth: 0,
         );
       default:
         return const SizedBox(
@@ -981,12 +975,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   ///this will pull up setPin bottomsheet and display pin icon
-  void _setPinOnMap() async {
-    setState(() {
-      bottomSheetStatus = BottomSheetStatus.setPin;
-      showDropPin = true;
-    });
-  }
+  // void _setPinOnMap() async {
+  //   setState(() {
+  //     bottomSheetStatus = BottomSheetStatus.setPin;
+  //     showDropPin = true;
+  //   });
+  // }
 
   ///this will pull up the bottomsheet and ask if the user what
   ///size cart they want
@@ -1057,11 +1051,11 @@ class _MainScreenState extends State<MainScreen> {
     // }
   }
 
-  void _returnToWelcome() {
-    setState(() {
-      bottomSheetStatus = BottomSheetStatus.welcome;
-    });
-  }
+  // void _returnToWelcome() {
+  //   setState(() {
+  //     bottomSheetStatus = BottomSheetStatus.welcome;
+  //   });
+  // }
 
   ///if the rider clicks the cancel button, it will dismiss
   ///the bottomsheet and cancel the ride.
@@ -1094,7 +1088,7 @@ class _MainScreenState extends State<MainScreen> {
 
   ///this builds the sidebar also known as the drawer.
   Widget buildDrawer(BuildContext context) {
-    _buildHeader() {
+    buildHeader() {
       return StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('users')
@@ -1153,7 +1147,7 @@ class _MainScreenState extends State<MainScreen> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          _buildHeader(),
+          buildHeader(),
           ListTile(
             title: const Text('Edit Profile'),
             onTap: () {
@@ -1286,7 +1280,6 @@ class MapScreen extends State<TheMap> {
   LocationService location = LocationService();
   static LatLng _initialPosition = const LatLng(0, 0);
   // static LatLng _lastPosition;
-  late LatLng _destinationPin;
 
   ///these three objects are used for the markers
   ///that display nearby drivers.
@@ -1311,8 +1304,6 @@ class MapScreen extends State<TheMap> {
   PolylinePoints polylinePoints;
 */
   late BitmapDescriptor _sourceIcon;
-
-  late BitmapDescriptor _destinationIcon;
 
   late LatLng pinDrop;
 
@@ -1346,40 +1337,32 @@ class MapScreen extends State<TheMap> {
   Widget build(BuildContext context) {
     return Scaffold(
         //key: mapScaffoldKey,
-        body: _initialPosition == null
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                ),
-              )
-            :
-            //Listener  ( child:
-            GoogleMap(
-                mapType: MapType.normal,
-                initialCameraPosition: _currentPosition,
-                onMapCreated: (GoogleMapController controller) {
-                  _setStyle(controller);
-                  _controller.complete(controller);
-                  setMapPins();
-                  _getUserLocation();
-                  //setPolylines();
-                },
-                onCameraMoveStarted: () {
-                  print("camera moving");
-                },
-                onCameraMove: (position) {
-                  //_destinationPin = position.target;
-                  pinDrop = position.target;
-                  //print('${position.target}');
-                },
-                onCameraIdle: () async {},
-                zoomGesturesEnabled: true,
-                markers: _markers,
-                //polylines: _polylines,
-                myLocationButtonEnabled: false,
-                myLocationEnabled: true,
-                mapToolbarEnabled: true,
-              ),
+        body: GoogleMap(
+          mapType: MapType.normal,
+          initialCameraPosition: _currentPosition,
+          onMapCreated: (GoogleMapController controller) {
+            _setStyle(controller);
+            _controller.complete(controller);
+            setMapPins();
+            _getUserLocation();
+            //setPolylines();
+          },
+          onCameraMoveStarted: () {
+            print("camera moving");
+          },
+          onCameraMove: (position) {
+            //_destinationPin = position.target;
+            pinDrop = position.target;
+            //print('${position.target}');
+          },
+          onCameraIdle: () async {},
+          zoomGesturesEnabled: true,
+          markers: _markers,
+          //polylines: _polylines,
+          myLocationButtonEnabled: false,
+          myLocationEnabled: true,
+          mapToolbarEnabled: true,
+        ),
         //),
 
         floatingActionButton: FloatingActionButton(
@@ -1393,16 +1376,16 @@ class MapScreen extends State<TheMap> {
     return pinDrop;
   }
 
-  void _setUserDefinedPin() {
-    setState(() {
-      print("hjhjjhj");
+  // void _setUserDefinedPin() {
+  //   setState(() {
+  //     print("hjhjjhj");
 
-      /*_markers.add(Marker(
-              markerId: MarkerId('pinDrop'),
-              position: _initialPosition,
-              icon: pinLocationIcon));*/
-    });
-  }
+  //     /*_markers.add(Marker(
+  //             markerId: MarkerId('pinDrop'),
+  //             position: _initialPosition,
+  //             icon: pinLocationIcon));*/
+  //   });
+  // }
 
   ///this sets the icon for the markers
   void _setCustomMapPin() async {

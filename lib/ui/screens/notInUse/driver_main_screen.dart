@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/user.dart';
@@ -12,17 +11,16 @@ import 'dart:async';
 // import 'package:url_launcher/url_launcher.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
-import 'package:zipapp/ui/screens/previous_driver_trips.dart';
-import 'dart:io';
-import 'package:zipapp/ui/screens/main_screen.dart';
-import '../../models/user.dart';
+import 'package:zipapp/ui/screens/notInUse/previous_driver_trips.dart';
+import 'package:zipapp/ui/screens/notInUse/main_screen.dart';
+import '../../../models/user.dart';
 // import 'package:unicorndial/unicorndial.dart';
 import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:zipapp/ui/screens/stripe_connect_screen.dart';
-import 'package:zipapp/ui/screens/driver_settings_screen.dart';
-import 'package:zipapp/ui/screens/earnings_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/stripe_connect_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/driver_settings_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/earnings_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 
@@ -31,7 +29,7 @@ enum DriverBottomSheetStatus { closed, confirmation, searching, rideDetails }
 class DriverMainScreen extends StatefulWidget {
   const DriverMainScreen({super.key});
   @override
-  _DriverMainScreenState createState() => _DriverMainScreenState();
+  State<DriverMainScreen> createState() => _DriverMainScreenState();
 }
 
 class _DriverMainScreenState extends State<DriverMainScreen> {
@@ -883,26 +881,26 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
 /*
   Open directions to address on either Apple/Google Maps.
 */
-  Future<void> _openRoute(double lat, double lng) async {
-    try {
-      if (Platform.isAndroid) {
-        if (await canLaunchUrlString("google.navigation:q=$lat,$lng")) {
-          launchUrlString("google.navigation:q=$lat,$lng");
-        } else {
-          throw "Could not";
-        }
-      } else {
-        if (await canLaunchUrlString(
-            "http://maps.apple.com/?daddr=$lat,$lng&dirflg=d")) {
-          launchUrlString("http://maps.apple.com/?daddr=$lat,$lng&dirflg=d");
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e.toString());
-      }
-    }
-  }
+  // Future<void> _openRoute(double lat, double lng) async {
+  //   try {
+  //     if (Platform.isAndroid) {
+  //       if (await canLaunchUrlString("google.navigation:q=$lat,$lng")) {
+  //         launchUrlString("google.navigation:q=$lat,$lng");
+  //       } else {
+  //         throw "Could not";
+  //       }
+  //     } else {
+  //       if (await canLaunchUrlString(
+  //           "http://maps.apple.com/?daddr=$lat,$lng&dirflg=d")) {
+  //         launchUrlString("http://maps.apple.com/?daddr=$lat,$lng&dirflg=d");
+  //       }
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print(e.toString());
+  //     }
+  //   }
+  // }
 }
 
 /*
@@ -921,7 +919,7 @@ class MapScreen extends State<TheMap> {
   final Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   // PolylinePoints polylinePoints = PolylinePoints();
-  Completer<GoogleMapController> _controller = Completer();
+  final Completer<GoogleMapController> _controller = Completer();
   late BitmapDescriptor _sourceIcon;
   late BitmapDescriptor _destinationIcon;
 

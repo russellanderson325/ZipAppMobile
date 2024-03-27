@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/screens/rider/search_screen.dart';
 import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
 
 typedef MyMarkerSetter = void Function(

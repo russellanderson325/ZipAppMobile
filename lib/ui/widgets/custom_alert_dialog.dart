@@ -27,7 +27,7 @@ class CustomAlertDialog extends StatelessWidget {
           fontFamily: "OpenSans",
         ),
       ),
-      content: Container(
+      content: SizedBox(
         height: 100,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

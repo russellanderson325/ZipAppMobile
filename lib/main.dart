@@ -3,11 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zipapp/firebase_options.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
-import 'package:zipapp/ui/screens/profile_screen.dart';
-import 'package:zipapp/ui/screens/root_screen.dart';
-import 'package:zipapp/ui/screens/sign_in_screen.dart';
-import 'package:zipapp/ui/screens/sign_up_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/main_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/profile_screen.dart';
+import 'package:zipapp/ui/screens/general/root_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/sign_in_screen.dart';
+import 'package:zipapp/ui/screens/notInUse/sign_up_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

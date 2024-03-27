@@ -19,7 +19,7 @@ class SignInDrawer extends StatefulWidget {
 class _SignInDrawerState extends State<SignInDrawer> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _forgotPass = TextEditingController();
+  // final TextEditingController _forgotPass = TextEditingController();
 
   AuthenticationDrawerWidgets adw = AuthenticationDrawerWidgets();
 

@@ -19,7 +19,7 @@ class Payment {
   //E.G. 1000 = $10.00 DOLLARS
   late double amount;
   final currency = "usd";
-  var paymentMethod;
+  // var paymentMethod;
   final fireBaseUser = auth.FirebaseAuth.instance.currentUser;
   //var email = fireBaseUser.email;
   //var paymentMethodList;

@@ -4,9 +4,9 @@ import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
-import 'package:zipapp/ui/screens/safety_screen.dart';
-import 'package:zipapp/ui/screens/terms_screen.dart';
+import 'package:zipapp/ui/screens/rider/privacy_policy_screen.dart';
+import 'package:zipapp/ui/screens/rider/safety_screen.dart';
+import 'package:zipapp/ui/screens/rider/terms_screen.dart';
 import 'package:zipapp/ui/widgets/underline_textbox.dart';
 
 class AccountScreen extends StatefulWidget {

@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/constants/zip_formats.dart';
-import 'package:zipapp/ui/screens/ride_details_screen.dart';
+import 'package:zipapp/ui/screens/rider/ride_details_screen.dart';
 
 class RideActivityItem extends StatefulWidget {
   final String destination;

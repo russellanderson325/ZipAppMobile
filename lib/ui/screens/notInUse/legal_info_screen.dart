@@ -5,7 +5,7 @@ class LegalInformationScreen extends StatefulWidget {
   const LegalInformationScreen({super.key});
 
   @override
-  _LegalInformationScreenState createState() => _LegalInformationScreenState();
+  State<LegalInformationScreen> createState() => _LegalInformationScreenState();
 }
 
 var tipAmount = '';
