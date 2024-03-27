@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zipapp/ui/screens/payments_screen.dart';
-import 'package:zipapp/ui/widgets/payment_list_item.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/utils.dart';
+
 
 /*
   * A widget that displays a list of payment methods
@@ -52,6 +53,18 @@ class PaymentMethodListWidget {
                     refreshKey: refreshKey
                   );
               }).toList();
+
+          // Add Apple/Google Pay buttons
+          listItems.add(
+            listItemWidgetBuilder.build(
+              context: context,
+              paymentMethodId: 'apple_pay',
+              cardType: 'Apple Pay',
+              lastFourDigits: '',
+              togglePaymentInfo: togglePaymentInfo,
+              refreshKey: refreshKey
+            )
+          );
           // Add spacing after each item
           List<Widget> spacedListItems = [];
           for (var i = 0; i < listItems.length; i++) {
@@ -77,14 +90,15 @@ class PaymentMethodListWidget {
    * @return Future<List<Map<String, dynamic>?>> The payment methods
    */
   static Future<List<Map<String, dynamic>?>> fetchPaymentMethodsIfNeeded(forceUpdate) async {
-    if (PaymentMethodsCache.cachedPaymentMethods == null || forceUpdate) {
+    List<Map<String, dynamic>?> cachedPaymentMethods = await Payment.getPaymentMethodsCache();
+    if (cachedPaymentMethods.isEmpty || forceUpdate) {
       forceUpdate = false;
       // Fetch from Stripe API
       var fetchedMethods = await Payment.getPaymentMethodsDetails();
-      PaymentMethodsCache.updateCache(fetchedMethods);
+      Payment.setPaymentMethodsCache(fetchedMethods);
       return fetchedMethods;
     } else {  
-      return PaymentMethodsCache.cachedPaymentMethods!;
+      return cachedPaymentMethods;
     }
   }
 }

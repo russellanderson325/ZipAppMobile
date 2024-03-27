@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/widgets/message_overlay.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/screens/payments_screen.dart';
 
 class StripeCardInfoPromptScreen extends StatefulWidget {
   final Function refreshKey;
@@ -29,16 +26,16 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
         title: const Text("Add Card"),
       ),
       body: Container(
-        margin: const EdgeInsets.all(40.0),
+        margin: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            const SizedBox(height: 150),
+            const SizedBox(height: 200),
             Column(
               children: [
                 const CardField(
                   cursorColor: Color.fromARGB(255, 54, 54, 54),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 0),
                 Visibility(
                   child: (statusMessage != "loading" ? Text(
                     statusMessage,

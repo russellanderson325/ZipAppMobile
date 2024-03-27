@@ -4,6 +4,7 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/payment_info_screen.dart';
 
+
 class PaymentListItem {
   Widget build(
       {required BuildContext context,
@@ -23,7 +24,6 @@ class PaymentListItem {
         Expanded(
           child: TextButton(
             onPressed: () {
-              print(togglePaymentInfo);
               if (!togglePaymentInfo) {
                 return;
               }
@@ -47,20 +47,31 @@ class PaymentListItem {
               mainAxisAlignment:
                   MainAxisAlignment.spaceBetween, // Space between items
               children: <Widget>[
-                // Row for the credit card icon and the text
-                Row(
-                  children: <Widget>[
-                    const Icon(LucideIcons.creditCard,
-                        size: 24, color: Colors.black),
-                    const SizedBox(width: 8), // Space between icon and text
-                    Text('$cardType ••••$lastFourDigits'),
-                  ],
-                ),
-                // Chevron-right icon on the right side
-                const Icon(LucideIcons.chevronRight,
-                    size: 24, color: TailwindColors.gray500),
-              ],
-            ),
+                  // Row for the credit card icon and the text
+                  (paymentMethodId != "apple_pay" || paymentMethodId != "google_pay") ? (
+                    Row(
+                      children: <Widget>[
+                        const Icon(LucideIcons.creditCard, size: 24, color: Colors.black
+                        ),
+                        const SizedBox(width: 8), // Space between icon and text
+                        Text('$cardType ••••$lastFourDigits'),
+                      ],
+                    )
+                  ) : (
+                    Row(
+                      children: <Widget>[
+                        const Icon(LucideIcons.creditCard, size: 24, color: Colors.black
+                        ),
+                        const SizedBox(width: 8), // Space between icon and text
+                        Text(cardType),
+                      ],
+                    )
+                  ),
+                  // Chevron-right icon on the right side
+                  const Icon(LucideIcons.chevronRight,
+                      size: 24, color: TailwindColors.gray500),
+                ],
+              ),
           ),
         ),
       ]),

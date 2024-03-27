@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
@@ -9,6 +10,7 @@ import 'package:zipapp/ui/widgets/payment_methods_list.dart';
 import 'package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart';
 import 'package:zipapp/ui/screens/default_tip_screen.dart';
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/services/payment.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({Key? key}) : super(key: key);
@@ -18,10 +20,8 @@ class PaymentsScreen extends StatefulWidget {
 }
 
 class PaymentMethodsCache {
-  static List<Map<String, dynamic>?>? cachedPaymentMethods;
-
-  static void updateCache(List<Map<String, dynamic>?> methods) {
-    cachedPaymentMethods = methods;
+  static void updateCache(List<Map<String, dynamic>?> methods) async {
+    Payment.setPaymentMethodsCache(methods);
   }
 }
 

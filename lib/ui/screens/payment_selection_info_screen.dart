@@ -38,6 +38,7 @@ class _PaymentSelectionInfoState extends State<PaymentSelectionInfo> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: <Widget>[
+            const SizedBox(height: 200),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -57,10 +58,11 @@ class _PaymentSelectionInfoState extends State<PaymentSelectionInfo> {
                 )
               ]
             ),
-            const SizedBox(height: 300),
+            const SizedBox(height: 100),
             TextButton.icon(
               onPressed: () async {
                 print("Payment Method ID: ${widget.paymentMethodId}");
+                
               },
               icon: const Icon(LucideIcons.forward),
               style: ZipDesign.yellowButtonStyle,
@@ -79,7 +81,7 @@ class _PaymentSelectionInfoState extends State<PaymentSelectionInfo> {
                 });
               },
               icon: const Icon(LucideIcons.trash),
-              style: ZipDesign.yellowButtonStyle,
+              style: ZipDesign.redButtonStyle,
               label: const Text('Remove Payment Method')
             )
           ],

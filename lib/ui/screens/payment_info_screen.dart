@@ -32,26 +32,33 @@ class _PaymentInfoState extends State<PaymentInfo> {
       backgroundColor: ZipColors.primaryBackground,
       appBar: AppBar(
         backgroundColor: ZipColors.primaryBackground,
-        title: const Text("Payment Info")
+        title: const Text("")
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: <Widget>[
+            const SizedBox(height: 200),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
                   "Card Brand: ${widget.cardType}",
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 30,
+                  ),
                 ),
                 Text(
                   "Card Number: •••• ${widget.lastFourDigits}",
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
                 )
               ]
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 100),
             TextButton.icon(
               onPressed: () async {
                 // If button has been pressed in the last 1 second, do nothing

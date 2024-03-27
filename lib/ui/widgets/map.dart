@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/test_vehicles_screen.dart';
-import 'package:zipapp/ui/screens/vehicles_screen.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;
@@ -45,14 +43,18 @@ class MapSampleState extends State<Map> {
         .then((value) {
       mapTheme = value;
     });
+    
     if (mounted) {
       positionService.getPosition().then((value) {
         setState(() {
           userLatLng = LatLng(value.latitude, value.longitude);
-          markers.add(Marker(
+          markers.add(
+            Marker(
               markerId: const MarkerId("userPosition"),
               position: userLatLng!,
-              infoWindow: const InfoWindow(title: "You are here")));
+              infoWindow: const InfoWindow(title: "You are here"),
+            )
+          );
         });
       });
     }
@@ -76,7 +78,7 @@ class MapSampleState extends State<Map> {
                   myLocationEnabled: true,
                   compassEnabled: true,
                   initialCameraPosition:
-                      CameraPosition(target: userLatLng!, zoom: 14.4746),
+                      CameraPosition(target: userLatLng!, zoom: 17.5),
                   mapToolbarEnabled: false,
                   markers: markers.toSet(),
                   myLocationButtonEnabled: false,
@@ -149,7 +151,7 @@ class MapSampleState extends State<Map> {
               value.result!.geometry!.location!.lng!);
         });
         PolylineResult? result = await _addSearchResult(searchResult);
-        _moveCamera(latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0075,
+        _moveCamera(latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
               value.result!.geometry!.location!.lng!));
         // Show the vehicle request screen
         TestVehiclesScreenState.showTestVehiclesScreen(context, (result!.distanceValue)!.toDouble());
@@ -158,23 +160,28 @@ class MapSampleState extends State<Map> {
   }
 
   Future<PolylineResult?> _addSearchResult(LocalSearchResult searchResult) async {
+    BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(size: Size(24, 24)), 'assets/destination_map_marker.png',
+    );
     if (mounted) {
       _resetMarkers();
       setState(() {
         markers.add(Marker(
-            markerId: MarkerId(searchResult.placeId),
-            position: searchLatLng!,
-            infoWindow: InfoWindow(title: searchResult.name)));
+          markerId: MarkerId(searchResult.placeId),
+          position: searchLatLng!,
+          infoWindow: InfoWindow(title: searchResult.name),
+          icon: customIcon,
+        ));
       });
       return await _updatePolylines();
     }
   }
 
-  void _moveCamera({latlng, zoom = 14.4746}) async {
+  void _moveCamera({latlng, zoom = 17}) async {
     latlng ??= userLatLng!;
     final GoogleMapController controller = await _controller.future;
     await controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: latlng, zoom: zoom)));
+        CameraPosition(target: latlng, zoom: zoom.toDouble())));
   }
 
   void _resetMarkers() {

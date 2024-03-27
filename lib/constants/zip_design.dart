@@ -52,7 +52,7 @@ class ZipDesign {
     iconColor: MaterialStateProperty.all(Colors.black),
     iconSize: MaterialStateProperty.all(16),
     foregroundColor: MaterialStateProperty.all(Colors.black),
-    backgroundColor: MaterialStateProperty.all(Colors.redAccent),
+    backgroundColor: MaterialStateProperty.all(const Color.fromARGB(100, 255, 0, 0)),
     textStyle: MaterialStateProperty.all(ZipDesign.labelText),
   );
 }
