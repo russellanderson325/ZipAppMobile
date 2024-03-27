@@ -104,7 +104,7 @@ class AuthService {
       print("user ${user.firstName} ${user.email} already exists");
     } else {
       print("user ${user.firstName} ${user.email} added");
-      FirebaseFirestore.instance.doc("users/${user.uid}").set(user.toJson());
+      _db.doc("users/${user.uid}").set(user.toJson());
     }
   }
 
@@ -119,6 +119,20 @@ class AuthService {
       User user = User.fromDocument(doc);
       user.updateActivity();
       return userRef.set(user.toJson(), SetOptions(merge: true));
+    }
+  }
+
+  void changeUserData(String userID, String firstName, String lastName,
+      String email, String phone) async {
+    try {
+      return await _db.collection('users').doc(userID).update({
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'phone': phone,
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
