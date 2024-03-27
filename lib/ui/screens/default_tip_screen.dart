@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/business/validator.dart';
+import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 
@@ -14,14 +15,16 @@ class DefaultTipScreen extends StatefulWidget {
 
 class DefaultTipScreenState extends State<DefaultTipScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  UserService userService = UserService();
-  late double tipAmount;
-  bool hasChanged = false;
+  final UserService userService = UserService();
+  double oldTipAmount = 20.0;
+  double? newTipAmount;
+  late bool hasChanged;
+  final TextEditingController customTipController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    tipAmount = 20.0;
+    hasChanged = false;
     loadSavedTipAmount();
   }
 
@@ -33,7 +36,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
         Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
         if (data.containsKey('defaultTip')) {
           setState(() {
-            tipAmount = data['defaultTip'].toDouble();
+            oldTipAmount = data['defaultTip'].toDouble();
           });
         }
       }
@@ -43,10 +46,14 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
   }
 
   void updateDefaultTip(double newTip) {
-    if (newTip != tipAmount && Validator.validateTipAmount(newTip)) {
+    if (newTip != oldTipAmount && Validator.validateTipAmount(newTip)) {
       setState(() {
-        tipAmount = newTip;
+        newTipAmount = newTip;
         hasChanged = true;
+      });
+    } else {
+      setState(() {
+        hasChanged = false;
       });
     }
   }
@@ -55,7 +62,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
     if (hasChanged) {
       try {
         await _firestore.collection('users').doc(userService.userID).update({
-          'defaultTip': tipAmount,
+          'defaultTip': newTipAmount,
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Changes saved successfully')),
@@ -72,10 +79,19 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
     }
   }
 
-  Widget percentageButton(String percentage) {
-    bool isSelected = tipAmount == double.tryParse(percentage);
+  Widget percentageButton(double percentage) {
+    bool isSelected =
+        hasChanged ? newTipAmount == percentage : oldTipAmount == percentage;
     return ElevatedButton(
-      onPressed: () => updateDefaultTip(double.parse(percentage)),
+      onPressed: () {
+        if (percentage == oldTipAmount) {
+          setState(() {
+            hasChanged = false;
+          });
+        }
+        updateDefaultTip(percentage);
+        customTipController.clear();
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? ZipColors.zipYellow : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -83,8 +99,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
       ),
       child: Text(
         '$percentage%',
-        style: ZipDesign.bodyText.copyWith(
-            color: isSelected ? Colors.black : Colors.grey, fontSize: 18),
+        style: ZipDesign.bodyText.copyWith(color: Colors.black, fontSize: 18),
       ),
     );
   }
@@ -99,7 +114,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
         title: Text('Default Tip',
             style: ZipDesign.pageTitleText.copyWith(color: Colors.black)),
         backgroundColor: ZipColors.primaryBackground,
-        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       backgroundColor: ZipColors.primaryBackground,
       body: SingleChildScrollView(
@@ -113,13 +128,13 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${tipAmount.toStringAsFixed(2)}%',
+                Text('${oldTipAmount.toStringAsFixed(2)}%',
                     style: ZipDesign.bodyText.copyWith(
-                        color: ZipColors
-                            .lightGray)), // Display tipAmount in dollars or percentage
+                        color: TailwindColors
+                            .gray500)), // Display tipAmount in dollars or percentage
                 Text('Your average tip: \$3.40',
                     style: ZipDesign.bodyText
-                        .copyWith(color: ZipColors.lightGray)),
+                        .copyWith(color: TailwindColors.gray500)),
               ],
             ),
             const SizedBox(height: 20),
@@ -133,7 +148,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
               childAspectRatio: 1.5 / 1.1,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              children: ['5', '10', '15', '20', '25', '30']
+              children: [5.0, 10.0, 15.0, 20.0, 25.0, 30.0]
                   .map((percentage) => percentageButton(percentage))
                   .toList(),
             ),
@@ -142,11 +157,40 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
                 style:
                     ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             TextField(
+              controller: customTipController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               onChanged: (value) {
-                if (value.isNotEmpty) {
+                if (value.isNotEmpty &&
+                    double.tryParse(value) != null &&
+                    Validator.validateTipAmount(double.parse(value))) {
                   updateDefaultTip(double.parse(value));
+                } else {
+                  setState(() {
+                    hasChanged = false;
+                  });
+                }
+              },
+              onSubmitted: (value) {
+                if (!Validator.validateTipAmount(double.tryParse(value))) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Invalid tip percentage'),
+                        content: const Text(
+                          'Please enter a tip percentage between 0 and 100.',
+                          style: ZipDesign.bodyText,
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('Ok'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 }
               },
               decoration: InputDecoration(
@@ -168,7 +212,10 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
         child: SafeArea(
           child: TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: hasChanged ? ZipColors.zipYellow : Colors.grey,
+              backgroundColor:
+                  hasChanged && Validator.validateTipAmount(newTipAmount)
+                      ? ZipColors.zipYellow
+                      : TailwindColors.gray300,
               minimumSize: const Size(double.infinity, 50),
               padding: const EdgeInsets.symmetric(vertical: 15),
             ),
@@ -181,7 +228,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
             child: Text(
               'Save changes',
               style: TextStyle(
-                color: hasChanged ? Colors.black : Colors.white,
+                color: hasChanged ? Colors.black : TailwindColors.gray500,
                 fontSize: 18,
               ),
             ),

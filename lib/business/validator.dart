@@ -20,7 +20,10 @@ class Validator {
     return text.toString().length >= 6;
   }
 
-  static bool validateTipAmount(double tip) {
-    return tip >= 0.0 && tip <= 50.0;
+  static bool validateTipAmount(double? tip) {
+    if (tip == null) {
+      return false;
+    }
+    return tip >= 0.0 && tip < 100.0;
   }
 }
