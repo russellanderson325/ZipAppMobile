@@ -35,7 +35,7 @@ class Payment {
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
   static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
 
-  static void setPrimaryPaymentMethod(applePay, googlePay, card, paymentMethodId) async {
+  static Future<PrimaryPaymentMethod> setPrimaryPaymentMethod(applePay, googlePay, card, paymentMethodId) async {
     PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod(
       applePay: applePay,
       googlePay: googlePay,
@@ -45,6 +45,7 @@ class Payment {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('primaryPaymentMethod', json.encode(primaryPaymentMethod));
+    return primaryPaymentMethod;
   }
 
   /*
@@ -56,9 +57,9 @@ class Payment {
    */
   static Future<PrimaryPaymentMethod> getPrimaryPaymentMethod() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    String primaryPaymentMethodString = prefs.getString('primaryPaymentMethod') ?? '';
     // Check if the primary payment method is set in shared preferences
-    if (prefs.getString('primaryPaymentMethod') == null){
+    if (primaryPaymentMethodString == ''){
       // If the primary payment method is not set, set it based on the platform
       PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod(
         applePay: Platform.isIOS,
@@ -70,8 +71,21 @@ class Payment {
       return primaryPaymentMethod;
     } else {
       // If the primary payment method is set, get it from shared preferences
-      PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod.fromJson(json.decode(prefs.getString('primaryPaymentMethod') ?? ''));
-      return primaryPaymentMethod;
+      PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod.fromJson(json.decode(primaryPaymentMethodString));
+
+      // If the primary payment method doesn't exist in Firebase set and return the primary payment method to Apple/Google Pay
+      // Check to see if payment method id is in Firebase
+      List<Map<String, dynamic>?> paymentMethodsInFirebase = await getPaymentMethodsDetails();
+      List<String> paymentMethodIds = paymentMethodsInFirebase.map((e) => (e?['id']).toString()).toList();
+      if (!paymentMethodIds.contains(primaryPaymentMethod.paymentMethodId)) {
+        print('HERE3');
+        primaryPaymentMethod = await setPrimaryPaymentMethod(Platform.isIOS, Platform.isAndroid, false, '');
+        print(primaryPaymentMethod);
+        return primaryPaymentMethod;
+      } else {
+        print('HERE4');
+        return primaryPaymentMethod;
+      }
     }
   }
 
@@ -262,6 +276,12 @@ class Payment {
         for (var doc in querySnapshot.docs) {
           await doc.reference.delete();
         }
+
+        // If the payment method is the primary payment method, 
+        // set the primary payment method to Apple/Google Pay
+        if (primaryPaymentMethod.paymentMethodId == paymentMethodId) {
+          setPrimaryPaymentMethod(Platform.isIOS, Platform.isAndroid, false, '');
+        }
       } catch (e) {
         print('Error calling function: $e');
       }
@@ -335,6 +355,7 @@ class Payment {
   static void setPaymentMethodsCache(List<Map<String, dynamic>?> methods) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('paymentMethods', json.encode(methods));
+    // prefs.setString('paymentMethods', '');
   }
 
   /*

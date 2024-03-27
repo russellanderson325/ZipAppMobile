@@ -1,6 +1,4 @@
-import "dart:ffi";
 import "dart:io";
-
 import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_stripe/flutter_stripe.dart";
@@ -12,6 +10,7 @@ import "package:zipapp/ui/screens/payments_screen.dart";
 import "package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart";
 import "package:zipapp/ui/widgets/payment_list_item.dart";
 import "package:zipapp/ui/widgets/payment_methods_list.dart";
+import "package:zipapp/ui/widgets/primary_payment_list_item.dart";
 import 'package:zipapp/utils.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/ui/widgets/payment_select_list_item.dart';
@@ -140,94 +139,86 @@ class TestVehiclesScreenState extends State<TestVehiclesScreen> {
             ),
 
             const SizedBox(height: 16),
-            const Text('Payment Methods', style: ZipDesign.sectionTitleText),
-            const SizedBox(height: 16),
+            // const Text('Payment Methods', style: ZipDesign.sectionTitleText),
+            // const SizedBox(height: 16),
 
-            TextButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => StripeCardInfoPromptScreen(refreshKey: refreshKey),
-                  ),
-                );
-              },
-              icon: const Icon(LucideIcons.plus),
-              label: const Text('Add payment method'),
-              style: ZipDesign.yellowButtonStyle,
-            ),
+            // TextButton.icon(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => StripeCardInfoPromptScreen(refreshKey: refreshKey),
+            //       ),
+            //     );
+            //   },
+            //   icon: const Icon(LucideIcons.plus),
+            //   label: const Text('Add payment method'),
+            //   style: ZipDesign.yellowButtonStyle,
+            // ),
 
-            // Payment Method List
-            PaymentMethodListWidget.build(
-              context: context,
-              uniqueKey: uniqueKey,
-              forceUpdate: forceUpdate,
-              listItemWidgetBuilder: PaymentSelectListItem(),
-              refreshKey: refreshKey,
-            ),
-            (Platform.isIOS || Platform.isAndroid) ? (
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  const Center(child: Text("OR")),
-                  const SizedBox(height: 16),
-                  // Apple Pay Button
-                  TextButton(
-                    clipBehavior: Clip.hardEdge,
-                    onPressed: () {
-                      if (DateTime.now().difference(lastAppleGooglePayButtonPress).inSeconds < 3) return;
-                      lastAppleGooglePayButtonPress = DateTime.now();
+            // // Payment Method List
+            // PaymentMethodListWidget.build(
+            //   context: context,
+            //   uniqueKey: uniqueKey,
+            //   forceUpdate: forceUpdate,
+            //   listItemWidgetBuilder: PaymentSelectListItem(),
+            //   refreshKey: refreshKey,
+            // ),
+            // (Platform.isIOS || Platform.isAndroid) ? (
+            //   Column(
+            //     children: [
+            //       const SizedBox(height: 16),
+            //       const Center(child: Text("OR")),
+            //       const SizedBox(height: 16),
+            //       // Apple Pay Button
+            //       TextButton(
+            //         clipBehavior: Clip.hardEdge,
+            //         onPressed: () {
+            //           if (DateTime.now().difference(lastAppleGooglePayButtonPress).inSeconds < 3) return;
+            //           lastAppleGooglePayButtonPress = DateTime.now();
                       
-                      // Show the Apple/Google Pay payment sheet
-                      Payment.showPaymentSheetToMakePayment(
-                        label, 
-                        (price * 100).round(), 
-                        currencyCode, 
-                        merchantCountryCode
-                      );
-                    },
-                    style: ButtonStyle(
-                      padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
-                      // foregroundColor: MaterialStateProperty.all(Colors.black),
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      )),
-                    ),
-                    child: Image(
-                      image: AssetImage((Platform.isIOS) ? "assets/apple_pay.png" : "assets/google_pay.png"),
-                      fit: BoxFit.contain,
-                    ),
-                  )
-                ]
-              )
-            ) : const SizedBox(),
-            TextButton(
-              onPressed: () {
-                // Pull up primary payment selection screen
-
+            //           // Show the Apple/Google Pay payment sheet
+            //           Payment.showPaymentSheetToMakePayment(
+            //             label, 
+            //             (price * 100).round(), 
+            //             currencyCode, 
+            //             merchantCountryCode
+            //           );
+            //         },
+            //         style: ButtonStyle(
+            //           padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+            //           // foregroundColor: MaterialStateProperty.all(Colors.black),
+            //           shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            //             borderRadius: BorderRadius.circular(10),
+            //           )),
+            //         ),
+            //         child: Image(
+            //           image: AssetImage((Platform.isIOS) ? "assets/apple_pay.png" : "assets/google_pay.png"),
+            //           fit: BoxFit.contain,
+            //         ),
+            //       )
+            //     ]
+            //   )
+            // ) : const SizedBox(),
+            FutureBuilder<Map<String, dynamic>?>(
+              future: getPrimaryPaymentMethodDetails(), // Assuming this returns Future<String>
+              builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
+                Map<String, dynamic>? primaryPaymentMethodDetails = snapshot.data!;
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Show loading state while waiting for the future to complete
+                  return const CircularProgressIndicator();
+                } else {
+                  // Display the primary payment method if the future completes successfully
+                  return PrimaryPaymentListItem().build(
+                    context: context,
+                    cardType: capitalizeFirstLetter(primaryPaymentMethodDetails['brand']),
+                    lastFourDigits: primaryPaymentMethodDetails['last4'] ?? '0000',
+                    paymentMethodId: primaryPaymentMethodDetails['id'],
+                    togglePaymentInfo: true,
+                    // refreshKey: refreshKey,
+                  );
+                }
               },
-              style: ZipDesign.yellowButtonStyle,
-              child: FutureBuilder<Map<String, dynamic>?>(
-                future: getPrimaryPaymentMethodDetails(), // Assuming this returns Future<String>
-                builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
-                  Map<String, dynamic>? primaryPaymentMethodDetails = snapshot.data!;
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    // Show loading state while waiting for the future to complete
-                    return const CircularProgressIndicator();
-                  } else {
-                    // Display the primary payment method if the future completes successfully
-                    return PaymentListItem().build(
-                      context: context,
-                      cardType: primaryPaymentMethodDetails.,
-                      lastFourDigits: primaryPaymentMethodDetails.lastFourDigits,
-                      paymentMethodId: primaryPaymentMethodDetails.paymentMethodId,
-                      togglePaymentInfo: true,
-                      refreshKey: refreshKey,
-                    
-                    );
-                  }
-                },
-              ),
             ),
             TextButton(
               onPressed: () {

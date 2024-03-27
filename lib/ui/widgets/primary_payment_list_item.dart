@@ -5,7 +5,7 @@ import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/payment_methods_selection_screen.dart';
 import 'package:zipapp/ui/screens/payment_selection_info_screen.dart';
 
-class PaymentSelectListItem {
+class PrimaryPaymentListItem {
   Widget build(
       {required BuildContext context,
       required String cardType,
@@ -27,16 +27,10 @@ class PaymentSelectListItem {
               if (!togglePaymentInfo) {
                 return;
               }
-              // Pull up the PaymentMethodsSelectionScreen 
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PaymentSelectionInfo(
-                    paymentMethodId: paymentMethodId,
-                    cardType: cardType,
-                    lastFourDigits: lastFourDigits,
-                    refreshKey: refreshKey,
-                  )),
+                  builder: (context) => const PaymentMethodsSelectionScreen()),
               );
             },
             style: ButtonStyle(

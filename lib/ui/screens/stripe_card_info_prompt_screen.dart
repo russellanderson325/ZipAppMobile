@@ -35,7 +35,7 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
                 const CardField(
                   cursorColor: Color.fromARGB(255, 54, 54, 54),
                 ),
-                const SizedBox(height: 0),
+                const SizedBox(height: 20),
                 Visibility(
                   child: (statusMessage != "loading" ? Text(
                     statusMessage,

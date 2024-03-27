@@ -94,7 +94,7 @@ class PaymentMethodListWidget {
     if (cachedPaymentMethods.isEmpty || forceUpdate) {
       forceUpdate = false;
       // Fetch from Stripe API
-      var fetchedMethods = await Payment.getPaymentMethodsDetails();
+      List<Map<String, dynamic>?> fetchedMethods = await Payment.getPaymentMethodsDetails();
       Payment.setPaymentMethodsCache(fetchedMethods);
       return fetchedMethods;
     } else {  
