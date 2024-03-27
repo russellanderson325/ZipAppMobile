@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 
@@ -42,7 +43,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
   }
 
   void updateDefaultTip(double newTip) {
-    if (newTip != tipAmount) {
+    if (newTip != tipAmount && Validator.validateTipAmount(newTip)) {
       setState(() {
         tipAmount = newTip;
         hasChanged = true;

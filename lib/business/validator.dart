@@ -20,21 +20,7 @@ class Validator {
     return text.toString().length >= 6;
   }
 
-  // static Future<bool> validateStreetAddress(String text) async {
-  //   bool isValid = false;
-  //   try{
-  //      List<Placemark> placemark = await Geolocator()
-  //       .placemarkFromAddress(text);
-  //       placemark.forEach((f){ print(f.toString() );});
-  //     if (placemark.isEmpty){
-  //       return false;
-  //     }
-  //     else{
-  //       return true;
-  //     }
-  //   }
-  //   catch(e){
-  //   }
-  //   return isValid;
-  // }
+  static bool validateTipAmount(double tip) {
+    return tip >= 0.0 && tip <= 50.0;
+  }
 }
