@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:zipapp/ui/screens/payments_screen.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/utils.dart';
 
@@ -23,11 +21,11 @@ class PaymentMethodListWidget {
     bool forceUpdate = false,
     bool togglePaymentInfo = true,
     refreshKey,
-    }) {
+  }) {
 
     return FutureBuilder<List<Map<String, dynamic>?>>(
       key: uniqueKey,
-      future: fetchPaymentMethodsIfNeeded(forceUpdate),
+      future: Payment.fetchPaymentMethodsIfNeeded(forceUpdate),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -50,7 +48,7 @@ class PaymentMethodListWidget {
                     lastFourDigits: paymentMethod?['last4'] ?? '0000',
                     paymentMethodId: paymentMethod?['id'],
                     togglePaymentInfo: togglePaymentInfo,
-                    refreshKey: refreshKey
+                    refreshKey: refreshKey,
                   );
               }).toList();
 
@@ -71,7 +69,7 @@ class PaymentMethodListWidget {
             spacedListItems.add(listItems[i]);
             if (i < listItems.length - 1) {
               // Add spacing after each item, except for the last one
-              spacedListItems.add(const SizedBox(height: 16));
+              spacedListItems.add(const SizedBox(height: 0));
             }
           }
           return Column(
@@ -84,21 +82,5 @@ class PaymentMethodListWidget {
     );
   }
 
-  /*
-   * Fetches the payment methods from the cache if they exist
-   * Otherwise, fetches from the Stripe API
-   * @return Future<List<Map<String, dynamic>?>> The payment methods
-   */
-  static Future<List<Map<String, dynamic>?>> fetchPaymentMethodsIfNeeded(forceUpdate) async {
-    List<Map<String, dynamic>?> cachedPaymentMethods = await Payment.getPaymentMethodsCache();
-    if (cachedPaymentMethods.isEmpty || forceUpdate) {
-      forceUpdate = false;
-      // Fetch from Stripe API
-      List<Map<String, dynamic>?> fetchedMethods = await Payment.getPaymentMethodsDetails();
-      Payment.setPaymentMethodsCache(fetchedMethods);
-      return fetchedMethods;
-    } else {  
-      return cachedPaymentMethods;
-    }
-  }
+
 }

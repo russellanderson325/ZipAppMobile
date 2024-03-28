@@ -1,12 +1,15 @@
 import "package:flutter/material.dart";
 import "package:zipapp/constants/zip_design.dart";
+import "package:zipapp/services/payment.dart";
 import "package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart";
 import "package:zipapp/ui/widgets/payment_methods_list.dart";
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/ui/widgets/payment_select_list_item.dart';
 
 class PaymentMethodsSelectionScreen extends StatefulWidget {
-  const PaymentMethodsSelectionScreen({Key? key}) : super(key: key);
+  final Function refreshKey;
+
+  const PaymentMethodsSelectionScreen({Key? key, required this.refreshKey}) : super(key: key);
 
   @override
   State<PaymentMethodsSelectionScreen> createState() => PaymentMethodsSelectionScreenState();
@@ -24,7 +27,6 @@ class PaymentMethodsSelectionScreenState extends State<PaymentMethodsSelectionSc
 
   @override
   Widget build(BuildContext context) {
-    print("Building PaymentMethodsSelectionScreen");
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -57,7 +59,7 @@ class PaymentMethodsSelectionScreenState extends State<PaymentMethodsSelectionSc
               label: const Text('Add payment method'),
               style: ZipDesign.yellowButtonStyle,
             ),
-
+            const SizedBox(height: 16),
             // Payment Method List
             PaymentMethodListWidget.build(
               context: context,
@@ -83,6 +85,7 @@ class PaymentMethodsSelectionScreenState extends State<PaymentMethodsSelectionSc
     setState(() {
       forceUpdate = true;
       uniqueKey = UniqueKey();
+      widget.refreshKey();
     });
   }
 }

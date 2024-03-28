@@ -9,7 +9,7 @@ import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
-import 'package:zipapp/ui/screens/test_vehicles_screen.dart';
+import 'package:zipapp/ui/screens/vehicles_screen.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;
@@ -154,7 +154,7 @@ class MapSampleState extends State<Map> {
         _moveCamera(latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
               value.result!.geometry!.location!.lng!));
         // Show the vehicle request screen
-        TestVehiclesScreenState.showTestVehiclesScreen(context, (result!.distanceValue)!.toDouble());
+        VehiclesScreenState.showVehiclesScreen(context, (result!.distanceValue)!.toDouble());
       },
     );
   }

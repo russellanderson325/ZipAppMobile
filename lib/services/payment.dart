@@ -21,7 +21,7 @@ import 'package:zipapp/models/primary_payment_method.dart';
 class Payment {
   static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
   static final FirebaseFunctions functions = FirebaseFunctions.instance;
-  static PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod(
+  static PrimaryPaymentMethod primaryPaymentMethodStatic = PrimaryPaymentMethod(
     applePay: false,
     googlePay: false,
     card: false,
@@ -35,16 +35,53 @@ class Payment {
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
   static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
 
-  static Future<PrimaryPaymentMethod> setPrimaryPaymentMethod(applePay, googlePay, card, paymentMethodId) async {
+  /*
+   * Fetches the payment methods from the cache if they exist
+   * Otherwise, fetches from the Stripe API
+   * @return Future<List<Map<String, dynamic>?>> The payment methods
+   */
+  static Future<List<Map<String, dynamic>?>> fetchPaymentMethodsIfNeeded(forceUpdate) async {
+    List<Map<String, dynamic>?> cachedPaymentMethods = await Payment.getPaymentMethodsCache();
+    // print('Cached payment methods: $cachedPaymentMethods');
+    if (cachedPaymentMethods.isEmpty || forceUpdate) {
+      forceUpdate = false;
+      // Fetch from Stripe API
+      List<Map<String, dynamic>?> fetchedMethods = await Payment.getPaymentMethodsDetails();
+      Payment.setPaymentMethodsCache(fetchedMethods);
+      return fetchedMethods;
+    } else {  
+      return cachedPaymentMethods;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getPrimaryPaymentMethodDetails() async {
+    PrimaryPaymentMethod primaryPaymentMethod = await Payment.getPrimaryPaymentMethod();
+    print('Primary Payment Method: ${primaryPaymentMethod.applePay} ${primaryPaymentMethod.googlePay} ${primaryPaymentMethod.card} ${primaryPaymentMethod.paymentMethodId}');
+    if (!primaryPaymentMethod.applePay && !primaryPaymentMethod.googlePay) {
+      Future<Map<String, dynamic>?> paymentMethod = Payment.getPaymentMethodById(primaryPaymentMethod.paymentMethodId);
+      return paymentMethod;
+    } else {
+      // If the primary payment method is Apple/Google Pay, return a map with the brand and id
+      Map<String, dynamic> paymentMethod = {
+        'brand': Platform.isIOS ? 'Apple Pay' : 'Google Pay',
+        'last4': "",
+        'id': Platform.isIOS ? 'apple_pay' : 'google_pay',
+      };
+      return Future.value(paymentMethod);
+    }
+  }
+
+  static Future<PrimaryPaymentMethod> setPrimaryPaymentMethod(bool applePay, bool googlePay, bool card, String paymentMethodId) async {
     PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod(
       applePay: applePay,
       googlePay: googlePay,
       card: card,
       paymentMethodId: paymentMethodId,
     );
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    print('Primary Payment Method: $primaryPaymentMethod');
     prefs.setString('primaryPaymentMethod', json.encode(primaryPaymentMethod));
+    primaryPaymentMethodStatic = primaryPaymentMethod;
     return primaryPaymentMethod;
   }
 
@@ -78,12 +115,11 @@ class Payment {
       List<Map<String, dynamic>?> paymentMethodsInFirebase = await getPaymentMethodsDetails();
       List<String> paymentMethodIds = paymentMethodsInFirebase.map((e) => (e?['id']).toString()).toList();
       if (!paymentMethodIds.contains(primaryPaymentMethod.paymentMethodId)) {
-        print('HERE3');
         primaryPaymentMethod = await setPrimaryPaymentMethod(Platform.isIOS, Platform.isAndroid, false, '');
-        print(primaryPaymentMethod);
+        primaryPaymentMethodStatic = primaryPaymentMethod;
         return primaryPaymentMethod;
       } else {
-        print('HERE4');
+        primaryPaymentMethodStatic = primaryPaymentMethod;
         return primaryPaymentMethod;
       }
     }
@@ -140,7 +176,7 @@ class Payment {
    * @param currencyCode - the currency code for the payment
    * @param merchantCountryCode - the merchant country code
    */
-  static Future<bool> showPaymentSheetToMakePayment(label, amount, currencyCode, merchantCountryCode) async {
+  static Future<bool> showPaymentSheetToMakePayment(String label, int amount, String currencyCode, String merchantCountryCode) async {
     String paymentIntent = await createPaymentIntent(amount, currencyCode);
     DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
         .collection('stripe_customers')
@@ -279,7 +315,7 @@ class Payment {
 
         // If the payment method is the primary payment method, 
         // set the primary payment method to Apple/Google Pay
-        if (primaryPaymentMethod.paymentMethodId == paymentMethodId) {
+        if (primaryPaymentMethodStatic.paymentMethodId == paymentMethodId) {
           setPrimaryPaymentMethod(Platform.isIOS, Platform.isAndroid, false, '');
         }
       } catch (e) {
@@ -330,7 +366,7 @@ class Payment {
       data['id'] = paymentMethodId; // Add the payment method id to the data
       return data;
     } catch (e) {
-      print('Error calling function: $e');
+      // print('Error calling function: $e');
       return null;
     }
   }
@@ -366,17 +402,17 @@ class Payment {
   static Future<List<Map<String, dynamic>>> getPaymentMethodsCache() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String cachedPaymentMethods = prefs.getString('paymentMethods') ?? '';
-    // Decode the string to a list of dynamic objects
+    print('Cached payment methods: $cachedPaymentMethods');
+    if (cachedPaymentMethods == '') {
+      return [];
+    } else {
+      // Decode the string to a list of dynamic objects
       List<dynamic> decodedList = json.decode(cachedPaymentMethods);
       // Convert each dynamic object to Map<String, dynamic>
       List<Map<String, dynamic>> paymentMethods = decodedList.map<Map<String, dynamic>>((dynamic item) {
         return Map<String, dynamic>.from(item);
       }).toList();
-
-    if (cachedPaymentMethods.isNotEmpty) {
       return paymentMethods;
-    } else {
-      return [];
     }
   }
   

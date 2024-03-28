@@ -62,6 +62,8 @@ flutter:
     - assets/mapthemes/uber_theme.json
     - assets/.env
     - assets/apple_pay.png
+    - assets/apple_pay_icon.png
+    - assets/google_pay_icon.png
     - assets/XCart.png
     - assets/XLCart.png
     - assets/destination_map_marker.png

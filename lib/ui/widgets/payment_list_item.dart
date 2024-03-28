@@ -47,29 +47,19 @@ class PaymentListItem {
               mainAxisAlignment:
                   MainAxisAlignment.spaceBetween, // Space between items
               children: <Widget>[
-                  // Row for the credit card icon and the text
-                  (paymentMethodId != "apple_pay" || paymentMethodId != "google_pay") ? (
-                    Row(
-                      children: <Widget>[
-                        const Icon(LucideIcons.creditCard, size: 24, color: Colors.black
-                        ),
-                        const SizedBox(width: 8), // Space between icon and text
-                        Text('$cardType ••••$lastFourDigits'),
-                      ],
-                    )
-                  ) : (
-                    Row(
-                      children: <Widget>[
-                        const Icon(LucideIcons.creditCard, size: 24, color: Colors.black
-                        ),
-                        const SizedBox(width: 8), // Space between icon and text
-                        Text(cardType),
-                      ],
-                    )
-                  ),
-                  // Chevron-right icon on the right side
-                  const Icon(LucideIcons.chevronRight,
-                      size: 24, color: TailwindColors.gray500),
+                // Row for the credit card icon and the text
+                Row(
+                  children: <Widget>[
+                    ( cardType == 'Apple Pay' ? const Image(image: AssetImage('assets/apple_pay_icon.png'), height: 18)
+                    : cardType == 'Google Pay' ? const Image(image: AssetImage('assets/google_pay_icon.png'), height: 18)
+                    : const Icon(LucideIcons.creditCard, size: 24, color: Colors.black)),
+                    const SizedBox(width: 8), // Space between icon and text
+                    Text('$cardType ${lastFourDigits != "" ? "••••$lastFourDigits" : ""}'),
+                  ],
+                ),
+                // Chevron-right icon on the right side
+                const Icon(LucideIcons.chevronRight,
+                    size: 24, color: TailwindColors.gray500),
                 ],
               ),
           ),

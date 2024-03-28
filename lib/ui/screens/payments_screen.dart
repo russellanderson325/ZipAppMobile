@@ -19,11 +19,11 @@ class PaymentsScreen extends StatefulWidget {
   State<PaymentsScreen> createState() => PaymentsScreenState();
 }
 
-class PaymentMethodsCache {
-  static void updateCache(List<Map<String, dynamic>?> methods) async {
-    Payment.setPaymentMethodsCache(methods);
-  }
-}
+// class PaymentMethodsCache {
+//   static void updateCache(List<Map<String, dynamic>?> methods) async {
+//     Payment.setPaymentMethodsCache(methods);
+//   }
+// }
 
 class PaymentsScreenState extends State<PaymentsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -79,7 +79,6 @@ class PaymentsScreenState extends State<PaymentsScreen> {
             const SizedBox(height: 16),
             TextButton.icon(
               onPressed: () {
-                print("Add new payment method");
                 Navigator.push(
                   context,
                   MaterialPageRoute(

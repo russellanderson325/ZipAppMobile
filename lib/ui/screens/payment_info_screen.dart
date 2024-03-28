@@ -43,37 +43,41 @@ class _PaymentInfoState extends State<PaymentInfo> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  "Card Brand: ${widget.cardType}",
+                  widget.cardType,
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 30,
+                    fontSize: 50,
                   ),
                 ),
-                Text(
-                  "Card Number: •••• ${widget.lastFourDigits}",
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ),
-                )
+                const SizedBox(height: 10),
+                (widget.cardType != 'Apple Pay' && widget.cardType != 'Google Pay' ? 
+                  Text("•••• ${widget.lastFourDigits}",
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 26,
+                    ),
+                  ) : Text("${widget.cardType} is supported.")
+                ),
               ]
             ),
-            const SizedBox(height: 100),
-            TextButton.icon(
-              onPressed: () async {
-                // If button has been pressed in the last 1 second, do nothing
-                if (removeButtonPressed) return;
-                removeButtonPressed = true;
+            const SizedBox(height: 300),
+            (widget.cardType != 'Apple Pay' && widget.cardType != 'Google Pay' ? 
+              TextButton.icon(
+                onPressed: () async {
+                  // If button has been pressed in the last 1 second, do nothing
+                  if (removeButtonPressed) return;
+                  removeButtonPressed = true;
 
-                await Payment.removePaymentMethod(widget.paymentMethodId).then((value) {
-                  widget.refreshKey();
-                  Navigator.pop(context);
-                });
-              },
-              icon: const Icon(LucideIcons.trash),
-              style: ZipDesign.redButtonStyle,
-              label: const Text('Remove Payment Method')
-            )
+                  await Payment.removePaymentMethod(widget.paymentMethodId).then((value) {
+                    widget.refreshKey();
+                    Navigator.pop(context);
+                  });
+                },
+                icon: const Icon(LucideIcons.trash),
+                style: ZipDesign.redButtonStyle,
+                label: const Text('Remove Payment Method')
+              ) : const SizedBox(height: 0)
+            ),
           ],
         ),
       )
