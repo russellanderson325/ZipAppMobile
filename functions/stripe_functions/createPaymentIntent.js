@@ -11,6 +11,7 @@ const attachPaymentMethodToCustomer = functions.https.onCall(async (data, contex
     const paymentIntent = await stripe.paymentIntents.create({
         amount: data.amount,
         currency: data.currency,
+        capture_method: "manual",
     });
 
     return paymentIntent.client_secret;

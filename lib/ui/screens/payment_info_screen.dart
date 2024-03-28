@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class PaymentInfo extends StatefulWidget {
   final String paymentMethodId;
@@ -23,40 +24,60 @@ class PaymentInfo extends StatefulWidget {
 }
 
 class _PaymentInfoState extends State<PaymentInfo> {
+  bool removeButtonPressed = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ZipColors.primaryBackground,
       appBar: AppBar(
         backgroundColor: ZipColors.primaryBackground,
-        title: const Text("Payment Info")
+        title: const Text("")
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
           children: <Widget>[
+            const SizedBox(height: 200),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  "Card Type: ${widget.cardType}",
-                  style: const TextStyle(color: Colors.black),
+                  widget.cardType,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 50,
+                  ),
                 ),
-                Text(
-                  "Card Number: •••• ${widget.lastFourDigits}",
-                  style: const TextStyle(color: Colors.black),
-                )
+                const SizedBox(height: 10),
+                (widget.cardType != 'Apple Pay' && widget.cardType != 'Google Pay' ? 
+                  Text("•••• ${widget.lastFourDigits}",
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 26,
+                    ),
+                  ) : Text("${widget.cardType} is supported.")
+                ),
               ]
             ),
-            TextButton(
-              onPressed: () async {
-                await Payment.removePaymentMethod(widget.paymentMethodId).then((value) {
-                  widget.refreshKey();
-                  Navigator.pop(context);
-                });
-              },
-              style: ZipDesign.yellowButtonStyle,
-              child: const Text('Remove Payment Method')
-            )
+            const SizedBox(height: 300),
+            (widget.cardType != 'Apple Pay' && widget.cardType != 'Google Pay' ? 
+              TextButton.icon(
+                onPressed: () async {
+                  // If button has been pressed in the last 1 second, do nothing
+                  if (removeButtonPressed) return;
+                  removeButtonPressed = true;
+
+                  await Payment.removePaymentMethod(widget.paymentMethodId).then((value) {
+                    widget.refreshKey();
+                    Navigator.pop(context);
+                  });
+                },
+                icon: const Icon(LucideIcons.trash),
+                style: ZipDesign.redButtonStyle,
+                label: const Text('Remove Payment Method')
+              ) : const SizedBox(height: 0)
+            ),
           ],
         ),
       )
