@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/utils.dart';
@@ -53,16 +55,29 @@ class PaymentMethodListWidget {
               }).toList();
 
           // Add Apple/Google Pay buttons
-          listItems.add(
-            listItemWidgetBuilder.build(
-              context: context,
-              paymentMethodId: 'apple_pay',
-              cardType: 'Apple Pay',
-              lastFourDigits: '',
-              togglePaymentInfo: togglePaymentInfo,
-              refreshKey: refreshKey
-            )
-          );
+          if (Platform.isIOS) {
+            listItems.add(
+              listItemWidgetBuilder.build(
+                context: context,
+                paymentMethodId: 'apple_pay',
+                cardType: 'Apple Pay',
+                lastFourDigits: '',
+                togglePaymentInfo: togglePaymentInfo,
+                refreshKey: refreshKey
+              )
+            );
+          } else if (Platform.isAndroid) {
+            listItems.add(
+              listItemWidgetBuilder.build(
+                context: context,
+                paymentMethodId: 'google_pay',
+                cardType: 'Google Pay',
+                lastFourDigits: '',
+                togglePaymentInfo: togglePaymentInfo,
+                refreshKey: refreshKey
+              )
+            );
+          }
           // Add spacing after each item
           List<Widget> spacedListItems = [];
           for (var i = 0; i < listItems.length; i++) {
