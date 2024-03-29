@@ -6,12 +6,14 @@ import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
+import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
 import 'package:zipapp/ui/screens/terms_screen.dart';
 import 'package:zipapp/ui/widgets/underline_textbox.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({Key? key}) : super(key: key);
+  final bool driver;
+  const AccountScreen({Key? key, required this.driver}) : super(key: key);
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -19,12 +21,11 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final UserService userService = UserService();
-  static const bool _isCustomer = true;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    print('Driver: ${widget.driver}');
   }
 
   @override
@@ -203,28 +204,12 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ZipDesign.labelText),
                             ))),
                     const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Switch(
-                        value: _isCustomer,
-                        onChanged: (value) {
-                          setState(() {
-                            Navigator.of(context).pop();
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const VerificationScreen()));
-                          });
-                        },
-                        activeColor: Colors.blue[400],
-                        activeTrackColor: Colors.blue[100],
-                      ),
-                    ),
+                    swapRiderOrDriver(),
+                    const SizedBox(height: 16),
                     Align(
                         alignment: Alignment.topLeft,
                         child: TextButton.icon(
-                            onPressed: () => AuthService().signOut(),
+                            onPressed: () => _logOut(),
                             icon: const Icon(LucideIcons.logOut),
                             label: const Text('Logout'),
                             style: ButtonStyle(
@@ -240,5 +225,47 @@ class _AccountScreenState extends State<AccountScreen> {
                             ))),
                   ]))
             ])));
+  }
+
+  Widget swapRiderOrDriver() {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: TextButton.icon(
+        onPressed: () {
+          if (!widget.driver) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DriverVerificationScreen(),
+              ),
+            );
+          } else {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const RiderMainScreen(),
+              ),
+            );
+          }
+        },
+        icon:
+            Icon(widget.driver ? LucideIcons.personStanding : LucideIcons.bus),
+        label: Text(
+            widget.driver ? 'Use our Rider Program' : 'Log In as a Driver'),
+        style: ButtonStyle(
+          padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+          iconColor: MaterialStateProperty.all(Colors.black),
+          iconSize: MaterialStateProperty.all(16),
+          foregroundColor: MaterialStateProperty.all(Colors.black),
+          textStyle: MaterialStateProperty.all(ZipDesign.labelText),
+        ),
+      ),
+    );
+  }
+
+  void _logOut() async {
+    AuthService().signOut();
+    Navigator.of(context).pushNamed("/root");
   }
 }

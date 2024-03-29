@@ -422,16 +422,7 @@ class _MainScreenState extends State<MainScreen> {
           // TheMap(
           //   key: mapScaffoldKey,
           // ),
-          main_map.Map(
-            key: mapScaffoldKey,
-            markerBuilder: (BuildContext context,
-                void Function(LocalSearchResult) childMarkerSetter) {
-              setMapMarkers = childMarkerSetter;
-            },
-            markerReset: (BuildContext context, void Function() childReset) {
-              resetMarkers = childReset;
-            },
-          ),
+          main_map.Map(key: mapScaffoldKey, driver: false),
           Align(
             alignment: Alignment.topLeft,
             child: SafeArea(
@@ -1255,7 +1246,8 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const VerificationScreen()));
+                        builder: (context) =>
+                            const DriverVerificationScreen()));
               });
             },
             activeColor: Colors.blue[400],
