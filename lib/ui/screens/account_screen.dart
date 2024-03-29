@@ -4,7 +4,7 @@ import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
 import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
