@@ -7,24 +7,144 @@
   We use Firebase Functions for all secret key handling and payment method stuff.
 */
 import 'dart:async';
-import 'dart:ffi';
+import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zipapp/models/primary_payment_method.dart';
 
 class Payment {
   static final _firebaseUser = auth.FirebaseAuth.instance.currentUser;
   static final FirebaseFunctions functions = FirebaseFunctions.instance;
-  
+  static PrimaryPaymentMethod primaryPaymentMethodStatic = PrimaryPaymentMethod(
+    applePay: false,
+    googlePay: false,
+    card: false,
+    paymentMethodId: '',
+  );
+
   // Firebase Functions
   static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
   static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
   static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
+  static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
+
+  /*
+   * Fetches the payment methods from the cache if they exist
+   * Otherwise, fetches from the Stripe API
+   * @return Future<List<Map<String, dynamic>?>> The payment methods
+   */
+  static Future<List<Map<String, dynamic>?>> fetchPaymentMethodsIfNeeded(forceUpdate) async {
+    List<Map<String, dynamic>?> cachedPaymentMethods = await Payment.getPaymentMethodsCache();
+    // print('Cached payment methods: $cachedPaymentMethods');
+    if (cachedPaymentMethods.isEmpty || forceUpdate) {
+      forceUpdate = false;
+      // Fetch from Stripe API
+      List<Map<String, dynamic>?> fetchedMethods = await Payment.getPaymentMethodsDetails();
+      Payment.setPaymentMethodsCache(fetchedMethods);
+      return fetchedMethods;
+    } else {  
+      return cachedPaymentMethods;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> getPrimaryPaymentMethodDetails() async {
+    PrimaryPaymentMethod primaryPaymentMethod = await Payment.getPrimaryPaymentMethod();
+    print('Primary Payment Method: ${primaryPaymentMethod.applePay} ${primaryPaymentMethod.googlePay} ${primaryPaymentMethod.card} ${primaryPaymentMethod.paymentMethodId}');
+    if (!primaryPaymentMethod.applePay && !primaryPaymentMethod.googlePay) {
+      Future<Map<String, dynamic>?> paymentMethod = Payment.getPaymentMethodById(primaryPaymentMethod.paymentMethodId);
+      return paymentMethod;
+    } else {
+      // If the primary payment method is Apple/Google Pay, return a map with the brand and id
+      Map<String, dynamic> paymentMethod = {
+        'brand': Platform.isIOS ? 'Apple Pay' : 'Google Pay',
+        'last4': "",
+        'id': Platform.isIOS ? 'apple_pay' : 'google_pay',
+      };
+      return Future.value(paymentMethod);
+    }
+  }
+
+  static Future<PrimaryPaymentMethod> setPrimaryPaymentMethod(bool applePay, bool googlePay, bool card, String paymentMethodId) async {
+    PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod(
+      applePay: applePay,
+      googlePay: googlePay,
+      card: card,
+      paymentMethodId: paymentMethodId,
+    );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    print('Primary Payment Method: $primaryPaymentMethod');
+    prefs.setString('primaryPaymentMethod', json.encode(primaryPaymentMethod));
+    primaryPaymentMethodStatic = primaryPaymentMethod;
+    return primaryPaymentMethod;
+  }
+
+  /*
+   * This method is used to get the primary payment method for the user.
+   * If the user has not set a primary payment method, it will set the primary payment method
+   * based on the platform (Apple Pay for iOS, Google Pay for Android).
+   * Note: It is stored in the shared preferences.
+   * @return Future<PrimaryPaymentMethod> - a future that resolves to the primary payment method
+   */
+  static Future<PrimaryPaymentMethod> getPrimaryPaymentMethod() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String primaryPaymentMethodString = prefs.getString('primaryPaymentMethod') ?? '';
+    // Check if the primary payment method is set in shared preferences
+    if (primaryPaymentMethodString == ''){
+      // If the primary payment method is not set, set it based on the platform
+      PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod(
+        applePay: Platform.isIOS,
+        googlePay: Platform.isAndroid,
+        card: false,
+      );
+      // Store the primary payment method in shared preferences
+      prefs.setString('primaryPaymentMethod', json.encode(primaryPaymentMethod));
+      return primaryPaymentMethod;
+    } else {
+      // If the primary payment method is set, get it from shared preferences
+      PrimaryPaymentMethod primaryPaymentMethod = PrimaryPaymentMethod.fromJson(json.decode(primaryPaymentMethodString));
+
+      // If the primary payment method doesn't exist in Firebase set and return the primary payment method to Apple/Google Pay
+      // Check to see if payment method id is in Firebase
+      List<Map<String, dynamic>?> paymentMethodsInFirebase = await getPaymentMethodsDetails();
+      List<String> paymentMethodIds = paymentMethodsInFirebase.map((e) => (e?['id']).toString()).toList();
+      if (!paymentMethodIds.contains(primaryPaymentMethod.paymentMethodId)) {
+        primaryPaymentMethod = await setPrimaryPaymentMethod(Platform.isIOS, Platform.isAndroid, false, '');
+        primaryPaymentMethodStatic = primaryPaymentMethod;
+        return primaryPaymentMethod;
+      } else {
+        primaryPaymentMethodStatic = primaryPaymentMethod;
+        return primaryPaymentMethod;
+      }
+    }
+  }
+
+  /*
+   * This method is used to calculate the cost of a ride based on the length of the ride.
+   * @param zipXL - a boolean indicating whether the ride is a ZipXL ride
+   * @param length - the length of the ride
+   * @param currentNumberOfRequests - the number of requests the user has made
+   * @return Future<double> - a future that resolves to the cost of the ride
+   */
+  static Future<double> getAmmount(bool zipXL, double length, int currentNumberOfRequests) async {
+    double amount;
+    HttpsCallableResult result = await getAmmountFunctionCallable
+        .call(<String, dynamic>{
+      'miles': length,
+      'zipXL': zipXL,
+      'customerRequests': currentNumberOfRequests
+    });
+    amount = result.data['cost'];
+    //set ammount so that it can be used in payment_screen.dart
+    //multiply by 100 cause the payment service moves the decimal place over twice.
+    return amount;
+  }
 
   /*
    * This method is used to create a payment intent. It basically declares the intention
@@ -56,7 +176,7 @@ class Payment {
    * @param currencyCode - the currency code for the payment
    * @param merchantCountryCode - the merchant country code
    */
-  static void showPaymentSheetToMakePayment(label, amount, currencyCode, merchantCountryCode) async {
+  static Future<bool> showPaymentSheetToMakePayment(String label, int amount, String currencyCode, String merchantCountryCode) async {
     String paymentIntent = await createPaymentIntent(amount, currencyCode);
     DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
         .collection('stripe_customers')
@@ -95,12 +215,12 @@ class Payment {
       // Present the Payment Sheet
       await Stripe.instance.presentPaymentSheet();
       print("Payment successful");
+      return true;
     } catch (error) {
       print("Payment failed: $error");
+      return false;
     }
   }
-
-  // Card Payment Functionality via Stripe
 
   /*
   * This method adds the payment method id to the firebase database.
@@ -157,6 +277,9 @@ class Payment {
           paymentMethodData: PaymentMethodData(),
         ),
       );
+
+      // Set the primary payment method to be the most recently added payment method (this is the most recently added payment method)
+      setPrimaryPaymentMethod(false, false, true, paymentMethod.id);
       return paymentMethod;
     } catch (e) {
       print("Error creating payment method...");
@@ -188,6 +311,12 @@ class Payment {
         // Loop through the documents and delete each one
         for (var doc in querySnapshot.docs) {
           await doc.reference.delete();
+        }
+
+        // If the payment method is the primary payment method, 
+        // set the primary payment method to Apple/Google Pay
+        if (primaryPaymentMethodStatic.paymentMethodId == paymentMethodId) {
+          setPrimaryPaymentMethod(Platform.isIOS, Platform.isAndroid, false, '');
         }
       } catch (e) {
         print('Error calling function: $e');
@@ -237,7 +366,7 @@ class Payment {
       data['id'] = paymentMethodId; // Add the payment method id to the data
       return data;
     } catch (e) {
-      print('Error calling function: $e');
+      // print('Error calling function: $e');
       return null;
     }
   }
@@ -253,6 +382,41 @@ class Payment {
     // Filter out nulls if necessary, depending on whether you want to keep or discard failed lookups
     return results.where((result) => result != null).toList();
   }
+
+  /*
+   * Updates the payment methods cache with the new payment methods.
+   * Note: Cache is stored using SharedPreferences
+   * @param methods - the list of payment methods
+   */
+  static void setPaymentMethodsCache(List<Map<String, dynamic>?> methods) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('paymentMethods', json.encode(methods));
+    // prefs.setString('paymentMethods', '');
+  }
+
+  /*
+   * Retrieves the payment methods from the cache
+   * Note: Cache is stored using SharedPreferences
+   * @return List<Map<String, dynamic>> - the list of payment methods
+   */
+  static Future<List<Map<String, dynamic>>> getPaymentMethodsCache() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String cachedPaymentMethods = prefs.getString('paymentMethods') ?? '';
+    print('Cached payment methods: $cachedPaymentMethods');
+    if (cachedPaymentMethods == '') {
+      return [];
+    } else {
+      // Decode the string to a list of dynamic objects
+      List<dynamic> decodedList = json.decode(cachedPaymentMethods);
+      // Convert each dynamic object to Map<String, dynamic>
+      List<Map<String, dynamic>> paymentMethods = decodedList.map<Map<String, dynamic>>((dynamic item) {
+        return Map<String, dynamic>.from(item);
+      }).toList();
+      return paymentMethods;
+    }
+  }
+  
+
 }
 
 // Graveyard of old methods

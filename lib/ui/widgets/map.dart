@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
-
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/main_screen.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/screens/vehicles_screen.dart';
 
 class Map extends StatefulWidget {
   final MyMarkerSetter markerBuilder;
@@ -43,14 +43,18 @@ class MapSampleState extends State<Map> {
         .then((value) {
       mapTheme = value;
     });
+    
     if (mounted) {
       positionService.getPosition().then((value) {
         setState(() {
           userLatLng = LatLng(value.latitude, value.longitude);
-          markers.add(Marker(
+          markers.add(
+            Marker(
               markerId: const MarkerId("userPosition"),
               position: userLatLng!,
-              infoWindow: const InfoWindow(title: "You are here")));
+              infoWindow: const InfoWindow(title: "You are here"),
+            )
+          );
         });
       });
     }
@@ -74,7 +78,7 @@ class MapSampleState extends State<Map> {
                   myLocationEnabled: true,
                   compassEnabled: true,
                   initialCameraPosition:
-                      CameraPosition(target: userLatLng!, zoom: 14.4746),
+                      CameraPosition(target: userLatLng!, zoom: 17.5),
                   mapToolbarEnabled: false,
                   markers: markers.toSet(),
                   myLocationButtonEnabled: false,
@@ -141,35 +145,43 @@ class MapSampleState extends State<Map> {
   void addSearchedMarker(LocalSearchResult searchResult) async {
     GooglePlace googlePlace = GooglePlace(Keys.map);
     await googlePlace.details.get(searchResult.placeId).then(
-      (value) {
+      (value) async {
         setState(() {
           searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
               value.result!.geometry!.location!.lng!);
         });
-        _addSearchResult(searchResult);
-        _moveCamera(latlng: searchLatLng);
+        PolylineResult? result = await _addSearchResult(searchResult);
+        _moveCamera(latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
+              value.result!.geometry!.location!.lng!));
+        // Show the vehicle request screen
+        VehiclesScreenState.showVehiclesScreen(context, (result!.distanceValue)!.toDouble());
       },
     );
   }
 
-  void _addSearchResult(LocalSearchResult searchResult) {
+  Future<PolylineResult?> _addSearchResult(LocalSearchResult searchResult) async {
+    BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(size: Size(24, 24)), 'assets/destination_map_marker.png',
+    );
     if (mounted) {
       _resetMarkers();
       setState(() {
         markers.add(Marker(
-            markerId: MarkerId(searchResult.placeId),
-            position: searchLatLng!,
-            infoWindow: InfoWindow(title: searchResult.name)));
+          markerId: MarkerId(searchResult.placeId),
+          position: searchLatLng!,
+          infoWindow: InfoWindow(title: searchResult.name),
+          icon: customIcon,
+        ));
       });
-      _updatePolylines();
+      return await _updatePolylines();
     }
   }
 
-  void _moveCamera({latlng, zoom = 14.4746}) async {
+  void _moveCamera({latlng, zoom = 17}) async {
     latlng ??= userLatLng!;
     final GoogleMapController controller = await _controller.future;
     await controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: latlng, zoom: zoom)));
+        CameraPosition(target: latlng, zoom: zoom.toDouble())));
   }
 
   void _resetMarkers() {
@@ -182,7 +194,8 @@ class MapSampleState extends State<Map> {
     _updatePolylines();
   }
 
-  void _updatePolylines() async {
+
+   Future<PolylineResult> _updatePolylines() async {
     if (markers.length > 1) {
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Keys.map,
@@ -198,7 +211,7 @@ class MapSampleState extends State<Map> {
         });
         Polyline polyline = Polyline(
           polylineId: const PolylineId("userRoute"),
-          color: Colors.blue,
+          color: const Color.fromARGB(255, 255, 193, 21),
           points: polylineCoordinates,
           width: 5,
           visible: true,
@@ -209,12 +222,15 @@ class MapSampleState extends State<Map> {
           });
         }
       }
+      return result;
     } else {
       if (mounted) {
         setState(() {
           polylines.clear();
         });
       }
+      return PolylineResult();
     }
   }
+
 }
