@@ -50,4 +50,20 @@ class CurrentUserService {
       return CurrentUser.fromDocument(snapshot);
     });
   }
+
+  Future<double> fetchDefaultTipAmount() async {
+    try {
+      DocumentSnapshot userDoc =
+          await _db.collection('users').doc(userID).get();
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        if (data.containsKey('defaultTip')) {
+          return data['defaultTip'].toDouble();
+        }
+      }
+    } catch (e) {
+      print("Error fetching default tip amount: $e");
+    }
+    return 20.0; // Default value if none is found
+  }
 }

@@ -25,7 +25,7 @@ import 'package:zipapp/ui/screens/promos_screen.dart';
 import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
 import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/payment_history_screen.dart';
-import 'package:zipapp/ui/screens/payment_screen.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
 
 enum BottomSheetStatus {
@@ -44,7 +44,7 @@ typedef MyMarkerReset = void Function(
     BuildContext context, void Function() methodFromChild);
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const  MainScreen({super.key});
 
   /*final GlobalKey<MapScreen> mapScaffoldKey;
   MainScreen(this.mapScaffoldKey);*/
@@ -908,7 +908,7 @@ class _MainScreenState extends State<MainScreen> {
                 const Padding(
                   padding: EdgeInsets.only(bottom: 20.0),
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
+                    valueColor: AlwaysStoppedAnimation<Color>(ZipColors.zipYellow),
                   ),
                 ),
                 const Text("Looking for driver",
@@ -1072,15 +1072,15 @@ class _MainScreenState extends State<MainScreen> {
   _navigateAndDisplaySelection(BuildContext context) async {
     // Navigator.push returns a Future that completes after calling
     // Navigator.pop on the Selection Screen.
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => PaymentScreen(
-                paymentService: paymentService,
-                key: const Key("PaymentScreen"),
-              )),
-    );
-    return result;
+    // final result = await Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) => PaymentScreen(
+    //             paymentService: paymentService,
+    //             key: const Key("PaymentScreen"),
+    //           )),
+    // );
+    // return result;
   }
 
   ///this builds the sidebar also known as the drawer.
@@ -1156,8 +1156,8 @@ class _MainScreenState extends State<MainScreen> {
             title: const Text('Payment'),
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const Payment()));
+              // Navigator.push(context,
+              //     MaterialPageRoute(builder: (context) => const Payment()));
             },
           ),
           ListTile(

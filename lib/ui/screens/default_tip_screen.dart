@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/business/validator.dart';
+import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 
@@ -8,32 +10,33 @@ class DefaultTipScreen extends StatefulWidget {
   const DefaultTipScreen({Key? key}) : super(key: key);
 
   @override
-  _DefaultTipScreenState createState() => _DefaultTipScreenState();
+  State<DefaultTipScreen> createState() => DefaultTipScreenState();
 }
 
-class _DefaultTipScreenState extends State<DefaultTipScreen> {
+class DefaultTipScreenState extends State<DefaultTipScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  UserService userService = UserService();
-  double tipAmount = 20.0;
-  bool hasChanged = false;
-  bool isCustomAmountSelected = false;
+  final UserService userService = UserService();
+  double oldTipAmount = 20.0;
+  double? newTipAmount;
+  late bool hasChanged;
+  final TextEditingController customTipController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    hasChanged = false;
     loadSavedTipAmount();
   }
 
   Future<void> loadSavedTipAmount() async {
     try {
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(userService.userID).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userService.userID).get();
       if (userDoc.exists && userDoc.data() != null) {
         Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
         if (data.containsKey('defaultTip')) {
           setState(() {
-            tipAmount = data['defaultTip'].toDouble();
-            // Determine whether the stored tip amount is a percentage or a dollar amount
-            isCustomAmountSelected = tipAmount >= 1.0;
+            oldTipAmount = data['defaultTip'].toDouble();
           });
         }
       }
@@ -43,11 +46,14 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
   }
 
   void updateDefaultTip(double newTip) {
-    if (newTip != tipAmount) {
+    if (newTip != oldTipAmount && Validator.validateTipAmount(newTip)) {
       setState(() {
-        tipAmount = newTip;
+        newTipAmount = newTip;
         hasChanged = true;
-        isCustomAmountSelected = true; // Set custom amount selected to true when updating tip amount
+      });
+    } else {
+      setState(() {
+        hasChanged = false;
       });
     }
   }
@@ -56,10 +62,10 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
     if (hasChanged) {
       try {
         await _firestore.collection('users').doc(userService.userID).update({
-          'defaultTip': tipAmount,
+          'defaultTip': newTipAmount,
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Changes saved successfully')),
+          const SnackBar(content: Text('Changes saved successfully')),
         );
         setState(() {
           hasChanged = false;
@@ -67,66 +73,33 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
       } catch (e) {
         print("Error saving changes: $e");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save changes')),
+          const SnackBar(content: Text('Failed to save changes')),
         );
       }
     }
   }
 
-  void showCustomTipDialog() {
-    TextEditingController _customTipController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter Custom Tip Percentage'),
-          content: TextField(
-            controller: _customTipController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(hintText: 'Tip percentage', prefixText: '% '),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                double? customTip = double.tryParse(_customTipController.text);
-                if (customTip != null) {
-                  updateDefaultTip(customTip);
-                  Navigator.of(context).pop(); // Close the dialog
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget percentageButton(String percentage, {bool isCustom = false}) {
-    bool isSelected = isCustom ? tipAmount != 20.0 && tipAmount != 10.0 && tipAmount != 15.0 && tipAmount != 25.0 && tipAmount != 30.0 : tipAmount == double.tryParse(percentage);
+  Widget percentageButton(double percentage) {
+    bool isSelected =
+        hasChanged ? newTipAmount == percentage : oldTipAmount == percentage;
     return ElevatedButton(
       onPressed: () {
-        if (isCustom) {
-          showCustomTipDialog();
-        } else {
-          updateDefaultTip(double.parse(percentage));
+        if (percentage == oldTipAmount) {
           setState(() {
-            isCustomAmountSelected = false; // Set custom amount selected to false when selecting a percentage
+            hasChanged = false;
           });
         }
+        updateDefaultTip(percentage);
+        customTipController.clear();
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? ZipColors.zipYellow : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20),
       ),
       child: Text(
-        isCustom ? '     %\nCustom' : '$percentage%',
-        style: ZipDesign.bodyText.copyWith(color: isSelected ? Colors.black : Colors.grey, fontSize: 18),
+        '$percentage%',
+        style: ZipDesign.bodyText.copyWith(color: Colors.black, fontSize: 18),
       ),
     );
   }
@@ -135,10 +108,13 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.close, color: Colors.black), onPressed: () => Navigator.pop(context)),
-        title: Text('Default Tip', style: ZipDesign.pageTitleText.copyWith(color: Colors.black)),
+        leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.black),
+            onPressed: () => Navigator.pop(context)),
+        title: Text('Default Tip',
+            style: ZipDesign.pageTitleText.copyWith(color: Colors.black)),
         backgroundColor: ZipColors.primaryBackground,
-        elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       backgroundColor: ZipColors.primaryBackground,
       body: SingleChildScrollView(
@@ -146,16 +122,25 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Current', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            Text('Current',
+                style:
+                    ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(isCustomAmountSelected ?  '${tipAmount.toStringAsFixed(2)}%' : '${tipAmount.toStringAsFixed(0)}%', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)), // Display tipAmount in dollars or percentage
-                Text('Your average tip: \$3.40', style: ZipDesign.bodyText.copyWith(color: ZipColors.lightGray)),
+                Text('${oldTipAmount.toStringAsFixed(2)}%',
+                    style: ZipDesign.bodyText.copyWith(
+                        color: TailwindColors
+                            .gray500)), // Display tipAmount in dollars or percentage
+                Text('Your average tip: \$3.40',
+                    style: ZipDesign.bodyText
+                        .copyWith(color: TailwindColors.gray500)),
               ],
             ),
             const SizedBox(height: 20),
-            Text('\nSelect Percentage\n', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            Text('\nSelect Percentage\n',
+                style:
+                    ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -163,34 +148,59 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
               childAspectRatio: 1.5 / 1.1,
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              children: ['10', '15', '20', '25', '30']
+              children: [5.0, 10.0, 15.0, 20.0, 25.0, 30.0]
                   .map((percentage) => percentageButton(percentage))
-                  .toList()
-                ..add(percentageButton('% Custom', isCustom: true)),
+                  .toList(),
             ),
             const SizedBox(height: 20),
-            Text('\nSelect Custom Amount', style: ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+            Text('\nSelect Custom Amount',
+                style:
+                    ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             TextField(
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              controller: customTipController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               onChanged: (value) {
-                if (value.isNotEmpty) {
+                if (value.isNotEmpty &&
+                    double.tryParse(value) != null &&
+                    Validator.validateTipAmount(double.parse(value))) {
                   updateDefaultTip(double.parse(value));
-                  setState(() {
-                    isCustomAmountSelected = true;
-                  });
                 } else {
                   setState(() {
-                    isCustomAmountSelected = false;
+                    hasChanged = false;
                   });
+                }
+              },
+              onSubmitted: (value) {
+                if (!Validator.validateTipAmount(double.tryParse(value))) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Invalid tip percentage'),
+                        content: const Text(
+                          'Please enter a tip percentage between 0 and 100.',
+                          style: ZipDesign.bodyText,
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('Ok'),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 }
               },
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
-                hintText: '\$ Enter amount...',
+                hintText: 'Enter percentage...',
                 hintStyle: ZipDesign.labelText.copyWith(color: Colors.black),
-                prefixText: '\$ ',
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: ZipColors.zipYellow)),
+                suffixText: '%',
+                enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: ZipColors.zipYellow)),
               ),
             ),
           ],
@@ -198,15 +208,30 @@ class _DefaultTipScreenState extends State<DefaultTipScreen> {
       ),
       bottomNavigationBar: BottomAppBar(
         color: ZipColors.primaryBackground,
+        surfaceTintColor: Colors.transparent,
         child: SafeArea(
           child: TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: hasChanged ? ZipColors.zipYellow : Colors.grey,
+              backgroundColor:
+                  hasChanged && Validator.validateTipAmount(newTipAmount)
+                      ? ZipColors.zipYellow
+                      : TailwindColors.gray300,
               minimumSize: const Size(double.infinity, 50),
               padding: const EdgeInsets.symmetric(vertical: 15),
             ),
-            onPressed: hasChanged ? () => saveChanges() : null,
-            child: const Text('Save changes', style: TextStyle(color: Colors.white)),
+            onPressed: hasChanged
+                ? () {
+                    saveChanges();
+                    Navigator.pop(context);
+                  }
+                : null,
+            child: Text(
+              'Save changes',
+              style: TextStyle(
+                color: hasChanged ? Colors.black : TailwindColors.gray500,
+                fontSize: 18,
+              ),
+            ),
           ),
         ),
       ),

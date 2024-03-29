@@ -141,7 +141,7 @@ class _PromosScreenState extends State<PromosScreen> {
   //                 "Apply",
   //                 softWrap: true,
   //                 style: TextStyle(
-  //                   color: Colors.yellow,
+  //                   color: ZipColors.zipYellow,
   //                   fontSize: 18.0,
   //                   fontWeight: FontWeight.w400,
   //                   fontFamily: "Bebas",

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:zipapp/business/user.dart';
+import 'package:zipapp/constants/zip_colors.dart';
 
 class PreviousTripsScreen extends StatefulWidget {
   const PreviousTripsScreen({super.key});
@@ -55,7 +56,7 @@ class _PreviousTripsScreenState extends State<PreviousTripsScreen> {
                   itemBuilder: (context, index) {
                     return Container(
                       height: 50,
-                      color: Colors.yellow,
+                      color: ZipColors.zipYellow,
                       child: Center(
                           child: Text('past ride: ${pastRideIDs[index]}')),
                     );

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/auth.dart';
+import 'package:zipapp/business/current_user.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/edit_account_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
 import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
@@ -20,12 +22,21 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  final CurrentUserService currentUserService = CurrentUserService();
   final UserService userService = UserService();
+
+  late String firstName;
+  late String lastName;
+  late String email;
+  late String phone;
 
   @override
   void initState() {
     super.initState();
-    print('Driver: ${widget.driver}');
+    firstName = userService.user.firstName;
+    lastName = userService.user.lastName;
+    email = userService.user.email;
+    phone = userService.user.phone;
   }
 
   @override
@@ -35,6 +46,7 @@ class _AccountScreenState extends State<AccountScreen> {
         appBar: AppBar(
           toolbarHeight: 32.0,
           backgroundColor: ZipColors.primaryBackground,
+          scrolledUnderElevation: 0,
         ),
         body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -51,16 +63,15 @@ class _AccountScreenState extends State<AccountScreen> {
                         backgroundColor: ZipColors.zipYellow,
                         foregroundColor: Colors.black,
                         child: Text(
-                          userService.user.firstName[0] +
-                              userService.user.lastName[0],
+                          firstName[0].toUpperCase() +
+                              lastName[0].toUpperCase(),
                           style: ZipDesign.pageTitleText,
                         ),
                       ),
               ),
               const SizedBox(height: 16),
               Center(
-                child: Text(
-                    '${userService.user.firstName} ${userService.user.lastName}',
+                child: Text('$firstName $lastName',
                     style: ZipDesign.pageTitleText),
               ),
               const SizedBox(height: 24),
@@ -78,13 +89,11 @@ class _AccountScreenState extends State<AccountScreen> {
                       const SizedBox(height: 16),
                       UnderlineTextbox.build(
                           labelText: 'Phone number',
-                          value: userService.user.phone,
+                          value: phone,
                           disabled: true),
                       const SizedBox(height: 16),
                       UnderlineTextbox.build(
-                          labelText: 'Email',
-                          value: userService.user.email,
-                          disabled: true),
+                          labelText: 'Email', value: email, disabled: true),
                       const SizedBox(height: 16),
                       UnderlineTextbox.build(
                           labelText: 'Password',
@@ -95,7 +104,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         children: <Widget>[
                           Expanded(
                               child: TextButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () => editAccount(),
                                   icon: const Icon(LucideIcons.pencil),
                                   label: const Text('Edit account details'),
                                   style: ButtonStyle(
@@ -225,6 +234,17 @@ class _AccountScreenState extends State<AccountScreen> {
                             ))),
                   ]))
             ])));
+  }
+
+  void editAccount() async {
+    final List<String> list = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const EditAccountScreen()));
+    setState(() {
+      firstName = list[0];
+      lastName = list[1];
+      email = list[2];
+      phone = list[3];
+    });
   }
 
   Widget swapRiderOrDriver() {
