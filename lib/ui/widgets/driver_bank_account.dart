@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/payment_info_screen.dart';
 
 class DriverBankAccount {
   static Widget build(
@@ -19,12 +18,7 @@ class DriverBankAccount {
         // Expanded to ensure the button stretches to fill the row
         Expanded(
           child: TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PaymentInfo()),
-              );
-            },
+            onPressed: () {},
             style: ButtonStyle(
               padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
               foregroundColor: MaterialStateProperty.all(Colors.black),
