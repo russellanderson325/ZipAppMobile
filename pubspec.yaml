@@ -21,6 +21,7 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   flutter_stripe: ^10.0.0
   geolocator: ^10.1.0
+  geoflutterfire2: ^2.3.15
   google_maps_flutter: ^2.5.3
   google_place_plus: ^1.0.0
   google_sign_in: ^6.2.1

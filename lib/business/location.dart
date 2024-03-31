@@ -1,5 +1,5 @@
 import 'dart:async';
-//import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_permissions/location_permissions.dart';
@@ -7,8 +7,8 @@ import 'package:location_permissions/location_permissions.dart';
 class LocationService {
   static final LocationService _instance = LocationService._internal();
   final Geolocator geolocator = Geolocator();
-  //Geoflutterfire geo = Geoflutterfire();
-  //GeolocationStatus geolocationStatus;
+  GeoFlutterFire geo = GeoFlutterFire();
+  // late GeoLocationStatus geolocationStatus;
   Position position = Position(
       longitude: 0,
       latitude: 0,
@@ -62,15 +62,15 @@ class LocationService {
         print("position2: $position");
       }
 
-      // while (position == null) {
-      //   print(
-      //       "current position is null - using geolocator to get current position now.");
-      //   position = await Geolocator.getCurrentPosition();
-      // }
-      // if (kDebugMode) {
-      //   print("Latitude: ${position.latitude}");
-      //   print("Longitiude: ${position.longitude}");
-      // }
+      while (position == null) {
+        print(
+            "current position is null - using geolocator to get current position now.");
+        position = await Geolocator.getCurrentPosition();
+      }
+      if (kDebugMode) {
+        print("Latitude: ${position.latitude}");
+        print("Longitiude: ${position.longitude}");
+      }
       // Create position stream and subscribe to keep service's position up to date.
       positionStream =
           Geolocator.getPositionStream(locationSettings: locationOptions)
@@ -94,8 +94,8 @@ class LocationService {
     }
   }
 
-  // GeoFirePoint getCurrentGeoFirePoint() {
-  //   return geo.point(
-  //       latitude: position.latitude, longitude: position.longitude);
-  // }
+  GeoFirePoint getCurrentGeoFirePoint() {
+    return geo.point(
+        latitude: position.latitude, longitude: position.longitude);
+  }
 }

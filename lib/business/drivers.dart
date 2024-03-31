@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
-//import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:zipapp/business/location.dart';
 import 'package:zipapp/business/user.dart';
@@ -16,7 +16,7 @@ class DriverService {
   static final DriverService _instance = DriverService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final bool showDebugPrints = true;
-  //Geoflutterfire geo = Geoflutterfire();
+  GeoFlutterFire geo = GeoFlutterFire();
   LocationService locationService = LocationService();
   late StreamSubscription<Position> locationSub;
   late CollectionReference driversCollection;
@@ -26,7 +26,7 @@ class DriverService {
   UserService userService = UserService();
   late List<Driver> nearbyDriversList;
   late Stream<List<Driver>> nearbyDriversListStream;
-  // GeoFirePoint myLocation;
+  late GeoFirePoint myLocation;
   late Driver driver;
   late CurrentShift currentShift;
   StreamSubscription<Driver>? driverSub;
@@ -105,12 +105,12 @@ class DriverService {
 
   void _updatePosition(Position pos) {
     if (driver.isWorking) {
-      // this.myLocation =
-      //     geo.point(latitude: pos.latitude, longitude: pos.longitude);
-      // print("Updating geoFirePoint to: ${myLocation.toString()}");
-      // // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
-      // driverReference.update(
-      //     {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
+      this.myLocation =
+          geo.point(latitude: pos.latitude, longitude: pos.longitude);
+      print("Updating geoFirePoint to: ${myLocation.toString()}");
+      // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
+      driverReference.update(
+          {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
       driverReference.update({
         'lastActivity': DateTime.now(),
         'geoFirePoint': {
@@ -133,7 +133,7 @@ class DriverService {
         .asBroadcastStream();
     driverReference.update({
       'lastActivity': DateTime.now(),
-      // 'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
+      'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
       'isAvailable': true,
       //'isWorking': true
     });
@@ -353,35 +353,35 @@ class DriverService {
 
   // TODO: Audit
   Stream<List<Driver>> getNearbyDriversStream() {
-    // nearbyDriversListStream ??= geo
-    //       .collection(collectionRef: driversCollection)
-    //       .within(center: myLocation, radius: 50, field: 'geoFirePoint')
-    //       .map((snapshots) =>
-    //           snapshots.map((e) => Driver.fromDocument(e)).take(10).toList());
+    nearbyDriversListStream = geo
+          .collection(collectionRef: driversCollection)
+          .within(center: myLocation, radius: 50, field: 'geoFirePoint')
+          .map((snapshots) =>
+              snapshots.map((e) => Driver.fromDocument(e)).take(10).toList());
     return nearbyDriversListStream;
   }
 
-  // Future<List<Driver>> getNearbyDriversList(double radius) async {
-  //  // GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
-  //   Query collectionReference =
-  //       _firestore.collection('drivers').where('isAvailable', isEqualTo: true);
+  Future<List<Driver>> getNearbyDriversList(double radius) async {
+    GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
+    Query collectionReference =
+        _firestore.collection('drivers').where('isAvailable', isEqualTo: true);
 
-  //   Stream<List<Driver>> stream = geo
-  //       .collection(collectionRef: collectionReference)
-  //       .within(
-  //           center: centerPoint,
-  //           radius: radius,
-  //           field: 'geoFirePoint',
-  //           strictMode: false)
-  //       .map((event) =>
-  //           event.map((e) => Driver.fromDocument(e)).take(10).toList());
+    Stream<List<Driver>> stream = geo
+        .collection(collectionRef: collectionReference)
+        .within(
+            center: centerPoint,
+            radius: radius,
+            field: 'geoFirePoint',
+            strictMode: false)
+        .map((event) =>
+            event.map((e) => Driver.fromDocument(e)).take(10).toList());
 
-  //   List<Driver> nearbyDrivers = await stream.first;
-  //   nearbyDrivers.forEach((driver) {
-  //     print("${driver.firstName} is available and in range.");
-  //   });
-  //   return nearbyDrivers;
-  // }
+    List<Driver> nearbyDrivers = await stream.first;
+    nearbyDrivers.forEach((driver) {
+      print("${driver.firstName} is available and in range.");
+    });
+    return nearbyDrivers;
+  }
 
   _updateDriverRecord() async {
     DocumentSnapshot myDriverRef = await driverReference.get();
@@ -391,7 +391,7 @@ class DriverService {
         'firstName': userService.user.firstName,
         'lastName': userService.user.lastName,
         'profilePictureURL': userService.user.profilePictureURL,
-        // 'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
+        'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
         'lastActivity': DateTime.now(),
         'isAvailable': false,
         'isWorking': false,

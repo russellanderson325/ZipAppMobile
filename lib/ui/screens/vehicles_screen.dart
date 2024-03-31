@@ -1,5 +1,6 @@
 import "dart:io";
 import "package:flutter/material.dart";
+import "package:zipapp/business/ride.dart";
 import "package:zipapp/constants/tailwind_colors.dart";
 import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/constants/zip_design.dart";
@@ -10,7 +11,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 class VehiclesScreen extends StatefulWidget {
   final double distanceInMeters; // Distance from user to destination in meters
-  const VehiclesScreen({super.key, required this.distanceInMeters});
+  final double lat; // Latitude of the destination
+  final double long; // Longitude of the destination
+  const VehiclesScreen({super.key, required this.distanceInMeters, required this.lat, required this.long});
 
   @override
   VehiclesScreenState createState() => VehiclesScreenState();
@@ -72,8 +75,8 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                           shape: MaterialStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           )),
-                          side: MaterialStateProperty.all(BorderSide(color: cartSize == 'X' ? ZipColors.boxBorder : Colors.grey)),
-                          fixedSize: MaterialStateProperty.all(const Size(160, 100)),
+                          side: MaterialStateProperty.all(BorderSide(color: cartSize == 'X' ? ZipColors.boxBorder : TailwindColors.gray500)),
+                          fixedSize: MaterialStateProperty.all(const Size(160, 80)),
                         ),
                         child: const Image(
                           image: ResizeImage(
@@ -94,7 +97,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                             borderRadius: BorderRadius.circular(10),
                           )),
                           side: MaterialStateProperty.all(BorderSide(color: cartSize == 'XL' ? ZipColors.boxBorder : Colors.grey)),
-                          fixedSize: MaterialStateProperty.all(const Size(160, 100)),
+                          fixedSize: MaterialStateProperty.all(const Size(160, 80)),
                         ),
                         child: const Image(
                           image: ResizeImage(
@@ -105,7 +108,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Text(
                     "Size: $cartSize",
                     style: const TextStyle(
@@ -120,7 +123,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                       fontSize: 18,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Text(
                     "\$${price.toStringAsFixed(2)}",
                     style: const TextStyle(
@@ -149,7 +152,13 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                     alignment: Alignment.centerLeft,
                     clipBehavior: Clip.hardEdge,
                     decoration: const BoxDecoration(
-                      border: Border(top: BorderSide(color: TailwindColors.gray300), bottom: BorderSide(color: TailwindColors.gray300)),
+                      border: Border(
+                        top: BorderSide(color: TailwindColors.gray500),
+                        bottom: BorderSide(color: TailwindColors.gray500),
+                        left: BorderSide(color: TailwindColors.gray500),
+                        right: BorderSide(color: TailwindColors.gray500),
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(10))
                     ),
                     child: Row(children: <Widget>[
                       // Expanded to ensure the button stretches to fill the row
@@ -211,10 +220,13 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                 }
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             TextButton(
               onPressed: () {
                 // Proceed to request confirmation
+                RideService ride = RideService();
+                ride.startRide(widget.lat, widget.long, refreshKey, price);
+
               },
               style: ZipDesign.yellowButtonStyle,
               child: const Text('Request Pickup'),
@@ -239,7 +251,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
    * @param distanceInMeters The distance from the user to the destination in meters
    * @return void
    */
-  static void showVehiclesScreen(BuildContext context, double distanceInMeters) {
+  static void showVehiclesScreen(BuildContext context, double distanceInMeters, double lat, double long) {
     // Show the bottom sheet
     showModalBottomSheet(
       clipBehavior: Clip.hardEdge,
@@ -253,7 +265,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
       builder: (BuildContext context) {
         return FractionallySizedBox(
           heightFactor: 0.5, // Adjust the height factor as needed, e.g., 0.9 for 90% of screen height
-          child: VehiclesScreen(distanceInMeters: distanceInMeters), // Pass the required parameters
+          child: VehiclesScreen(distanceInMeters: distanceInMeters, lat: lat, long: long), // Pass the required parameters
         );
       },
     );

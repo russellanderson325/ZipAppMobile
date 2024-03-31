@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/constants/zip_design.dart";
 import "package:zipapp/services/payment.dart";
 import "package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart";
@@ -30,10 +31,10 @@ class PaymentMethodsSelectionScreenState extends State<PaymentMethodsSelectionSc
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: ZipColors.primaryBackground,
         title: const Text("Payment Methods"),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: ZipColors.primaryBackground,
       body: Container(
         padding: const EdgeInsets.only(left: 24, right: 24),
         child: ListView(
@@ -42,9 +43,9 @@ class PaymentMethodsSelectionScreenState extends State<PaymentMethodsSelectionSc
 
             const SizedBox(height: 16),
           
-            const Text('Payment Methods', style: ZipDesign.sectionTitleText),
+            // const Text('Payment Methods', style: ZipDesign.sectionTitleText),
 
-            const SizedBox(height: 16),
+            // const SizedBox(height: 16),
 
             TextButton.icon(
               onPressed: () {

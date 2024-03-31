@@ -276,7 +276,7 @@ class MapSampleState extends State<Map> {
                 value.result!.geometry!.location!.lng!));
         // Show the vehicle request screen
         VehiclesScreenState.showVehiclesScreen(
-            context, (result!.distanceValue)!.toDouble());
+            context, (result!.distanceValue)!.toDouble(), value.result!.geometry!.location!.lat!, value.result!.geometry!.location!.lng!);
       },
     );
   }
