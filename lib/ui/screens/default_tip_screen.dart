@@ -31,7 +31,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
   Future<void> loadSavedTipAmount() async {
     try {
       DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userService.userID).get();
+      await _firestore.collection('users').doc(userService.userID).get();
       if (userDoc.exists && userDoc.data() != null) {
         Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
         if (data.containsKey('defaultTip')) {
@@ -81,7 +81,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
 
   Widget percentageButton(double percentage) {
     bool isSelected =
-        hasChanged ? newTipAmount == percentage : oldTipAmount == percentage;
+    hasChanged ? newTipAmount == percentage : oldTipAmount == percentage;
     return ElevatedButton(
       onPressed: () {
         if (percentage == oldTipAmount) {
@@ -124,7 +124,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
           children: [
             Text('Current',
                 style:
-                    ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+                ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -140,7 +140,7 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
             const SizedBox(height: 20),
             Text('\nSelect Percentage\n',
                 style:
-                    ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+                ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -155,11 +155,11 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
             const SizedBox(height: 20),
             Text('\nSelect Custom Amount',
                 style:
-                    ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
+                ZipDesign.sectionTitleText.copyWith(color: Colors.black)),
             TextField(
               controller: customTipController,
               keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              const TextInputType.numberWithOptions(decimal: true),
               onChanged: (value) {
                 if (value.isNotEmpty &&
                     double.tryParse(value) != null &&
@@ -213,17 +213,17 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
           child: TextButton(
             style: TextButton.styleFrom(
               backgroundColor:
-                  hasChanged && Validator.validateTipAmount(newTipAmount)
-                      ? ZipColors.zipYellow
-                      : TailwindColors.gray300,
+              hasChanged && Validator.validateTipAmount(newTipAmount)
+                  ? ZipColors.zipYellow
+                  : TailwindColors.gray300,
               minimumSize: const Size(double.infinity, 50),
               padding: const EdgeInsets.symmetric(vertical: 15),
             ),
             onPressed: hasChanged
                 ? () {
-                    saveChanges();
-                    Navigator.pop(context);
-                  }
+              saveChanges();
+              Navigator.pop(context);
+            }
                 : null,
             child: Text(
               'Save changes',

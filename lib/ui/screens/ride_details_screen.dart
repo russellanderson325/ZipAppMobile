@@ -5,7 +5,7 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/constants/zip_formats.dart';
-
+import 'Rating_Screen.dart';
 class RideDetailsScreen extends StatefulWidget {
   final DateTime dateTime;
   final double price;
@@ -147,7 +147,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
             const SizedBox(width: 16),
             Text(address,
                 style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
           ],
         ),
         ZipFormats.activityDetailsTimeFormatter(dateTime),
@@ -167,7 +167,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
             const SizedBox(width: 16),
             Text(address,
                 style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+                const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
           ],
         ),
         ZipFormats.activityDetailsTimeFormatter(dateTime),
@@ -191,7 +191,17 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           height: 23,
           width: 64,
           child: TextButton(
-            onPressed: () {},
+            onPressed: () {
+              // This is where you push the RatingScreen onto the navigation stack.
+              if (buttonTitle == 'Rate') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RatingScreen()),
+                );
+              } else {
+                // Handle other button actions, like adding a tip.
+              }
+            },
             style: ButtonStyle(
               fixedSize: MaterialStateProperty.all(const Size(64, 23)),
               padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
@@ -201,7 +211,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
                 ),
               ),
               backgroundColor:
-                  MaterialStateProperty.all(TailwindColors.gray200),
+              MaterialStateProperty.all(TailwindColors.gray200),
             ),
             child: Text(
               buttonTitle,
@@ -217,6 +227,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       ],
     );
   }
+
 
   Widget _buildPaymentRow(IconData icon, String cardName, double price) {
     return Row(
