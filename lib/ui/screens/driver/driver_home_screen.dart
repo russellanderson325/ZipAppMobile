@@ -3,15 +3,15 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class DriverHomeScreen extends StatefulWidget {
+  const DriverHomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<DriverHomeScreen> createState() => _DriverHomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final UserService userService = UserService();
+class _DriverHomeScreenState extends State<DriverHomeScreen> {
+  UserService userService = UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.w500)),
       ),
       body: const Center(
-        child: mapwidget.Map(driver: false),
+        child: mapwidget.Map(driver: true),
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:zipapp/business/validator.dart';
 
 import 'package:zipapp/constants/zip_colors.dart';
 
@@ -22,7 +21,7 @@ class AuthenticationDrawerWidgets {
   }
 
   Widget inputTextField(
-      TextEditingController controller, bool obscureText, Function validator) {
+      TextEditingController controller, bool obscureText, Function? validator) {
     return TextField(
       obscureText: obscureText,
       controller: controller,

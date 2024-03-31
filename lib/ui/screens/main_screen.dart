@@ -23,7 +23,7 @@ import 'package:zipapp/ui/screens/settings_screen.dart';
 import 'package:zipapp/ui/screens/previous_trips_screen.dart';
 import 'package:zipapp/ui/screens/promos_screen.dart';
 import 'package:zipapp/ui/widgets/ride_bottom_sheet.dart';
-import 'package:zipapp/ui/screens/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/payment_history_screen.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
@@ -422,16 +422,7 @@ class _MainScreenState extends State<MainScreen> {
           // TheMap(
           //   key: mapScaffoldKey,
           // ),
-          main_map.Map(
-            key: mapScaffoldKey,
-            markerBuilder: (BuildContext context,
-                void Function(LocalSearchResult) childMarkerSetter) {
-              setMapMarkers = childMarkerSetter;
-            },
-            markerReset: (BuildContext context, void Function() childReset) {
-              resetMarkers = childReset;
-            },
-          ),
+          main_map.Map(key: mapScaffoldKey, driver: false),
           Align(
             alignment: Alignment.topLeft,
             child: SafeArea(
@@ -1255,7 +1246,8 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const VerificationScreen()));
+                        builder: (context) =>
+                            const DriverVerificationScreen()));
               });
             },
             activeColor: Colors.blue[400],

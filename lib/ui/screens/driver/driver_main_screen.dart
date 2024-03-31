@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/screens/account_screen.dart';
-import 'package:zipapp/ui/screens/activity_screen.dart';
-import 'package:zipapp/ui/screens/home_screen.dart';
-import 'package:zipapp/ui/screens/payments_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_activity_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_home_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_income_screen.dart';
 
-class RiderMainScreen extends StatefulWidget {
-  const RiderMainScreen({super.key});
+class DriverMainScreen extends StatefulWidget {
+  const DriverMainScreen({super.key});
 
   @override
-  State<RiderMainScreen> createState() => _RiderMainScreenState();
+  State<DriverMainScreen> createState() => _DriverMainScreenState();
 }
 
-class _RiderMainScreenState extends State<RiderMainScreen> {
+class _DriverMainScreenState extends State<DriverMainScreen> {
   final UserService userService = UserService();
   int _selectedIndex = 0;
 
@@ -25,10 +25,10 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
-      const HomeScreen(),
-      const ActivityScreen(),
-      const PaymentsScreen(),
-      const AccountScreen(driver: false),
+      const DriverHomeScreen(),
+      const DriverActivityScreen(),
+      const DriverIncomeScreen(),
+      const AccountScreen(driver: true),
     ];
     const List<BottomNavigationBarItem> items = [
       BottomNavigationBarItem(
@@ -41,14 +41,13 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
           backgroundColor: ZipColors.primaryBackground),
       BottomNavigationBarItem(
           icon: Icon(Icons.credit_card),
-          label: 'Payments',
+          label: 'Income',
           backgroundColor: ZipColors.primaryBackground),
       BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Account',
           backgroundColor: ZipColors.primaryBackground),
     ];
-
     return Scaffold(
         body: Center(
           child: pages.elementAt(_selectedIndex),
