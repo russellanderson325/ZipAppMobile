@@ -109,7 +109,7 @@ class _RatingScreenState extends State<RatingScreen> {
                 return IconButton(
                   icon: Icon(
                     index < _rating ? Icons.star : Icons.star_border,
-                    color: ZipColors.zipYellow,
+                    color: index < _rating ? ZipColors.zipYellow : ZipColors.lightGray,
                     size: 40,
                   ),
                   onPressed: !_submitted // Disable if already submitted
@@ -193,14 +193,14 @@ class _RatingScreenState extends State<RatingScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: _usingDefaultTip ? ZipColors.zipYellow : Colors.white,
-                      border: Border.all(color: ZipColors.zipYellow, width: 2),
+                      border: Border.all(color: _usingDefaultTip ? ZipColors.zipYellow : ZipColors.lightGray,),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: <Widget>[
-                        Text(' Default Tip', style: TextStyle(color: _usingDefaultTip ? Colors.black : ZipColors.zipYellow)),
+                        Text(' Default Tip', style: TextStyle(color: _usingDefaultTip ? Colors.black : Colors.black)),
                         SizedBox(width: 8),
-                        Text('$_defaultTipPercentage%', style: TextStyle(color: _usingDefaultTip ? Colors.black : ZipColors.zipYellow)),
+                        Text('$_defaultTipPercentage%', style: TextStyle(color: _usingDefaultTip ? Colors.black : Colors.black)),
                       ],
                     ),
                   ),
