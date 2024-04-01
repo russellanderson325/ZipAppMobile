@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
@@ -87,6 +88,7 @@ class DriverService {
   }
 
   Future<bool> setupService() async {
+    print('Setting up driver service');
     await _updateDriverRecord();
     driverSub = driverReference
         .snapshots(includeMetadataChanges: true)
@@ -364,7 +366,8 @@ class DriverService {
   Future<List<Driver>> getNearbyDriversList(double radius) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
     Query collectionReference =
-        _firestore.collection('drivers').where('isAvailable', isEqualTo: true);
+        _firestore.collection('drivers')
+        .where('isAvailable', isEqualTo: true);
 
     Stream<List<Driver>> stream = geo
         .collection(collectionRef: collectionReference)

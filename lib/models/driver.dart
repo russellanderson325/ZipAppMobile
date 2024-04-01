@@ -2,6 +2,7 @@
 // import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart';
 import '../utils.dart';
 
@@ -14,7 +15,7 @@ class Driver {
   final String fcmToken; // Firebase Cloud Messaging Token
   final bool isWorking;
   final bool isAvailable;
-  //final GeoFirePoint geoFirePoint;
+  final GeoFirePoint? geoFirePoint;
   final String currentRideID;
   final List<String> daysOfWeek;
   final bool isOnBreak;
@@ -25,7 +26,7 @@ class Driver {
       required this.lastName,
       required this.lastActivity,
       required this.profilePictureURL,
-      // this.geoFirePoint,
+      this.geoFirePoint,
       required this.fcmToken,
       required this.isWorking,
       required this.isAvailable,
@@ -40,7 +41,7 @@ class Driver {
       'lastName': lastName,
       'lastActivity': lastActivity,
       'profilePictureURL': profilePictureURL,
-      // 'geoFirePoint': geoFirePoint,
+      'geoFirePoint': geoFirePoint as Object,
       'fcmToken': fcmToken,
       'isWorking': isWorking,
       'isAvailable': isAvailable,
@@ -57,7 +58,7 @@ class Driver {
         lastName: doc['lastName'] as String,
         lastActivity: convertStamp(doc['lastActivity'] as Timestamp),
         profilePictureURL: doc['profilePictureURL'] as String,
-        // geoFirePoint: extractGeoFirePoint(doc['geoFirePoint']),
+        geoFirePoint: extractGeoFirePoint(doc['geoFirePoint']),
         fcmToken: doc['fcmToken'] ?? "",
         isWorking: doc['isWorking'] as bool,
         isAvailable: doc['isAvailable'] as bool,
@@ -72,27 +73,27 @@ class Driver {
     return Driver.fromJson(doc.data() as Map<String, dynamic>);
   }
 
-  // static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
-  //   GeoPoint point = pointMap['geopoint'];
-  //   return GeoFirePoint(point.latitude, point.longitude);
-  // }
+  static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
+    GeoPoint point = pointMap['geopoint'];
+    return GeoFirePoint(point.latitude, point.longitude);
+  }
 
-  // static List<int> daysOfWeekConvert(List workDays) {
-  //   Map dayConvert = <String, int>{};
-  //   dayConvert['sunday'] = 0;
-  //   dayConvert['monday'] = 1;
-  //   dayConvert['tuesday'] = 2;
-  //   dayConvert['wednesday'] = 3;
-  //   dayConvert['thursday'] = 4;
-  //   dayConvert['friday'] = 5;
-  //   dayConvert['saturday'] = 6;
+  static List<int> daysOfWeekConvert(List workDays) {
+    Map dayConvert = <String, int>{};
+    dayConvert['sunday'] = 0;
+    dayConvert['monday'] = 1;
+    dayConvert['tuesday'] = 2;
+    dayConvert['wednesday'] = 3;
+    dayConvert['thursday'] = 4;
+    dayConvert['friday'] = 5;
+    dayConvert['saturday'] = 6;
 
-  //   for (var i = 0; i < workDays.length; i++) {
-  //     String temp = workDays[i].toLowerCase();
-  //     workDays[i] = dayConvert[temp];
-  //   }
-  //   return workDays;
-  // }
+    for (var i = 0; i < workDays.length; i++) {
+      String temp = workDays[i].toLowerCase();
+      workDays[i] = dayConvert[temp];
+    }
+    return workDays as List<int>;
+  }
 }
 
 class CurrentShift {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
@@ -60,6 +61,8 @@ class RideService {
   /// passes it into the pickupAddress field of the ride document
   /// it also gets the destination address and passes it into the
   /// destinationAddress field.
+  // void startRide(double lat, double long, Function callBackFunction,
+  //     double paymentPrice) async {
   void startRide(double lat, double long, Function callBackFunction,
       double paymentPrice) async {
     updateUI = callBackFunction;
@@ -81,8 +84,7 @@ class RideService {
     /// a driver accepts or if there are no drivers or no driver accepted, waits 60 seconds for
     /// availability to change and restart with a new list of drivers up to 5 times.
     while (isSearchingForRide) {
-      List<Driver> nearbyDrivers = [];
-      // await driverService.getNearbyDriversList(radius);
+      List<Driver> nearbyDrivers = await driverService.getNearbyDriversList(radius);
       if (showDebugPrints) {
         if (kDebugMode) {
           print("There are ${nearbyDrivers.length} drivers nearby.");
@@ -158,6 +160,8 @@ class RideService {
   /// Sets a 60 second timeout on the request for the driver to answer by, and waits for 70 seconds to get a responce
   /// before timing out locally.
   Future<void> _sendRequestToDriver(Driver driver, double paymentPrice) async {
+    GeoFirePoint destination = locationService.getCurrentGeoFirePoint();
+    GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
     String pAmount = paymentPrice.toString();
     if (showDebugPrints) {
       if (kDebugMode) {
@@ -172,8 +176,8 @@ class RideService {
         .set(Request(
                 id: rideID,
                 name: userService.user.firstName,
-                // destinationAddress: destination,
-                // pickupAddress: pickup,
+                destinationAddress: destination,
+                pickupAddress: pickup,
                 price: "\$$pAmount",
                 photoURL: userService.user.profilePictureURL,
                 timeout: Timestamp.fromMillisecondsSinceEpoch(
@@ -271,8 +275,8 @@ class RideService {
   }
 
   Future<void> _initializeRideInFirestore(double lat, double long) async {
-    // destination = geo.point(latitude: lat, longitude: long);
-    // pickup = locationService.getCurrentGeoFirePoint();
+    GeoFirePoint destination = locationService.getCurrentGeoFirePoint();
+    GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
     DocumentSnapshot myRide = await rideReference.get();
     if (kDebugMode) {
       print('** rideReference = ${myRide.id}');
@@ -286,8 +290,8 @@ class RideService {
         'userPhotoURL': userService.user.profilePictureURL,
         'drid': '',
         'lastActivity': DateTime.now(),
-        // 'pickupAddress': pickup.data,
-        // 'destinationAddress': destination.data,
+        'pickupAddress': pickup.data,
+        'destinationAddress': destination.data,
         'status': "INITIALIZING",
       });
       addCurrentRider();
@@ -299,8 +303,8 @@ class RideService {
         'userPhotoURL': userService.user.profilePictureURL,
         'drid': '',
         'lastActivity': DateTime.now(),
-        // 'pickupAddress': pickup.data,
-        // 'destinationAddress': destination.data,
+        'pickupAddress': pickup.data,
+        'destinationAddress': destination.data,
         'status': "INITIALIZING"
       });
     }

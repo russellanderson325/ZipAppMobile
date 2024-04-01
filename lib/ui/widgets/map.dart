@@ -5,6 +5,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:zipapp/business/drivers.dart';
 
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
@@ -24,13 +25,13 @@ class Map extends StatefulWidget {
 class MapSampleState extends State<Map> {
   //general map code
   String mapTheme = '';
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   PositionService positionService = PositionService();
   LatLng? userLatLng, searchLatLng;
   final markers = <Marker>[];
   final polylines = <Polyline>[];
   PolylinePoints polylinePoints = PolylinePoints();
+  DriverService driverService = DriverService();
 
   @override
   void initState() {
@@ -99,6 +100,7 @@ class MapSampleState extends State<Map> {
 
   void clockIn() {
     setState(() {
+      driverService.clockIn();
       clockedIn = true;
       onBreak = false;
     });
@@ -106,6 +108,7 @@ class MapSampleState extends State<Map> {
 
   void clockOut() {
     setState(() {
+      driverService.clockOut();
       clockedIn = false;
       onBreak = false;
     });
@@ -113,12 +116,14 @@ class MapSampleState extends State<Map> {
 
   void startBreak() {
     setState(() {
+      driverService.startBreak();
       onBreak = true;
     });
   }
 
   void endBreak() {
     setState(() {
+      driverService.endBreak();
       onBreak = false;
     });
   }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 // import 'package:geoflutterfire/geoflutterfire.dart';
 
 class Ride {
@@ -9,8 +10,8 @@ class Ride {
   final String drid;
   final String driverPictureURL;
   final String driverName;
-  // final GeoFirePoint destinationAddress;
-  // final GeoFirePoint pickupAddress;
+  final GeoFirePoint? destinationAddress;
+  final GeoFirePoint? pickupAddress;
   final String status;
 
   Ride(
@@ -20,8 +21,8 @@ class Ride {
       required this.drid,
       required this.driverName,
       required this.driverPictureURL,
-      // this.destinationAddress,
-      // this.pickupAddress,
+      this.destinationAddress,
+      this.pickupAddress,
       required this.status});
 
   Map<String, Object> toJson() {
@@ -32,36 +33,36 @@ class Ride {
       'drid': drid,
       'driverName': driverName,
       'driverPictureURL': driverPictureURL,
-      // 'destinationAddress': destinationAddress,
-      // 'pickupAddress': pickupAddress,
+      'destinationAddress': destinationAddress as Object,
+      'pickupAddress': pickupAddress as Object,
       'status': status
     };
   }
 
-  factory Ride.fromJson(Map<String, Object> doc) {
+  factory Ride.fromJson(Map<String, dynamic> json) {
     if (kDebugMode) {
-      print('doc = ');
-      print(doc);
+      // print('doc = ');
+      // print(json);
     }
-    Ride ride = Ride(
-        uid: doc['uid'] as String,
-        userName: doc['userName'] as String,
-        userPictureURL: doc['userPictureURL'] as String,
-        drid: doc['drid'] as String,
-        driverName: doc['driverName'] as String,
-        driverPictureURL: doc['driverPictureURL'] as String,
-        // destinationAddress: extractGeoFirePoint(doc['destinationAddress']),
-        // pickupAddress: extractGeoFirePoint(doc['pickupAddress']),
-        status: doc['status'] as String);
-    return ride;
+    return Ride(
+        uid: json['uid'] as String? ?? '',
+        userName: json['userName'] as String? ?? '',
+        userPictureURL: json['userPictureURL'] as String? ?? '',
+        drid: json['drid'] as String? ?? '',
+        driverName: json['driverName'] as String? ?? '',
+        driverPictureURL: json['driverPictureURL'] as String? ?? '',
+        status: json['status'] as String? ?? '',
+    );
   }
+
 
   factory Ride.fromDocument(DocumentSnapshot doc) {
-    return Ride.fromJson(doc.data() as Map<String, Object>);
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    return Ride.fromJson(data);
   }
 
-  // static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
-  //   GeoPoint point = pointMap['geopoint'];
-  //   return GeoFirePoint(point.latitude, point.longitude);
-  // }
+  static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
+    GeoPoint point = pointMap['geopoint'];
+    return GeoFirePoint(point.latitude, point.longitude);
+  }
 }

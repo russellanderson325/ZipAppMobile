@@ -5,6 +5,7 @@ import "package:zipapp/constants/tailwind_colors.dart";
 import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/constants/zip_design.dart";
 import "package:zipapp/services/payment.dart";
+import "package:zipapp/ui/screens/main_screen.dart";
 import "package:zipapp/ui/screens/payment_methods_selection_screen.dart";
 import 'package:zipapp/utils.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -225,7 +226,9 @@ class VehiclesScreenState extends State<VehiclesScreen> {
               onPressed: () {
                 // Proceed to request confirmation
                 RideService ride = RideService();
-                ride.startRide(widget.lat, widget.long, refreshKey, price);
+                ride.startRide(widget.lat, widget.long, (status){
+                  
+                }, price);
 
               },
               style: ZipDesign.yellowButtonStyle,
@@ -290,5 +293,6 @@ class VehiclesScreenState extends State<VehiclesScreen> {
     });
   }
 
+  
 
 }
