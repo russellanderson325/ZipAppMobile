@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/user.dart';
@@ -5,7 +6,8 @@ import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/constants/zip_formats.dart';
-import 'Rating_Screen.dart';
+import 'package:zipapp/ui/widgets/RatingDrawer.dart';
+
 class RideDetailsScreen extends StatefulWidget {
   final DateTime dateTime;
   final double price;
@@ -192,14 +194,13 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           width: 64,
           child: TextButton(
             onPressed: () {
-
-              if (buttonTitle == 'Rate') {
+              if (buttonTitle == 'Add tip' || buttonTitle == 'Rate') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RatingScreen()),
+                  MaterialPageRoute(builder: (context) => const RatingDrawer()),
                 );
               } else {
-                // Handle other button actions, like adding a tip.
+
               }
             },
             style: ButtonStyle(
@@ -227,6 +228,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
       ],
     );
   }
+
 
 
   Widget _buildPaymentRow(IconData icon, String cardName, double price) {
