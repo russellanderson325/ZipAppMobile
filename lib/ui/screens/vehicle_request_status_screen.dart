@@ -59,7 +59,12 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
     ride?.cancelRide(); // Still unsure if this is correct -Jordyn (4/1/24)
     Future.microtask(() => widget.resetMap());
     print("Ride cancelled");
-    super.dispose();
+
+    try {
+      super.dispose();
+    } catch (e) {
+      // Do nothing
+    }
   }
 
   @override
@@ -134,6 +139,10 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
               // Charge the card
               // If the payment fails, then cancel the ride
               // If the payment is successful, then the ride is not canceled and the driver will come to pick up the user
+              Payment.createPaymentIntent((widget.price * 100).toInt(), widget.currencyCode).then((clientSecret) {
+                    String paymentIntentId = clientSecret.split('_secret_')[0];
+                    
+              });
             }
               
             

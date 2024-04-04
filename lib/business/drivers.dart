@@ -366,6 +366,7 @@ class DriverService {
       case 'CANCELED':
         // uiCallbackFunction!(DriverBottomSheetStatus.closed);
         cancelRide();
+        startDriving();
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride is canceled");
@@ -382,6 +383,7 @@ class DriverService {
         break;
       case 'ENDED':
         // uiCallbackFunction!(DriverBottomSheetStatus.closed);
+        startDriving();
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride has ended.");

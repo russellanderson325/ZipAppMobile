@@ -115,8 +115,7 @@ class SearchScreenState extends State<SearchScreen> {
   }
 
   void _getPlaces(String value) async {
-    var result = await _googlePlace.autocomplete
-        .get(value, radius: radius, language: 'en', location: userLatLon!);
+    var result = await _googlePlace.autocomplete.get(value, radius: radius, language: 'en', location: userLatLon);
     if (result != null && result.predictions != null && mounted) {
       Iterable<LocalSearchResult> resultsList = result.predictions!.map((p) {
         return LocalSearchResult(name: p.description!, placeId: p.placeId!);
