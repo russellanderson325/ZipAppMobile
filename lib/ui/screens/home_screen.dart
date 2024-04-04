@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.w500)),
       ),
       body: const Center(
-        child: mapwidget.Map(driver: false),
+        child: mapwidget.MapWidget(driver: false),
       ),
     );
   }

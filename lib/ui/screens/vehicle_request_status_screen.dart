@@ -121,7 +121,8 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
                 ).then((result) {
                   if (result['authorized']) {
                     print('Authorization successful, ride will not be cancelled');
-                    print(Payment.capturePaymentIntent(result['paymentIntentID']));
+                    print('Payment intent ID: ${result['paymentIntentId']}');
+                    Payment.capturePaymentIntent(result['paymentIntentId']);
                   } else {
                     // Cancel the ride
                     print('Authorization failed, canceling ride');

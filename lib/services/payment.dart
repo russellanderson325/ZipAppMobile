@@ -80,7 +80,6 @@ class Payment {
       paymentMethodId: paymentMethodId,
     );
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('Primary Payment Method: $primaryPaymentMethod');
     prefs.setString('primaryPaymentMethod', json.encode(primaryPaymentMethod));
     primaryPaymentMethodStatic = primaryPaymentMethod;
     return primaryPaymentMethod;
@@ -170,11 +169,11 @@ class Payment {
    * This method is used to capture a payment intent. It basically charges the user.
    * @param paymentIntent - the payment intent to be captured
    */
-  static Future<HttpsCallableResult<dynamic>> capturePaymentIntent(String paymentIntent) async {
+  static Future<HttpsCallableResult<dynamic>> capturePaymentIntent(String paymentIntentId) async {
     try {
       HttpsCallableResult<dynamic> capturePaymentIntentResult = await capturePaymentIntentCallable.call(
         {
-          'paymentIntent': paymentIntent,
+          'paymentIntentId': paymentIntentId,
         }
       );
       return capturePaymentIntentResult;
@@ -217,7 +216,7 @@ class Payment {
    */
   static Future<Map<String, dynamic>> showPaymentSheetToMakeIntent(String label, int amount, String currencyCode, String merchantCountryCode) async {
     String clientSecret = await createPaymentIntent(amount, currencyCode);
-    String paymentIntent = clientSecret.split('_secret_')[0];
+    String paymentIntentId = clientSecret.split('_secret_')[0];
 
     DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
         .collection('stripe_customers')
@@ -257,12 +256,12 @@ class Payment {
       await Stripe.instance.presentPaymentSheet();
       return {
         "authorized": true,
-        "paymentIntent": paymentIntent,
+        "paymentIntentId": paymentIntentId,
       };
     } catch (error) {
       return {
         "authorized": false,
-        "paymentIntent": paymentIntent,
+        "paymentIntentId": paymentIntentId,
       };
     }
   }

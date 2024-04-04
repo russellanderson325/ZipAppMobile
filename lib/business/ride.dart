@@ -25,6 +25,7 @@ class RideService {
   late bool removeRide;
   late double pickupRadius;
   late String rideID;
+  Driver? acceptedDriver;
   // Services
   LocationService locationService = LocationService();
   DriverService driverService = DriverService();
@@ -84,12 +85,18 @@ class RideService {
     /// availability to change and restart with a new list of drivers up to 5 times.
     while (isSearchingForRide) {
       List<Driver> nearbyDrivers = await driverService.getNearbyDriversList(radius);
+      print("Nearby drivers: $nearbyDrivers");
       if (nearbyDrivers.isNotEmpty && timesSearched < 6) {
+        print('Nearby drivers not empty');
         for (int i = 0; i < nearbyDrivers.length; i++) {
+          print(i);
           if (isSearchingForRide) {
+            print("Is searching for ride...");
+            print("Driver: ${nearbyDrivers[i].uid}");
             Driver driver = nearbyDrivers[i];
             await rideReference.update({'status': 'WAITING'});
-            await _sendRequestToDriver(driver, paymentPrice);
+            bool driverAccepted = await _sendRequestToDriver(driver, paymentPrice);
+            if (driverAccepted) acceptedDriver = driver;
           }
         }
         timesSearched += 1;
@@ -123,6 +130,7 @@ class RideService {
     statusUpdate("CANCELED");
     rideSubscription.cancel();
     DocumentSnapshot myRide = await rideReference.get();
+    _getDriverReference(acceptedDriver!.uid).collection('requests').doc(rideID).delete();
     // If the ride exists, remove the rider from the current rides collection
     if (myRide.exists) {
       removeCurrentRider();
@@ -141,10 +149,14 @@ class RideService {
     });
   }
 
+  _getDriverReference(String driverID) {
+    return _firestore.collection('drivers').doc(driverID);
+  }
+
   /// Sends a request to the specified driver using the service's current pickup and destination GeoFirePoints.
   /// Sets a 60 second timeout on the request for the driver to answer by, and waits for 70 seconds to get a responce
   /// before timing out locally.
-  Future<void> _sendRequestToDriver(Driver driver, double paymentPrice) async {
+  Future<bool> _sendRequestToDriver(Driver driver, double paymentPrice) async {
     GeoFirePoint destination = locationService.getCurrentGeoFirePoint();
     GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
     // Convert GeoFirePoint to Map before sending
@@ -160,31 +172,37 @@ class RideService {
 
     String pAmount = paymentPrice.toString();
 
-    // Create payment intent
-
     _firestore
-        .collection('drivers')
-        .doc(driver.uid)
-        .collection('requests')
-        .doc(rideID)
-        .set(Request(
-                id: rideID,
-                name: userService.user.firstName,
-                destinationAddress: destinationData,
-                pickupAddress: pickupData,
-                price: "\$$pAmount",
-                photoURL: userService.user.profilePictureURL,
-                timeout: Timestamp.fromMillisecondsSinceEpoch(
-                    Timestamp.now().millisecondsSinceEpoch + 60000))
-            .toJson());
-    int iterations = 0;
+      .collection('drivers')
+      .doc(driver.uid)
+      .collection('requests')
+      .doc(rideID)
+      .set(
+        Request(
+          id: rideID,
+          name: userService.user.firstName,
+          destinationAddress: destinationData,
+          pickupAddress: pickupData,
+          price: "\$$pAmount",
+          photoURL: userService.user.profilePictureURL,
+          timeout: Timestamp.fromMillisecondsSinceEpoch(
+            Timestamp.now().millisecondsSinceEpoch + 60000
+          )
+        )
+      .toJson());
+      
+  int iterations = 0;
     // Timeout loop for current request
     while (!goToNextDriver) {
       await Future.delayed(const Duration(seconds: 1));
       iterations++;
-      if (iterations >= 70) goToNextDriver = true;
+      if (iterations >= 70) {
+        goToNextDriver = true;
+        return Future.value(false);
+      }
     }
     goToNextDriver = false;
+    return Future.value(true);
   }
 
   void _retrievePickupRadius() async {

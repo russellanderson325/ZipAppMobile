@@ -87,6 +87,10 @@ class DriverService {
     shiftuid = DateFormat('MMddyyyy').format(DateTime.now());
   }
 
+  /*
+   * Setup the driver service, this will setup the driver service and listen for requests.
+   * @return Future<bool> True if the driver service was setup successfully, false otherwise
+   */
   Future<bool> setupService() async {
     print('Setting up driver service');
     await _updateDriverRecord();
@@ -99,27 +103,47 @@ class DriverService {
     });
     //locationSub.cancel();
     locationSub = locationService.positionStream.listen(_updatePosition);
-    if (kDebugMode) {
-      print("DriverService setup");
-    }
     return true;
   }
 
+  /*
+   * Get the driver's current state (isAvailable, isWorking, isOnBreak)
+   * @return Map<String, bool> The driver's current state
+   */
+  Future<Map<String, bool>> getDriverStates() async {
+    Map<String, bool> driverStates = {
+      'isAvailable': false,
+      'isWorking': false,
+      'isOnBreak': false
+    };
+    await FirebaseFirestore.instance
+        .collection('drivers')
+        .doc(userService.userID)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      driverStates['isAvailable'] = documentSnapshot.get('isAvailable');
+      driverStates['isWorking'] = documentSnapshot.get('isWorking');
+      driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak');
+    });
+    return Future.value(driverStates);
+  }
+
+  /*
+   * Update the driver's position
+   * @param pos The position to update the driver's position to
+   * @return void
+   */
   void _updatePosition(Position pos) {
     if (driver.isWorking) {
-      this.myLocation =
-          geo.point(latitude: pos.latitude, longitude: pos.longitude);
-      // print("Updating geoFirePoint to: ${myLocation.toString()}");
+      myLocation = geo.point(
+        latitude: pos.latitude, 
+        longitude: pos.longitude
+      );
       // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
-      driverReference.update(
-          {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
-      // driverReference.update({
-      //   'lastActivity': DateTime.now(),
-      //   'geoFirePoint': {
-      //     'geohash': 'djg1qxwqx',
-      //     'geopoint': const GeoPoint(0, 0)
-      //   }
-      // });
+      driverReference.update({
+        'lastActivity': DateTime.now(), 
+        'geoFirePoint': myLocation.data
+      });
     }
   }
 
@@ -128,7 +152,7 @@ class DriverService {
    * The callback function will be called when the driver service is started.
    * @return void
    */
-  Future<void> startDriving() async {
+  void startDriving() {
     print('Starting driver service');
     // uiCallbackFunction = callback;
     // uiCallbackFunction!(DriverBottomSheetStatus.searching);
@@ -155,7 +179,6 @@ class DriverService {
         // Optionally, perform some action when no requests are available
       }
     });
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /*
@@ -178,7 +201,6 @@ class DriverService {
       }
       declineRequest(req.id);
     });
-    // uiCallbackFunction!(DriverBottomSheetStatus.confirmation);
   }
 
   /*
@@ -276,6 +298,11 @@ class DriverService {
     stopDriving();
   }
 
+  /*
+   * Add the ride to the driver's list of past drives
+   * @param rideID The ID of the ride to add to the driver's past drives
+   * @return void
+   */
   void _addRideToDriver(rideID) async {
     if (kDebugMode) {
       print('Adding ride $rideID to driver list of past drives');
@@ -293,6 +320,11 @@ class DriverService {
         .update({'pastDrives': driverPastDrives});
   }
 
+  /*
+   * Add the ride to the rider's list of past rides
+   * @param rideID The ID of the ride to add to the rider's past rides
+   * @return void
+   */
   void _addRideToRider(rideID) async {
     if (kDebugMode) {
       print('Adding ride $rideID to rider list of past rides');
@@ -309,14 +341,15 @@ class DriverService {
         .update({'pastRides': riderPastRides});
   }
 
+  /*
+   * Cancel the current ride
+   * @return void
+   */
   void cancelRide() async {
     if (currentRide.status != "CANCELED") {
       await _firestore.collection('rides').doc(driver.currentRideID).update({
         'lastActivity': DateTime.now(),
         'status': 'CANCELED',
-        // 'drid': '',
-        // 'driverName': '',
-        // 'driverPhotoURL': ''
       });
     }
     stopDriving();
@@ -462,18 +495,14 @@ class DriverService {
 
   Future<String> clockOut() async {
     late String message;
-    if (kDebugMode) {
-      print(shiftuid);
-    }
+
     try {
       HttpsCallableResult result = await driverClockOutFunction.call(
           <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
 
       message = (result.data['message']).toString();
     } catch (e) {
-      if (kDebugMode) {
-        print("Error clocking out");
-      }
+      rethrow;
     }
     return message;
   }
