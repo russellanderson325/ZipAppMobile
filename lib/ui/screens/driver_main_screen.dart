@@ -332,14 +332,14 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'Clock In',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              List result = await driverService.clockIn();
-                              //[message, override]
-                              if (result[1]) {
-                                _overrideAlert(context, result[0]);
-                              } else {
-                                _driverAlert(context, result[0], result[1]);
-                                driverService.startDriving();
-                              }
+                              // List result = await driverService.clockIn();
+                              // //[message, override]
+                              // if (result[1]) {
+                              //   _overrideAlert(context, result[0]);
+                              // } else {
+                              //   _driverAlert(context, result[0], result[1]);
+                              //   driverService.startDriving();
+                              // }
                             },
                           ),
                           SpeedDialChild(
@@ -348,8 +348,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'Clock Out',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              String message = await driverService.clockOut();
-                              _driverAlert(context, message, false);
+                              // String message = await driverService.clockOut();
+                              // _driverAlert(context, message, false);
                             },
                           ),
                           SpeedDialChild(
@@ -358,8 +358,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'Start Break',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              String message = await driverService.startBreak();
-                              _driverAlert(context, message, false);
+                              // String message = await driverService.startBreak();
+                              // _driverAlert(context, message, false);
                             },
                           ),
                           SpeedDialChild(
@@ -368,8 +368,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'End Break',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              String message = await driverService.endBreak();
-                              _driverAlert(context, message, false);
+                              // String message = await driverService.endBreak();
+                              // _driverAlert(context, message, false);
                             },
                           ),
                         ],

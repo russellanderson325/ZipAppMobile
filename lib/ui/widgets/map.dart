@@ -14,6 +14,8 @@ import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/vehicles_screen.dart';
+import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
+import 'package:zipapp/ui/widgets/message_overlay.dart';
 
 class MapWidget extends StatefulWidget {
   final bool driver;
@@ -37,6 +39,10 @@ class MapWidgetSampleState extends State<MapWidget> {
     'isWorking': false,
     'onBreak': false,
   };
+  DateTime lastClockInButtonPress = DateTime(0);
+  DateTime lastClockOutButtonPress = DateTime(0);
+  DateTime lastStartBreakButtonPress = DateTime(0);
+  DateTime lastEndBreakButtonPress = DateTime(0);
 
   @override
   void initState() {
@@ -100,6 +106,19 @@ class MapWidgetSampleState extends State<MapWidget> {
   // late bool onBreak;
 
   void clockIn() {
+    if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 10) {
+      MessageOverlay(
+        message: "Please wait a few seconds before trying again.", 
+        duration: const Duration(seconds: 3),
+        color: "#FF0000",
+        textColor: "#FFFFFF",
+        background: true,
+        opacity: 0.8,
+      ).show(context);
+      return;
+    }
+    lastClockInButtonPress = DateTime.now();
+
     setState(() {
       driverStates['isWorking'] = true;
       driverStates['isOnBreak'] = false;
@@ -109,6 +128,19 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   void clockOut() {
+    if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 10) {
+      MessageOverlay(
+        message: "Please wait a few seconds before trying again.", 
+        duration: const Duration(seconds: 3),
+        color: "#FF0000",
+        textColor: "#FFFFFF",
+        background: true,
+        opacity: 0.8,
+      ).show(context);
+      return;
+    }
+    lastClockOutButtonPress = DateTime.now();
+
     setState(() {
       driverStates['isWorking'] = false;
       driverStates['isOnBreak'] = false;
@@ -118,6 +150,19 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   void startBreak() {
+    if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 10) {
+      MessageOverlay(
+        message: "Please wait a few seconds before trying again.", 
+        duration: const Duration(seconds: 3),
+        color: "#FF0000",
+        textColor: "#FFFFFF",
+        background: true,
+        opacity: 0.8,
+      ).show(context);
+      return;
+    }
+    lastStartBreakButtonPress = DateTime.now();
+
     setState(() {
       driverStates['isOnBreak'] = true;
       driverStates['isWorking'] = true;
@@ -127,6 +172,19 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   void endBreak() {
+    if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 10) {
+      MessageOverlay(
+        message: "Please wait a few seconds before trying again.", 
+        duration: const Duration(seconds: 3),
+        color: "#FF0000",
+        textColor: "#FFFFFF",
+        background: true,
+        opacity: 0.8,
+      ).show(context);
+      return;
+    }
+    lastEndBreakButtonPress = DateTime.now();
+
     setState(() {
       driverStates['isOnBreak'] = false;
       driverStates['isWorking'] = true;

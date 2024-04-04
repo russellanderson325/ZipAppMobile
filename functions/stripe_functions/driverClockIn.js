@@ -3,18 +3,14 @@ const admin = require("firebase-admin");
 
 const driverClockIn = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "Authentication required.");
+        return {success: false, response: "The function must be called while authenticated."};
     }
 
-    const {daysOfWeek, isWorking, driveruid, shiftuid} = data;
-
-    if (isWorking) {
-        return {result: false, message: "Driver already clocked in", isWorking};
-    }
+    const {daysOfWeek, driveruid, shiftuid} = data;
 
     const currentTime = new Date();
     if (!daysOfWeek.includes(currentTime.getDay())) {
-        return {result: false, override: true, message: "Driver not scheduled today"};
+        return {success: false, response: "Driver not scheduled today"};
     }
 
     const shiftRef = await admin.firestore().collection("drivers").doc(driveruid)
@@ -22,18 +18,20 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
 
     if (!shiftRef.exists) {
         await createShift(driveruid, shiftuid, currentTime);
-        return {result: false, override: true, message: "Driver not scheduled", isWorking: false};
+        return {success: false, response: "Driver not scheduled"};
     }
 
+    // Todo: This is broken because the current time is not flexible to the difference in timezones.
+    // ! Specifically, the time that is produced here on the server is not the same as the time that is produced on the client.
     const shift = shiftRef.data();
     if (currentTime.getTime() < shift.startTime.toDate().getTime() - 600000) {
-        return {result: false, override: true, message: "Too early for scheduled time"};
+        return {success: false, response: "Too early for scheduled time"};
     }
 
     try {
         await updateShiftAndDriverStatus(driveruid, shiftuid, currentTime);
         console.log("Capturing payment intent with ID", data.paymentIntentId);
-        return {success: true, message: "Clock in successful"};
+        return {success: true, response: "Clock in successful"};
     } catch (error) {
         console.error("Stripe error:", error);
         return {success: false, response: error};

@@ -121,9 +121,9 @@ class DriverService {
         .doc(userService.userID)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
-      driverStates['isAvailable'] = documentSnapshot.get('isAvailable');
-      driverStates['isWorking'] = documentSnapshot.get('isWorking');
-      driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak');
+      driverStates['isAvailable'] = documentSnapshot.get('isAvailable') ?? false;
+      driverStates['isWorking'] = documentSnapshot.get('isWorking') ?? false;
+      driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak') ?? false;
     });
     return Future.value(driverStates);
   }
@@ -464,88 +464,75 @@ class DriverService {
     }
   }
 
-  Future<List> clockIn() async {
-    late String message;
-    late bool override;
-    try {
-      HttpsCallableResult result =
-          await driverClockInFunction.call(<String, dynamic>{
-        'daysOfWeek': driver.daysOfWeek,
-        'isWorking': driver.isWorking,
-        'driveruid': driver.uid,
-        'shiftuid': shiftuid
-      });
+  /*
+   * Clock in the driver
+   * @return Future<Map<String, dynamic>> The result of the clock in operation
+   */
+  Future<Map<String, dynamic>> clockIn() async {
+    HttpsCallableResult result = await driverClockInFunction.call(<String, dynamic>{
+      'daysOfWeek': driver.daysOfWeek,
+      'driveruid': driver.uid,
+      'shiftuid': shiftuid
+    });
+    print(result.data);
+    //grab return values
+    String response = result.data['response'];
+    bool success = result.data['success'];
 
-      //grab return values
-      message = result.data['message'].toString();
-      override = result.data['override'];
-
-      try {
-        driverReference.update({'isWorking': result.data['isWorking']});
-      } catch (e) {
-        if (kDebugMode) {
-          print("Error setting is Working");
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error clocking in');
-      }
-    }
-    return [message, override];
+    return {'success': success, 'response': response};
   }
 
-  Future<String> clockOut() async {
-    late String message;
+  /*
+   * Clock out the driver
+   * @return Future<Map<String, dynamic>> The result of the clock out operation
+   */
+  Future<Map<String, dynamic>> clockOut() async {
+    HttpsCallableResult result = await driverClockOutFunction.call(
+        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
 
-    try {
-      HttpsCallableResult result = await driverClockOutFunction.call(
-          <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    String response = (result.data['response']).toString();
+    bool success = result.data['success'];
 
-      message = (result.data['message']).toString();
-    } catch (e) {
-      rethrow;
-    }
-    return message;
+    return {'response': response, 'success': success};
   }
 
-  Future<String> startBreak() async {
-    late String message;
-    try {
-      HttpsCallableResult result = await driverStartBreakFunction.call(
-          <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+  /*
+   * Start the driver's break
+   * @return Future<Map<String, dynamic>> The result of the start break operation
+   */
+  Future<Map<String, dynamic>> startBreak() async {
+    HttpsCallableResult result = await driverStartBreakFunction.call(
+        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    print('startBreak');
+    print(result.data);
+    String response = (result.data['response']).toString();
+    bool success = result.data['success'];
 
-      message = (result.data['message']).toString();
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error starting break");
-      }
-    }
-    return message;
+    return {'response': response, 'success': success};
   }
 
-  Future<String> endBreak() async {
-    late String message;
-    try {
-      HttpsCallableResult result = await driverEndBreakFunction.call(
-          <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+  /*
+   * End the driver's break
+   * @return Future<Map<String, dynamic>> The result of the end break operation
+   */
+  Future<Map<String, dynamic>> endBreak() async {
+    HttpsCallableResult result = await driverEndBreakFunction.call(
+        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    print(result.data);
+    String response = (result.data['response']).toString();
+    bool success = result.data['success'];
 
-      message = (result.data['message']).toString();
-    } catch (e) {
-      if (kDebugMode) {
-        print("Error starting break");
-      }
-    }
-    return message;
+    return {'response': response, 'success': success};
   }
-
+  
+  // I'm gonna be honest I dont know what the purpose of this was supposed to be
   Future<String> overrideClockIn() async {
     late String message;
     try {
       HttpsCallableResult result = await overrideClockInFunction.call(
           <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
 
-      message = (result.data['message']).toString();
+      message = (result.data['response']).toString();
     } catch (e) {
       if (kDebugMode) {
         print("Error overriding clock in");

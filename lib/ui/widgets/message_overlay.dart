@@ -18,35 +18,36 @@ class MessageOverlay {
     required this.message, 
     required this.duration, 
     this.color = "#000000", 
-    this.textColor = "#000000", 
+    this.textColor = "#FFFFFF", 
     this.opacity = 1, 
-    this.background = false});
+    this.background = false
+  });
 
-    void show(BuildContext context) {
-      if (_currentOverlayEntry != null) {
-        // An overlay is already showing, so don't show another one.
-        return;
-      }
+  void show(BuildContext context) {
+    if (_currentOverlayEntry != null) {
+      // An overlay is already showing, so don't show another one.
+      return;
+    }
 
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
           Positioned(
-            top: MediaQuery.of(context).size.height / 6 - 25,
+            top: MediaQuery.of(context).size.height / 4 - 75 / 2, // To center vertically
             left: MediaQuery.of(context).size.width * 0, // To center horizontally
             child: Material(
               color: Colors.transparent,
               child: Container(
                 width: MediaQuery.of(context).size.width * 1,
-                height: 50,
+                height: 75,
                 alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 color: background ? Color(int.parse(color.substring(1, 7), radix: 16) + 0xFF000000).withOpacity(opacity) : Colors.transparent,
                 child: Text(
                   message,
                   style: TextStyle(
                     color: Color(int.parse(textColor.substring(1, 7), radix: 16) + 0xFF000000), 
-                    fontSize: 12,
+                    fontSize: 16,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -57,7 +58,7 @@ class MessageOverlay {
       ),
     );
 
-    
+  
     _currentOverlayEntry = overlayEntry;
     Overlay.of(context).insert(overlayEntry);
 

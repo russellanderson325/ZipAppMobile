@@ -53,18 +53,20 @@ class Driver {
 
   factory Driver.fromJson(Map<String, dynamic> doc) {
     Driver driver = Driver(
-        uid: doc['uid'] as String,
-        firstName: doc['firstName'] as String,
-        lastName: doc['lastName'] as String,
-        lastActivity: convertStamp(doc['lastActivity'] as Timestamp),
-        profilePictureURL: doc['profilePictureURL'] as String,
-        geoFirePoint: extractGeoFirePoint(doc['geoFirePoint']),
-        fcmToken: doc['fcmToken'] ?? "",
-        isWorking: doc['isWorking'] as bool,
-        isAvailable: doc['isAvailable'] as bool,
-        currentRideID: doc['currentRideID'] as String,
-        daysOfWeek: [], //daysOfWeekConvert(doc['daysOfWeek']),
-        isOnBreak: doc['isOnBreak'] as bool);
+      uid: doc['uid'] as String,
+      firstName: doc['firstName'] as String,
+      lastName: doc['lastName'] as String,
+      lastActivity: convertStamp(doc['lastActivity'] as Timestamp),
+      profilePictureURL: doc['profilePictureURL'] as String,
+      geoFirePoint: extractGeoFirePoint(doc['geoFirePoint']),
+      fcmToken: doc['fcmToken'] ?? "",
+      isWorking: doc['isWorking'] ?? false,
+      isAvailable: doc['isAvailable'] ?? false,
+      isOnBreak: doc['isOnBreak'] as bool,
+      currentRideID: doc['currentRideID'] as String,
+      daysOfWeek: [], 
+      //daysOfWeekConvert(doc['daysOfWeek']),
+    );
     //totalHoursWorked: doc['totalHoursWorked']);
     return driver;
   }
