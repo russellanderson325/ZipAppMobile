@@ -56,7 +56,7 @@ const driverClockOut = functions.https.onCall(async (data, context) => {
         message = error.message;
     }
 
-    return {result, message};
+    return {success: result, response: message};
 });
 
 module.exports = driverClockOut;

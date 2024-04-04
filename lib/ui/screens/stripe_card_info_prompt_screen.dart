@@ -63,26 +63,25 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
                 setState(() {
                   statusMessage = "loading";
                 });
+
                 // Attempt to create the payment method using Stripe
                 Payment.createPaymentMethod().then((paymentMethod) async {
                   // Get the payment method with the fingerprint
                   Map<String, dynamic>? paymentMethodWithFingerprint = await Payment.getPaymentMethodById(paymentMethod!.id);
+                  print("Payment Method: $paymentMethodWithFingerprint");
                   // Get the fingerprint
-                  String fingerprint = await paymentMethodWithFingerprint!['fingerprint'];
+                  String fingerprint = paymentMethodWithFingerprint!['fingerprint'];
+
                   // Save the payment method to the Firestore database
                   // Note: If the finger print already exists in the users payment methods, it will not be added
                   // and the payment method will be removed from the Stripe API
+                  print("Fingerprint: $fingerprint");
                   await Payment.setPaymentMethodIdAndFingerprint(paymentMethod.id, fingerprint);
                   
-                  // // Navigate back to the previous screen
-                  // if (stripeButtonPressed) return;
-                  // stripeButtonPressed = true;
-                  // if (mounted) {
-                    Navigator.pop(context);
-                  // }
-                  // Refresh the FutureBuilder Payment Method list
+                  Navigator.pop(context);
                   widget.refreshKey();
                 }).catchError((e) {
+                  print(e.toString());
                   switch (e.toString()) {
                     case "Exception: Payment method already exists":
                       setState(() {

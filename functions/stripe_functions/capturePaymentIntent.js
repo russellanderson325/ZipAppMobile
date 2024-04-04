@@ -8,13 +8,14 @@ const capturePaymentIntent = functions.https.onCall(async (data, context) => {
             "unauthenticated", "The function must be called while authenticated.",
         );
     }
+
     try {
-        console.log("Capturing payment intent with ID", data.paymentIntentId);
         const captureResponse = await stripe.paymentIntents.capture(data.paymentIntentId);
-        return captureResponse;
+        console.log("Capturing payment intent with ID", data.paymentIntentId);
+        return {success: true, response: captureResponse};
     } catch (error) {
         console.error("Stripe error:", error);
-        throw new functions.https.HttpsError("internal", "Stripe error", error);
+        return {success: false, response: error};
     }
 });
 

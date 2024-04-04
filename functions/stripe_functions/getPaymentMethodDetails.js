@@ -13,12 +13,10 @@ const getPaymentMethodDetails = functions.https.onCall(async (data, context) => 
     try {
         const paymentMethodId = data.paymentMethodId; // Expect "paymentMethodId" to be passed in the function call
         const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId);
-
-        // Optionally, store these details in Firestore or return them to the client
-        return paymentMethod.card;
+        return {success: true, response: paymentMethod.card};
     } catch (error) {
         console.error("Stripe error:", error);
-        throw new functions.https.HttpsError("unknown", `Error retrieving payment method: ${error.message}`);
+        return {success: false, response: error};
     }
 });
 

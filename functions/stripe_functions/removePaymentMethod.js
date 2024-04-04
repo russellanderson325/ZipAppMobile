@@ -11,9 +11,11 @@ const removePaymentMethod = functions.https.onCall(async (data, context) => {
 
     try {
         stripe.paymentMethods.detach(data.paymentMethodId);
+        console.log("Payment method removed with ID", data.paymentMethodId);
+        return {success: true, response: "Payment method removed successfully."};
     } catch (error) {
         console.error("Stripe error:", error);
-        throw new functions.https.HttpsError("unknown", `Error retrieving payment method: ${error.message}`);
+        return {success: false, response: error};
     }
 });
 

@@ -127,7 +127,10 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
                   if (result['authorized']) {
                     print('Authorization successful, ride will not be cancelled');
                     print('Payment intent ID: ${result['paymentIntentId']}');
-                    Payment.capturePaymentIntent(result['paymentIntentId']);
+                    Payment.capturePaymentIntent(result['paymentIntentId']).then((result) {
+                      bool success = result['success'];
+                      
+                    });
                   } else {
                     // Cancel the ride
                     print('Authorization failed, canceling ride');
@@ -141,7 +144,13 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
               // If the payment is successful, then the ride is not canceled and the driver will come to pick up the user
               Payment.createPaymentIntent((widget.price * 100).toInt(), widget.currencyCode).then((clientSecret) {
                     String paymentIntentId = clientSecret.split('_secret_')[0];
-                    
+                    Payment.capturePaymentIntent(paymentIntentId).then((result) {
+                      print(result);
+                    }).catchError((error) {
+                      print("Failed to capture payment intent: $error");
+                      ride?.cancelRide();
+                      dispose();
+                    });
               });
             }
               

@@ -169,14 +169,12 @@ class Payment {
    * This method is used to capture a payment intent. It basically charges the user.
    * @param paymentIntent - the payment intent to be captured
    */
-  static Future<HttpsCallableResult<dynamic>> capturePaymentIntent(String paymentIntentId) async {
+  static Future<Map<String, dynamic>> capturePaymentIntent(String paymentIntentId) async {
     try {
-      HttpsCallableResult<dynamic> capturePaymentIntentResult = await capturePaymentIntentCallable.call(
-        {
-          'paymentIntentId': paymentIntentId,
-        }
-      );
-      return capturePaymentIntentResult;
+      final results = await capturePaymentIntentCallable.call({'paymentIntentId': paymentIntentId});
+
+      Map<String, dynamic> response = Map<String, dynamic>.from(results.data);
+      return response;
     } catch (error) {
       print('Error capturing payment intent: $error');
       rethrow;
@@ -278,8 +276,20 @@ class Payment {
     
     var documentSnapshot = await stripeCustomer.get();
     var customerId = documentSnapshot.data()?['customer_id'];
-          
-    // First check to see if finger print already exists in users payment methods
+    
+    // Attach the payment method to the customer in the Stripe API
+    HttpsCallableResult<dynamic> response = await attachPaymentMethodToCustomerCallable.call(
+      {
+        'paymentMethodId': paymentMethodId,
+        'customerId': customerId,
+      }
+    );
+
+    if (!response.data['success']) {
+      print('Error attaching payment method to customer: ${response.data['response']}');
+      return;
+    }
+    // Check to see if finger print already exists in users payment methods
     var querySnapshot = await stripeCustomer
         .collection('payment_methods')
         .where('fingerprint', isEqualTo: fingerprint)
@@ -299,14 +309,6 @@ class Payment {
             "fingerprint": fingerprint,
           });
     }
-
-    // Attach the payment method to the customer in the Stripe API
-    attachPaymentMethodToCustomerCallable.call(
-      {
-        'paymentMethodId': paymentMethodId,
-        'customerId': customerId,
-      }
-    );
   }
 
   /*
@@ -404,15 +406,13 @@ class Payment {
   * @return Map<String, dynamic>? - the payment method details
   */
   static Future<Map<String, dynamic>?> getPaymentMethodById(String paymentMethodId) async {
-    try {
-      final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
-      Map<String, dynamic> data = results.data;
-      data['id'] = paymentMethodId; // Add the payment method id to the data
-      return data;
-    } catch (e) {
-      // print('Error calling function: $e');
-      return null;
-    }
+    final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
+
+    if (!results.data['success']) throw Exception('Error getting payment method details');
+
+    Map<String, dynamic> response = Map<String, dynamic>.from(results.data['response']);
+    response['id'] = paymentMethodId;
+    return response;
   }
 
   /*
@@ -435,7 +435,6 @@ class Payment {
   static void setPaymentMethodsCache(List<Map<String, dynamic>?> methods) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('paymentMethods', json.encode(methods));
-    // prefs.setString('paymentMethods', '');
   }
 
   /*

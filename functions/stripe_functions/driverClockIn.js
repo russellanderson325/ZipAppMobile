@@ -30,8 +30,14 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
         return {result: false, override: true, message: "Too early for scheduled time"};
     }
 
-    await updateShiftAndDriverStatus(driveruid, shiftuid, currentTime);
-    return {result: true, message: "Clock in successful", isWorking: true};
+    try {
+        await updateShiftAndDriverStatus(driveruid, shiftuid, currentTime);
+        console.log("Capturing payment intent with ID", data.paymentIntentId);
+        return {success: true, message: "Clock in successful"};
+    } catch (error) {
+        console.error("Stripe error:", error);
+        return {success: false, response: error};
+    }
 });
 
 /**
