@@ -8,9 +8,11 @@ const getPaymentMethodDetails = require("./stripe_functions/getPaymentMethodDeta
 const removePaymentMethod = require("./stripe_functions/removePaymentMethod");
 const attachPaymentMethodToCustomer = require("./stripe_functions/attachPaymentMethodToCustomer");
 const createPaymentIntent = require("./stripe_functions/createPaymentIntent");
+const capturePaymentIntent = require("./stripe_functions/capturePaymentIntent");
 
 // Export the functions
 exports.getPaymentMethodDetails = getPaymentMethodDetails;
 exports.removePaymentMethod = removePaymentMethod;
 exports.attachPaymentMethodToCustomer = attachPaymentMethodToCustomer;
 exports.createPaymentIntent = createPaymentIntent;
+exports.capturePaymentIntent = capturePaymentIntent;

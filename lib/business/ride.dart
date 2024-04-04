@@ -2,15 +2,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
-// import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
-
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class RideService {
@@ -24,56 +21,58 @@ class RideService {
   late Stream<Ride> rideStream;
   late StreamSubscription rideSubscription;
   late Ride ride;
-  // GeoFirePoint destination;
-  // GeoFirePoint pickup;
-  late Function updateUI;
+  late Function statusUpdate;
   late bool removeRide;
   late double pickupRadius;
-
   late String rideID;
-
   // Services
-  // Geoflutterfire geo = Geoflutterfire();
   LocationService locationService = LocationService();
   DriverService driverService = DriverService();
   UserService userService = UserService();
-
   // Subscriptions
   late Stream<List<DocumentSnapshot>> nearbyDrivers;
 
+  /*
+   * Singleton constructor for RideService
+   * @return RideService
+   */
   factory RideService() {
     return _instance;
   }
 
+  /*
+   * Internal constructor for RideService
+   * Initializes the Firestore references for the rides and current rides collections
+   * and sets the rideID to the ID of the ride document.
+   * @return RideService
+   */
   RideService._internal() {
-    if (kDebugMode) {
-      print("RideService Created");
-    }
-//    rideReference = _firestore.collection('rides').doc(userService.userID);
     rideReference = _firestore.collection('rides').doc();
     rideID = rideReference.id;
     currentRidesReference =
         _firestore.collection('CurrentRides').doc('currentRides');
   }
 
-  /// This function will start the ride process between a customer
-  /// and a driver. It gets the current location of the user and
-  /// passes it into the pickupAddress field of the ride document
-  /// it also gets the destination address and passes it into the
-  /// destinationAddress field.
-  // void startRide(double lat, double long, Function callBackFunction,
-  //     double paymentPrice) async {
-  void startRide(double lat, double long, Function callBackFunction,
-      double paymentPrice) async {
-    updateUI = callBackFunction;
-    updateUI(BottomSheetStatus.searching);
+  /*
+   * Start the ride. This function is called when the user requests a ride.
+   * It initializes the ride in Firestore, starts listening to the ride document
+   * and sends requests to nearby drivers. It will continue to send requests
+   * until a driver accepts or the request times out.
+   * @param lat: double - latitude of the user's current location
+   * @param long: double - longitude of the user's current location
+   * @param statusUpdateIn: Function - callback function to update the UI with the ride status
+   * @param paymentPrice: double - the price of the ride
+   * @return void
+   */
+  void startRide(double lat, double long, Function statusUpdateIn, double paymentPrice) async {
+    statusUpdate = statusUpdateIn;
+    statusUpdate("SEARCHING");
     await _initializeRideInFirestore(lat, long);
     rideStream = rideReference
         .snapshots()
         .map((snapshot) => Ride.fromDocument(snapshot))
         .asBroadcastStream();
-    rideSubscription = rideStream.listen(
-        _onRideUpdate); // Listen to changes in ride Document and update service
+    rideSubscription = rideStream.listen(_onRideUpdate); // Listen to changes in ride Document and update service
     int timesSearched = 0;
     double radius = 1;
     isSearchingForRide = true;
@@ -85,34 +84,18 @@ class RideService {
     /// availability to change and restart with a new list of drivers up to 5 times.
     while (isSearchingForRide) {
       List<Driver> nearbyDrivers = await driverService.getNearbyDriversList(radius);
-      if (showDebugPrints) {
-        if (kDebugMode) {
-          print("There are ${nearbyDrivers.length} drivers nearby.");
-        }
-      }
       if (nearbyDrivers.isNotEmpty && timesSearched < 6) {
         for (int i = 0; i < nearbyDrivers.length; i++) {
           if (isSearchingForRide) {
             Driver driver = nearbyDrivers[i];
             await rideReference.update({'status': 'WAITING'});
             await _sendRequestToDriver(driver, paymentPrice);
-            if (showDebugPrints) {
-              if (kDebugMode) {
-                print("Moving to next driver");
-              }
-            }
           }
         }
         timesSearched += 1;
       } else {
         timesSearched += 1;
         radius += 10;
-        if (showDebugPrints) {
-          if (kDebugMode) {
-            print(
-                "No Drivers Found after $timesSearched tries, setting radius to $radius");
-          }
-        }
         if (timesSearched > 5) {
           isSearchingForRide = false;
         } else {
@@ -125,21 +108,23 @@ class RideService {
         print("Ride is in progress with user: ${ride.driverName}");
       }
     } else {
-      await rideReference
-          .update({'lastActivity': DateTime.now(), 'status': "CANCELED"});
+      await rideReference.update({'lastActivity': DateTime.now(), 'status': "CANCELED"});
     }
   }
 
+  /*
+  * Cancel the ride. Update the status of the ride in firestore, cancel the ride subscription 
+  * and remove the rider from the current rides collection.
+  * @return void
+  */
   void cancelRide() async {
     isSearchingForRide = false;
     goToNextDriver = true;
-    updateUI(BottomSheetStatus.closed);
+    statusUpdate("CANCELED");
     rideSubscription.cancel();
     DocumentSnapshot myRide = await rideReference.get();
+    // If the ride exists, remove the rider from the current rides collection
     if (myRide.exists) {
-      if (kDebugMode) {
-        print("Canceling ride");
-      }
       removeCurrentRider();
       rideReference.update({
         'lastActivity': DateTime.now(),
@@ -162,12 +147,21 @@ class RideService {
   Future<void> _sendRequestToDriver(Driver driver, double paymentPrice) async {
     GeoFirePoint destination = locationService.getCurrentGeoFirePoint();
     GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
+    // Convert GeoFirePoint to Map before sending
+    Map<String, dynamic> destinationData = {
+      'geopoint': destination.data['geopoint'], // Instance of GeoPoint
+      'geohash': destination.data['geohash']
+    };
+
+    Map<String, dynamic> pickupData = {
+      'geopoint': pickup.data['geopoint'],
+      'geohash': pickup.data['geohash']
+    };
+
     String pAmount = paymentPrice.toString();
-    if (showDebugPrints) {
-      if (kDebugMode) {
-        print("Sending request to ${driver.uid}");
-      }
-    }
+
+    // Create payment intent
+
     _firestore
         .collection('drivers')
         .doc(driver.uid)
@@ -176,8 +170,8 @@ class RideService {
         .set(Request(
                 id: rideID,
                 name: userService.user.firstName,
-                destinationAddress: destination,
-                pickupAddress: pickup,
+                destinationAddress: destinationData,
+                pickupAddress: pickupData,
                 price: "\$$pAmount",
                 photoURL: userService.user.profilePictureURL,
                 timeout: Timestamp.fromMillisecondsSinceEpoch(
@@ -186,13 +180,8 @@ class RideService {
     int iterations = 0;
     // Timeout loop for current request
     while (!goToNextDriver) {
-      if (showDebugPrints) {
-        if (kDebugMode) {
-          print("Request to ${driver.uid} sent $iterations seconds ago.");
-        }
-      }
       await Future.delayed(const Duration(seconds: 1));
-      iterations += 1;
+      iterations++;
       if (iterations >= 70) goToNextDriver = true;
     }
     goToNextDriver = false;
@@ -201,13 +190,8 @@ class RideService {
   void _retrievePickupRadius() async {
     // pickup radius is retrieved from config settings in firestore
     // double check with sponsors as to how the pickup radius should be implemented
-    DocumentReference adminSettingsRef =
-        _firestore.collection('config_settings').doc('admin_settings');
-    pickupRadius =
-        (await adminSettingsRef.get()).get('PickupRadius').toDouble();
-    if (kDebugMode) {
-      print('Pickup Radius retrieved from admin settings: $pickupRadius');
-    }
+    DocumentReference adminSettingsRef = _firestore.collection('config_settings').doc('admin_settings');
+    pickupRadius = (await adminSettingsRef.get()).get('PickupRadius').toDouble();
   }
 
   // This method is attached to the ride stream and run every time the ride document in firestore changes.
@@ -218,59 +202,32 @@ class RideService {
       wasRideAlreadyCanceled = true;
     }
     ride = updatedRide;
+    statusUpdate(ride.status);
     switch (updatedRide.status) {
       case 'CANCELED':
         removeRide = true;
         isSearchingForRide = false;
-        updateUI(BottomSheetStatus.closed);
+        // updateUI(BottomSheetStatus.closed);
         if (!wasRideAlreadyCanceled) cancelRide();
-        if (kDebugMode) {
-          print("Ride is canceled");
-        }
         break;
       case 'IN_PROGRESS':
         isSearchingForRide = false;
         goToNextDriver = true;
-        updateUI(BottomSheetStatus.rideDetails);
-        if (kDebugMode) {
-          print("Ride is now IN_PROGRESS");
-        }
         break;
       case 'INITIALIZING':
-        updateUI(BottomSheetStatus.searching);
-        if (kDebugMode) {
-          print("Ride is initializing");
-        }
         break;
       case 'SEARCHING':
         goToNextDriver = true;
-        updateUI(BottomSheetStatus.searching);
-        if (kDebugMode) {
-          print("Moving to next driver and setting ride back to searching.");
-        }
         break;
       case 'WAITING':
-        if (kDebugMode) {
-          print("Waiting on response from driver.");
-        }
         break;
       case 'ENDED':
         removeRide = true;
         isSearchingForRide = false;
         goToNextDriver = false;
-        updateUI(BottomSheetStatus.closed);
-        if (kDebugMode) {
-          print("Ride has ended.");
-        }
         removeCurrentRider();
         break;
       default:
-    }
-    if (showDebugPrints) {
-      if (kDebugMode) {
-        print(
-            "Updated ride status from ${ride.status} to ${updatedRide.status}");
-      }
     }
   }
 

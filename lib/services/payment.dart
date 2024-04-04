@@ -33,6 +33,7 @@ class Payment {
   static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
   static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
+  static final capturePaymentIntentCallable = functions.httpsCallable('capturePaymentIntent');
   static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
 
   /*
@@ -147,6 +148,43 @@ class Payment {
   }
 
   /*
+   * This method is used to modify the price of a payment intent and capture it.
+   * This is specifically useful when the user decides to split the fair among users.
+   * @param paymentIntent - the payment intent to be captured
+   * @param amount - the amount to be captured
+   */
+  static void modifyPriceAndCapturePaymentIntent(String paymentIntent, int amount) async {
+    try {
+      await capturePaymentIntentCallable.call(
+        {
+          'paymentIntent': paymentIntent,
+          'amount': amount,
+        }
+      );
+    } catch (e) {
+      print('Error capturing payment intent: $e');
+    }
+  }
+
+  /*
+   * This method is used to capture a payment intent. It basically charges the user.
+   * @param paymentIntent - the payment intent to be captured
+   */
+  static Future<HttpsCallableResult<dynamic>> capturePaymentIntent(String paymentIntent) async {
+    try {
+      HttpsCallableResult<dynamic> capturePaymentIntentResult = await capturePaymentIntentCallable.call(
+        {
+          'paymentIntent': paymentIntent,
+        }
+      );
+      return capturePaymentIntentResult;
+    } catch (error) {
+      print('Error capturing payment intent: $error');
+      rethrow;
+    }
+  }
+
+  /*
    * This method is used to create a payment intent. It basically declares the intention
    * to make a payment and returns the payment intent (sort of).
    * @param amount - the amount to be paid
@@ -168,17 +206,20 @@ class Payment {
   }
 
   /*
-   * This method is used to show the payment sheet to make a payment.
-   * It should show the Apple Pay sheet for iOS and the Google Pay sheet 
-   * for Android (hopefully -- Android still needs testing).
+   * This method is used to show the payment sheet to make an intent.
+   * I believe how this works is we create a payment intention in Stripe, which is set to manually be captured.
+   * Then we show the payment sheet to the user, and when the user confirms, the payment intent is mapped to the payment method.
+   * We can later capture the payment intent to actually charge the user.
    * @param label - the label for the payment
    * @param amount - the amount to be paid
    * @param currencyCode - the currency code for the payment
    * @param merchantCountryCode - the merchant country code
    */
-  static Future<bool> showPaymentSheetToMakePayment(String label, int amount, String currencyCode, String merchantCountryCode) async {
-    String paymentIntent = await createPaymentIntent(amount, currencyCode);
-    DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
+  static Future<Map<String, dynamic>> showPaymentSheetToMakeIntent(String label, int amount, String currencyCode, String merchantCountryCode) async {
+    String clientSecret = await createPaymentIntent(amount, currencyCode);
+    String paymentIntent = clientSecret.split('_secret_')[0];
+
+    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
         .collection('stripe_customers')
         .doc(_firebaseUser?.uid);
 
@@ -190,7 +231,7 @@ class Payment {
       paymentSheetParameters: SetupPaymentSheetParameters(
         customerId: customerId,
         customFlow: false,
-        paymentIntentClientSecret: paymentIntent.toString(),
+        paymentIntentClientSecret: clientSecret,
         allowsDelayedPaymentMethods: false,
         removeSavedPaymentMethodMessage: 'Remove Payment Method',
         primaryButtonLabel: 'Pay',
@@ -214,11 +255,15 @@ class Payment {
     try {
       // Present the Payment Sheet
       await Stripe.instance.presentPaymentSheet();
-      print("Payment successful");
-      return true;
+      return {
+        "authorized": true,
+        "paymentIntent": paymentIntent,
+      };
     } catch (error) {
-      print("Payment failed: $error");
-      return false;
+      return {
+        "authorized": false,
+        "paymentIntent": paymentIntent,
+      };
     }
   }
 

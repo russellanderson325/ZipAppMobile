@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:cloud_functions/cloud_functions.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/foundation.dart';
@@ -9,7 +8,6 @@ class Payment {
   //PaymentMethod _paymentMethod;
   var customerData = {};
   late DocumentReference cardDocumentID;
-
   //*******CHANGE THESE VARIABLES TO WHAT THE RIDER IS GOING TO HAVE TO PAY***********
   //SO FAR THESE ARE PLACEHOLDER NUMBERS
 
@@ -19,7 +17,6 @@ class Payment {
   //E.G. 1000 = $10.00 DOLLARS
   late double amount;
   final currency = "usd";
-  var paymentMethod;
   final fireBaseUser = auth.FirebaseAuth.instance.currentUser;
   //var email = fireBaseUser.email;
   //var paymentMethodList;
@@ -108,25 +105,11 @@ class Payment {
           .get()
           .then((DocumentSnapshot documentSnapshot) {
         if (documentSnapshot.exists) {
-          if (kDebugMode) {
-            print("Test: Exists:");
-          }
           docReference = documentSnapshot;
-          if (kDebugMode) {
-            print("TEST: PAYMENMT DOC REERENCE: ${docReference?.data()}");
-          }
         } else {
-          if (kDebugMode) {
-            print("validatePayment: looking for snapshot");
-          }
           docReference = null;
         }
       });
-      // print("TEST4: ${docReference.data()}");
-    }
-    //Navigator.of(context).pop();
-    if (kDebugMode) {
-      print("TEST: ${docReference?.data()}");
     }
     return docReference;
   }

@@ -338,7 +338,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                                 _overrideAlert(context, result[0]);
                               } else {
                                 _driverAlert(context, result[0], result[1]);
-                                await driverService.startDriving(updateUI);
+                                await driverService.startDriving();
                               }
                             },
                           ),
@@ -661,9 +661,9 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                       style: TextStyle(color: Colors.white, fontSize: 16.0),
                     ),
                     onPressed: () async {
-                      // await _openRoute(currentRequest.pickupAddress.latitude,
-                      //     currentRequest.pickupAddress.longitude);
-                      // await driverService.acceptRequest(currentRequest.id);
+                      await _openRoute(currentRequest.pickupAddress.latitude,
+                          currentRequest.pickupAddress.longitude);
+                      await driverService.acceptRequest(currentRequest.id);
                     },
                   ),
                   ElevatedButton.icon(
@@ -694,7 +694,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
   void _overrideDriver() async {
     String result = await driverService.overrideClockIn();
     _driverAlert(context, result, false);
-    await driverService.startDriving(updateUI);
+    await driverService.startDriving();
   }
 
 /*

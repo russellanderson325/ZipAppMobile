@@ -101,6 +101,7 @@ class MapSampleState extends State<Map> {
   void clockIn() {
     setState(() {
       driverService.clockIn();
+      driverService.startDriving();
       clockedIn = true;
       onBreak = false;
     });
@@ -109,6 +110,7 @@ class MapSampleState extends State<Map> {
   void clockOut() {
     setState(() {
       driverService.clockOut();
+      driverService.stopDriving();
       clockedIn = false;
       onBreak = false;
     });
@@ -117,6 +119,7 @@ class MapSampleState extends State<Map> {
   void startBreak() {
     setState(() {
       driverService.startBreak();
+      driverService.stopDriving();
       onBreak = true;
     });
   }
@@ -124,6 +127,7 @@ class MapSampleState extends State<Map> {
   void endBreak() {
     setState(() {
       driverService.endBreak();
+      driverService.startDriving();
       onBreak = false;
     });
   }
@@ -279,9 +283,15 @@ class MapSampleState extends State<Map> {
         _moveCamera(
             latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
                 value.result!.geometry!.location!.lng!));
+
         // Show the vehicle request screen
         VehiclesScreenState.showVehiclesScreen(
-            context, (result!.distanceValue)!.toDouble(), value.result!.geometry!.location!.lat!, value.result!.geometry!.location!.lng!);
+          context, 
+          (result!.distanceValue)!.toDouble(), 
+          value.result!.geometry!.location!.lat!, 
+          value.result!.geometry!.location!.lng!,
+          _resetMarkers,
+        );
       },
     );
   }

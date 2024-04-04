@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
@@ -33,8 +32,9 @@ class DriverService {
   StreamSubscription<Driver>? driverSub;
   // Request specific variables
   late CollectionReference requestCollection;
-  StreamSubscription<Request>? requestSub;
-  late Stream<Request> requestStream;
+  late Stream<List<Request>> requestStream;
+  StreamSubscription<List<Request>>? requestSub;
+  late List<Request> currentRequests = [];
   late Request currentRequest;
   // Ride specific varaibles
   late Stream<Ride> rideStream;
@@ -43,7 +43,7 @@ class DriverService {
   //Shift specific variables
   late String shiftuid;
 
-  Function? uiCallbackFunction;
+  // Function? uiCallbackFunction;
 
   HttpsCallable driverClockInFunction =
       FirebaseFunctions.instance.httpsCallable(
@@ -109,29 +109,34 @@ class DriverService {
     if (driver.isWorking) {
       this.myLocation =
           geo.point(latitude: pos.latitude, longitude: pos.longitude);
-      print("Updating geoFirePoint to: ${myLocation.toString()}");
+      // print("Updating geoFirePoint to: ${myLocation.toString()}");
       // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
       driverReference.update(
           {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
-      driverReference.update({
-        'lastActivity': DateTime.now(),
-        'geoFirePoint': {
-          'geohash': 'djg1qxwqx',
-          'geopoint': const GeoPoint(0, 0)
-        }
-      });
+      // driverReference.update({
+      //   'lastActivity': DateTime.now(),
+      //   'geoFirePoint': {
+      //     'geohash': 'djg1qxwqx',
+      //     'geopoint': const GeoPoint(0, 0)
+      //   }
+      // });
     }
   }
 
-  Future<void> startDriving(Function callback) async {
-    uiCallbackFunction = callback;
-    uiCallbackFunction!(DriverBottomSheetStatus.searching);
+  /*
+   * Start the driver service, this will start the driver service and listen for requests.
+   * The callback function will be called when the driver service is started.
+   * @return void
+   */
+  Future<void> startDriving() async {
+    print('Starting driver service');
+    // uiCallbackFunction = callback;
+    // uiCallbackFunction!(DriverBottomSheetStatus.searching);
     requestStream = requestCollection
         .snapshots()
         .map((event) => event.docs
             .map((e) => Request.fromDocument(e))
-            .toList()
-            .elementAt(0))
+            .toList())
         .asBroadcastStream();
     driverReference.update({
       'lastActivity': DateTime.now(),
@@ -139,16 +144,31 @@ class DriverService {
       'isAvailable': true,
       //'isWorking': true
     });
-    requestSub = requestStream.listen((request) {
-      _onRequestRecieved(request);
+    requestSub = requestStream.listen((List<Request> requests) {
+      if (requests.isNotEmpty) {
+        // Handle the first request
+        Request firstRequest = requests.first;
+        _onRequestRecieved(firstRequest);
+      } else {
+        // No requests available
+        print('No requests available at the moment.');
+        // Optionally, perform some action when no requests are available
+      }
     });
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
+  /*
+   * Handle a request that has been recieved, 
+   * if the request is not accepted within the timeout period, 
+   * it will be declined.
+   * @param req The request that has been recieved
+   * @return void
+   */
   _onRequestRecieved(Request req) {
     if (kDebugMode) {
-      print(
-          "Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
+      acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
+      print("Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
     }
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
@@ -158,9 +178,14 @@ class DriverService {
       }
       declineRequest(req.id);
     });
-    uiCallbackFunction!(DriverBottomSheetStatus.confirmation);
+    // uiCallbackFunction!(DriverBottomSheetStatus.confirmation);
   }
 
+  /*
+   * Decline a request
+   * @param requestID The ID of the request to decline
+   * @return void
+   */
   Future<void> declineRequest(String requestID) async {
     if (kDebugMode) {
       print("Declining request: $requestID");
@@ -175,7 +200,7 @@ class DriverService {
           .doc(requestID)
           .update({'status': "SEARCHING"});
       await requestCollection.doc(requestID).delete();
-      uiCallbackFunction!(DriverBottomSheetStatus.searching);
+      // uiCallbackFunction!(DriverBottomSheetStatus.searching);
     }
     if (kDebugMode) {
       print("Request is already deleted");
@@ -216,22 +241,19 @@ class DriverService {
   void stopDriving() {
     driverReference.update({
       'lastActivity': DateTime.now(),
-      // 'isAvailable': false,
-      // 'isWorking': false,
-      'currentRideID': ''
+      'currentRideID': '',
+      'isAvailable': true,
     });
-    if (requestSub != null) {
-      requestSub!.cancel();
-    }
-    if (driverSub != null) {
-      driverSub!.cancel();
-    }
-    if (rideSub != null) {
-      rideSub!.cancel();
-    }
-    if (uiCallbackFunction != null) {
-      uiCallbackFunction!(DriverBottomSheetStatus.closed);
-    }
+    // Clear requests from the driver on Firebase
+    driverReference.collection('requests').get().then((value) {
+      value.docs.map((element) {
+        element.reference.delete();
+      });
+    });
+    // Stop listening for requests
+    requestSub?.cancel();
+    driverSub?.cancel();
+    rideSub?.cancel();
   }
 
   void completeRide() async {
@@ -292,9 +314,9 @@ class DriverService {
       await _firestore.collection('rides').doc(driver.currentRideID).update({
         'lastActivity': DateTime.now(),
         'status': 'CANCELED',
-        'drid': '',
-        'driverName': '',
-        'driverPhotoURL': ''
+        // 'drid': '',
+        // 'driverName': '',
+        // 'driverPhotoURL': ''
       });
     }
     stopDriving();
@@ -309,7 +331,7 @@ class DriverService {
     currentRide = updatedRide;
     switch (updatedRide.status) {
       case 'CANCELED':
-        uiCallbackFunction!(DriverBottomSheetStatus.closed);
+        // uiCallbackFunction!(DriverBottomSheetStatus.closed);
         cancelRide();
         if (showDebugPrints) {
           if (kDebugMode) {
@@ -318,7 +340,7 @@ class DriverService {
         }
         break;
       case 'IN_PROGRESS':
-        uiCallbackFunction!(DriverBottomSheetStatus.rideDetails);
+        // uiCallbackFunction!(DriverBottomSheetStatus.rideDetails);
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride is now IN_PROGRESS");
@@ -326,7 +348,7 @@ class DriverService {
         }
         break;
       case 'ENDED':
-        uiCallbackFunction!(DriverBottomSheetStatus.closed);
+        // uiCallbackFunction!(DriverBottomSheetStatus.closed);
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride has ended.");

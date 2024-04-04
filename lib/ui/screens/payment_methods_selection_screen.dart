@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/constants/zip_design.dart";
-import "package:zipapp/services/payment.dart";
 import "package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart";
 import "package:zipapp/ui/widgets/payment_methods_list.dart";
 import 'package:lucide_icons/lucide_icons.dart';
@@ -39,14 +38,7 @@ class PaymentMethodsSelectionScreenState extends State<PaymentMethodsSelectionSc
         padding: const EdgeInsets.only(left: 24, right: 24),
         child: ListView(
           children: <Widget>[
-            // const SizedBox(height: 8),
-
             const SizedBox(height: 16),
-          
-            // const Text('Payment Methods', style: ZipDesign.sectionTitleText),
-
-            // const SizedBox(height: 16),
-
             TextButton.icon(
               onPressed: () {
                 Navigator.push(
