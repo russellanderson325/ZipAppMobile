@@ -42,15 +42,61 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
     super.initState();
     // Proceed to request confirmation
     ride = RideService();
-    _isMounted = true; 
+    _isMounted = true;
+    statusMessage = "";
 
-    /* 
-     * Start the ride.
-     * Note that this sends a request out to the nearest driver and waits for
-     * the driver to accept the request. The status of the ride is updated
-     * via the statusUpdate callback.
-    */
-    ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price);
+    if (widget.primaryPaymentMethod?['id'] == "apple_pay" || widget.primaryPaymentMethod?['id'] == "google_pay") {
+      Payment.showPaymentSheetToMakeIntent(
+        widget.label, 
+        (widget.price * 100).toInt(), 
+        widget.currencyCode, 
+        widget.merchantCountryCode
+        ).then((result) {
+          if (result['authorized']) {
+            // Send the request to the nearest driver, and so on...
+            ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price);
+
+            // Below is the code to capture the payment intent
+            // Payment.capturePaymentIntent(result['paymentIntentId']).then((result) {
+            //   if (result['success']) {
+            //   } else {
+            //     ride?.cancelRide();
+            //     dispose();
+            //   }
+            // });
+          } else {
+            // Cancel the ride
+            ride?.cancelRide();
+            dispose();
+          }
+        });
+    } else {
+        Payment.createPaymentIntent((widget.price * 100).toInt(), widget.currencyCode).then((result) {
+        Map<String, dynamic> response = Map<String, dynamic>.from(result['response']);
+        String clientSecret = response['client_secret'];                
+        Payment.confirmPayment(clientSecret).then((result) {
+          if (result['authorized'] as bool) {
+            // Send the request to the nearest driver, and so on...
+            ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price);
+
+            // Below is the code to capture the payment intent
+            // String paymentIntentId = clientSecret.split('_secret_')[0];
+            // Payment.capturePaymentIntent(paymentIntentId).then((result) {
+            //   print(result);
+            // }).catchError((error) {
+            //   ride?.cancelRide();
+            //   dispose();
+            // });
+          } else {
+            ride?.cancelRide();
+            dispose();
+          }
+        }).catchError((error) {
+          ride?.cancelRide();
+          dispose();
+        });
+      });
+    }
   }
 
   @override
@@ -110,67 +156,16 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
             break;
           case "IN_PROGRESS":
             print("In Progress");
-            statusMessage = "Driver connected and en route...";
-            // If the payment method is apple/google pay, then prompt the user to pay
-            // If the user declines to pay, then cancel the ride
-            // If the payment times out, then cancel the ride
-            // If the user uses a card, then charge the card
-            // If the payment fails, then cancel the ride
-            // If the payment is successful, then the ride is not canceled and the driver will come to pick up the user
-            if (widget.primaryPaymentMethod?['id'] == "apple_pay" || widget.primaryPaymentMethod?['id'] == "google_pay") {
-              Payment.showPaymentSheetToMakeIntent(
-                widget.label, 
-                (widget.price * 100).toInt(), 
-                widget.currencyCode, 
-                widget.merchantCountryCode
-                ).then((result) {
-                  if (result['authorized']) {
-                    print('Authorization successful, ride will not be cancelled');
-                    print('Payment intent ID: ${result['paymentIntentId']}');
-                    Payment.capturePaymentIntent(result['paymentIntentId']).then((result) {
-                      bool success = result['success'];
-                      
-                    });
-                  } else {
-                    // Cancel the ride
-                    print('Authorization failed, canceling ride');
-                    ride?.cancelRide();
-                    dispose();
-                  }
-                });
-            } else {
-              // Charge the card
-              // If the payment fails, then cancel the ride
-              // If the payment is successful, then the ride is not canceled and the driver will come to pick up the user
-              Payment.createPaymentIntent((widget.price * 100).toInt(), widget.currencyCode).then((clientSecret) {
-                    String paymentIntentId = clientSecret.split('_secret_')[0];
-                    Payment.capturePaymentIntent(paymentIntentId).then((result) {
-                      if (result['success']) {
-                        print('Payment successful, ride will not be cancelled');
-                      } else {
-                        print('Payment failed, canceling ride');
-                        ride?.cancelRide();
-                        dispose();
-                      }
-                      print(result);
-                    }).catchError((error) {
-                      print("Failed to capture payment intent: $error");
-                      ride?.cancelRide();
-                      dispose();
-                    });
-              });
-            }
-              
-            
+            statusMessage = "Driver connected and en route...";            
             break;
           case "ENDED":
             print("Ended");
-            statusMessage = "Ride has ended";
+            statusMessage = "Ride has ended, thank you for riding with us. Your payment has been processed.";
             widget.resetMap();
             break;
           case "CANCELLED":
             print("Cancelled");
-            statusMessage = "Ride has been cancelled";
+            statusMessage = "Ride has been cancelled, no charge will be made.";
             widget.resetMap();
             break;
         }

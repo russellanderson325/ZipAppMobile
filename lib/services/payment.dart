@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zipapp/models/primary_payment_method.dart';
 
@@ -204,7 +204,7 @@ class Payment {
    * @param currency - the currency code for the payment
    * @return Future<String> - a future that resolves to the payment intent
    */
-  static Future<String> createPaymentIntent(int amount, String currency) async {
+  static Future<Map<String, dynamic>> createPaymentIntent(int amount, String currency) async {
     try {
       final HttpsCallableResult result = await createPaymentIntentCallable.call(
         {
@@ -212,9 +212,38 @@ class Payment {
           'currency': currency,
         }
       );
-      return result.data;
+      return {'success': result.data['success'], 'response': result.data['response']};
+    } catch (error) {
+      return {'success': false, 'response': error};
+    }
+  }
+
+  /*
+   * This method is used to confirm a payment intent and basically attach a payment method to it.
+   * @param clientSecret - the client secret of the payment intent
+   */
+  static Future<Map<String, bool>> confirmPayment(String clientSecret) async {
+    try {
+      // These are "okay" to be in the code because they are public keys,
+      // but they should be stored in a more secure location like .env
+      if (kDebugMode) {
+        Stripe.publishableKey = "pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u";
+      } else {
+        Stripe.publishableKey = "pk_live_2bHAGSfue3vfL7ZKKBUisTjT001a503e1U";
+      }
+      // Prepare payment method details
+      PaymentIntent paymentIntent = await Stripe.instance.confirmPayment(
+        paymentIntentClientSecret: clientSecret, 
+        data: const PaymentMethodParams.card(
+          paymentMethodData: PaymentMethodData(),
+        ),
+      );
+      // Payment confirmed
+      print('Payment confirmed: ${paymentIntent.id}');
+      return {'authorized': true};
     } catch (e) {
-      return '';
+      print('Error confirming payment: $e');
+      return {'authorized': false};
     }
   }
 
@@ -229,7 +258,9 @@ class Payment {
    * @param merchantCountryCode - the merchant country code
    */
   static Future<Map<String, dynamic>> showPaymentSheetToMakeIntent(String label, int amount, String currencyCode, String merchantCountryCode) async {
-    String clientSecret = await createPaymentIntent(amount, currencyCode);
+    Map<String, dynamic> result = await createPaymentIntent(amount, currencyCode);
+    Map<String, dynamic> response = Map<String, dynamic>.from(result['response']);
+    String clientSecret = response['client_secret'];
     String paymentIntentId = clientSecret.split('_secret_')[0];
 
     DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
