@@ -1,54 +1,57 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 
 class Request {
   final String id;
-  // final GeoFirePoint destinationAddress;
-  // final GeoFirePoint pickupAddress;
+  final dynamic destinationAddress;
+  final dynamic pickupAddress;
   final String price;
   final String name;
   final String photoURL;
   final Timestamp timeout;
 
-  Request(
-      {required this.id,
-      // this.destinationAddress,
-      // this.pickupAddress,
-      required this.price,
-      required this.name,
-      required this.photoURL,
-      required this.timeout});
+  Request({
+    required this.id,
+    this.destinationAddress,
+    this.pickupAddress,
+    required this.price,
+    required this.name,
+    required this.photoURL,
+    required this.timeout,
+  });
 
-  Map<String, Object> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
-      // 'destinationAddress': destinationAddress.data,
-      // 'pickupAddress': pickupAddress.data,
+      'destinationAddress': destinationAddress,
+      'pickupAddress': pickupAddress,
       'price': price,
       'name': name,
       'photoURL': photoURL,
-      'timeout': timeout
+      'timeout': timeout,
     };
   }
 
-  factory Request.fromJson(Map<String, Object> doc) {
-    Request ride = Request(
-        id: doc['id'] as String,
-        // destinationAddress: extractGeoFirePoint(doc['destinationAddress']),
-        // pickupAddress: extractGeoFirePoint(doc['pickupAddress']),
-        price: doc['price'] as String,
-        name: doc['name'] as String,
-        photoURL: doc['photoURL'] as String,
-        timeout: doc['timeout'] as Timestamp);
-    return ride;
+  factory Request.fromJson(Map<String, dynamic> doc) {
+    return Request(
+      id: doc['id'] as String,
+      destinationAddress: extractGeoFirePoint(doc['destinationAddress']),
+      pickupAddress: extractGeoFirePoint(doc['pickupAddress']),
+      price: doc['price'] as String,
+      name: doc['name'] as String,
+      photoURL: doc['photoURL'] as String,
+      timeout: doc['timeout'] as Timestamp,
+    );
   }
 
   factory Request.fromDocument(DocumentSnapshot doc) {
-    return Request.fromJson(doc.data() as Map<String, Object>);
+    // Ensure that doc.data() is a Map<String, dynamic>, providing a fallback if necessary
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    return Request.fromJson(data);
   }
 
-  // static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
-  //   GeoPoint point = pointMap['geopoint'];
-  //   return GeoFirePoint(point.latitude, point.longitude);
-  // }
+  static GeoFirePoint extractGeoFirePoint(Map<String, dynamic> pointMap) {
+    GeoPoint point = pointMap['geopoint'];
+    return GeoFirePoint(point.latitude, point.longitude);
+  }
 }

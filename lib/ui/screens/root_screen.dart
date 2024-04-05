@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
+import 'package:zipapp/business/ride.dart';
 // import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/ui/screens/rider_main_screen.dart';
@@ -69,7 +70,7 @@ class _RootScreenState extends State<RootScreen> {
         }
       },
     );
-    //return const WelcomeScreen();
+    // return const WelcomeScreen();
   }
 
   Future<bool> _initializeServices(String uid) async {
@@ -80,6 +81,7 @@ class _RootScreenState extends State<RootScreen> {
     DriverService driverService = DriverService();
     await driverService.setupService();
     // RideService rideService = RideService();
+    // await rideService.setupService();
     return true;
   }
 }

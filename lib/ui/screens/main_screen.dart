@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late GlobalKey<MapScreen> mapScaffoldKey;
   late GlobalKey<SearchScreenState> searchScaffoldKey;
-  late GlobalKey<main_map.MapSampleState> mapScaffoldKey2;
+  late GlobalKey<main_map.MapWidgetSampleState> mapScaffoldKey2;
   late double screenHeight, screenWidth;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late VoidCallback onBackPress;
@@ -422,7 +422,7 @@ class _MainScreenState extends State<MainScreen> {
           // TheMap(
           //   key: mapScaffoldKey,
           // ),
-          main_map.Map(key: mapScaffoldKey, driver: false),
+          main_map.MapWidget(key: mapScaffoldKey, driver: false),
           Align(
             alignment: Alignment.topLeft,
             child: SafeArea(

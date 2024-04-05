@@ -5,6 +5,8 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:zipapp/business/drivers.dart';
+import 'package:zipapp/business/user.dart';
 
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
@@ -12,25 +14,35 @@ import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/vehicles_screen.dart';
+import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
+import 'package:zipapp/ui/widgets/message_overlay.dart';
 
-class Map extends StatefulWidget {
+class MapWidget extends StatefulWidget {
   final bool driver;
-  const Map({Key? key, required this.driver}) : super(key: key);
+  const MapWidget({Key? key, required this.driver}) : super(key: key);
 
   @override
-  State<Map> createState() => MapSampleState();
+  State<MapWidget> createState() => MapWidgetSampleState();
 }
 
-class MapSampleState extends State<Map> {
+class MapWidgetSampleState extends State<MapWidget> {
   //general map code
   String mapTheme = '';
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   PositionService positionService = PositionService();
   LatLng? userLatLng, searchLatLng;
   final markers = <Marker>[];
   final polylines = <Polyline>[];
   PolylinePoints polylinePoints = PolylinePoints();
+  DriverService driverService = DriverService();
+  Map<String, bool> driverStates = {
+    'isWorking': false,
+    'onBreak': false,
+  };
+  DateTime lastClockInButtonPress = DateTime(0);
+  DateTime lastClockOutButtonPress = DateTime(0);
+  DateTime lastStartBreakButtonPress = DateTime(0);
+  DateTime lastEndBreakButtonPress = DateTime(0);
 
   @override
   void initState() {
@@ -52,11 +64,7 @@ class MapSampleState extends State<Map> {
           ));
         });
       });
-    }
-
-    if (widget.driver) {
-      clockedIn = false;
-      onBreak = false;
+      updateDriverStatus();
     }
   }
 
@@ -92,36 +100,121 @@ class MapSampleState extends State<Map> {
     );
   }
 
+  void angryMessage(message) {
+    print(message);
+    if (mounted) {
+      MessageOverlay(
+        message: message, 
+        duration: const Duration(seconds: 2),
+        color: "#F54747",
+        textColor: "#FFFFFF",
+        background: true,
+        opacity: 1,
+      ).show(context);
+    }
+  }
+
   //driver code
+  void clockIn() async {
+    // Prevent the user from spamming the clock in button
+    if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
+      return;
+    }
+    lastClockInButtonPress = DateTime.now();
 
-  late bool clockedIn;
-  late bool onBreak;
+    // Clock in the driver
+    Map<String, dynamic> response = await driverService.clockIn();
 
-  void clockIn() {
+    // If the response is not successful, show an error message and return
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    // Start driving
+    driverService.startDriving();
+
+    // Update the UI
     setState(() {
-      clockedIn = true;
-      onBreak = false;
+      driverStates['isOnBreak'] = false;
+      driverStates['isWorking'] = true;
     });
   }
 
-  void clockOut() {
+  void clockOut() async {
+    if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
+      return;
+    }
+    lastClockOutButtonPress = DateTime.now();
+
+    var response = await driverService.clockOut();
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    driverService.stopDriving();
+
     setState(() {
-      clockedIn = false;
-      onBreak = false;
+      driverStates['isOnBreak'] = false;
+      driverStates['isWorking'] = false;
     });
   }
 
-  void startBreak() {
+  void startBreak() async {
+    if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
+      return;
+    }
+    lastStartBreakButtonPress = DateTime.now();
+
+    var response = await driverService.startBreak();
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    driverService.stopDriving();
+
     setState(() {
-      onBreak = true;
+      driverStates['isOnBreak'] = true;
+      driverStates['isWorking'] = true;
     });
   }
 
-  void endBreak() {
+  void endBreak() async {
+    if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
+      return;
+    }
+    lastEndBreakButtonPress = DateTime.now();
+
+    var response = await driverService.endBreak();
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    driverService.startDriving();
+
     setState(() {
-      onBreak = false;
+      driverStates['isOnBreak'] = false;
+      driverStates['isWorking'] = true;
     });
   }
+
+
+  Future<void> updateDriverStatus() async {
+    // Fetch the driver states asynchronously.
+    Map<String, bool> states = await driverService.getDriverStates();
+    // Once the data is available, then update the state synchronously.
+    setState(() {
+      driverStates = states;
+    });
+  }
+
 
   SizedBox driverBox(double screenWidth, double screenHeight) {
     return SizedBox(
@@ -132,18 +225,18 @@ class MapSampleState extends State<Map> {
           color: ZipColors.primaryBackground,
         ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: clockedIn
+        child: driverStates['isWorking']!
             ? Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: TextButton.icon(
-                      onPressed: onBreak ? endBreak : startBreak,
-                      icon: onBreak
+                      onPressed: driverStates['isOnBreak']! ? endBreak : startBreak,
+                      icon: driverStates['isOnBreak']!
                           ? const Icon(LucideIcons.play)
                           : const Icon(LucideIcons.pause),
-                      label: onBreak
+                      label: driverStates['isOnBreak']!
                           ? const Text('Resume driving')
                           : const Text('Start break'),
                       style: ButtonStyle(
@@ -274,9 +367,15 @@ class MapSampleState extends State<Map> {
         _moveCamera(
             latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
                 value.result!.geometry!.location!.lng!));
+
         // Show the vehicle request screen
         VehiclesScreenState.showVehiclesScreen(
-            context, (result!.distanceValue)!.toDouble());
+          context, 
+          (result!.distanceValue)!.toDouble(), 
+          value.result!.geometry!.location!.lat!, 
+          value.result!.geometry!.location!.lng!,
+          _resetMarkers,
+        );
       },
     );
   }

@@ -8,13 +8,19 @@ const attachPaymentMethodToCustomer = functions.https.onCall(async (data, contex
             "unauthenticated", "The function must be called while authenticated.",
         );
     }
-    const paymentMethod = await stripe.paymentMethods.attach(
-        data.paymentMethodId,
-        {
-            customer: data.customerId,
-        },
-    );
-    return paymentMethod;
+    try {
+        const paymentMethod = await stripe.paymentMethods.attach(
+            data.paymentMethodId,
+            {
+                customer: data.customerId,
+            },
+        );
+        console.log("Payment method attached to customer", paymentMethod.id);
+        return {success: true, response: paymentMethod};
+    } catch (error) {
+        console.error("Stripe error:", error);
+        return {success: false, response: error};
+    }
 });
 
 module.exports = attachPaymentMethodToCustomer;

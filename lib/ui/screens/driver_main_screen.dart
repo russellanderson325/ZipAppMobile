@@ -332,14 +332,14 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'Clock In',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              List result = await driverService.clockIn();
-                              //[message, override]
-                              if (result[1]) {
-                                _overrideAlert(context, result[0]);
-                              } else {
-                                _driverAlert(context, result[0], result[1]);
-                                await driverService.startDriving(updateUI);
-                              }
+                              // List result = await driverService.clockIn();
+                              // //[message, override]
+                              // if (result[1]) {
+                              //   _overrideAlert(context, result[0]);
+                              // } else {
+                              //   _driverAlert(context, result[0], result[1]);
+                              //   driverService.startDriving();
+                              // }
                             },
                           ),
                           SpeedDialChild(
@@ -348,8 +348,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'Clock Out',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              String message = await driverService.clockOut();
-                              _driverAlert(context, message, false);
+                              // String message = await driverService.clockOut();
+                              // _driverAlert(context, message, false);
                             },
                           ),
                           SpeedDialChild(
@@ -358,8 +358,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'Start Break',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              String message = await driverService.startBreak();
-                              _driverAlert(context, message, false);
+                              // String message = await driverService.startBreak();
+                              // _driverAlert(context, message, false);
                             },
                           ),
                           SpeedDialChild(
@@ -368,8 +368,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                             label: 'End Break',
                             labelStyle: const TextStyle(fontSize: 17.0),
                             onTap: () async {
-                              String message = await driverService.endBreak();
-                              _driverAlert(context, message, false);
+                              // String message = await driverService.endBreak();
+                              // _driverAlert(context, message, false);
                             },
                           ),
                         ],
@@ -661,9 +661,9 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                       style: TextStyle(color: Colors.white, fontSize: 16.0),
                     ),
                     onPressed: () async {
-                      // await _openRoute(currentRequest.pickupAddress.latitude,
-                      //     currentRequest.pickupAddress.longitude);
-                      // await driverService.acceptRequest(currentRequest.id);
+                      await _openRoute(currentRequest.pickupAddress.latitude,
+                          currentRequest.pickupAddress.longitude);
+                      await driverService.acceptRequest(currentRequest.id);
                     },
                   ),
                   ElevatedButton.icon(
@@ -694,7 +694,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
   void _overrideDriver() async {
     String result = await driverService.overrideClockIn();
     _driverAlert(context, result, false);
-    await driverService.startDriving(updateUI);
+    driverService.startDriving();
   }
 
 /*

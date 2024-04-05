@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zipapp/models/primary_payment_method.dart';
 
@@ -33,7 +33,24 @@ class Payment {
   static final removePaymentMethodCallable = functions.httpsCallable('removePaymentMethod');
   static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
+  static final capturePaymentIntentCallable = functions.httpsCallable('capturePaymentIntent');
   static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
+
+
+  static void addPaymentDetailsToFirebase(paymentDetails, currency, last4) async {
+    var firebaseUser = auth.FirebaseAuth.instance.currentUser;
+    await FirebaseFirestore.instance
+      .collection("stripe_customers")
+      .doc(firebaseUser?.uid)
+      .collection('payments')
+      .add({
+        "amount": paymentDetails.amount,
+        "currency": currency,
+        "payment_method": paymentDetails.paymentMethod,
+        "receipt_email": firebaseUser?.email,
+        "card_last4": last4,
+      });
+  }
 
   /*
    * Fetches the payment methods from the cache if they exist
@@ -79,7 +96,6 @@ class Payment {
       paymentMethodId: paymentMethodId,
     );
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('Primary Payment Method: $primaryPaymentMethod');
     prefs.setString('primaryPaymentMethod', json.encode(primaryPaymentMethod));
     primaryPaymentMethodStatic = primaryPaymentMethod;
     return primaryPaymentMethod;
@@ -147,13 +163,48 @@ class Payment {
   }
 
   /*
+   * This method is used to modify the price of a payment intent and capture it.
+   * This is specifically useful when the user decides to split the fair among users.
+   * @param paymentIntent - the payment intent to be captured
+   * @param amount - the amount to be captured
+   */
+  static void modifyPriceAndCapturePaymentIntent(String paymentIntent, int amount) async {
+    try {
+      await capturePaymentIntentCallable.call(
+        {
+          'paymentIntent': paymentIntent,
+          'amount': amount,
+        }
+      );
+    } catch (e) {
+      print('Error capturing payment intent: $e');
+    }
+  }
+
+  /*
+   * This method is used to capture a payment intent. It basically charges the user.
+   * @param paymentIntent - the payment intent to be captured
+   */
+  static Future<Map<String, dynamic>> capturePaymentIntent(String paymentIntentId) async {
+    try {
+      final results = await capturePaymentIntentCallable.call({'paymentIntentId': paymentIntentId});
+
+      Map<String, dynamic> response = Map<String, dynamic>.from(results.data);
+      return response;
+    } catch (error) {
+      print('Error capturing payment intent: $error');
+      rethrow;
+    }
+  }
+
+  /*
    * This method is used to create a payment intent. It basically declares the intention
    * to make a payment and returns the payment intent (sort of).
    * @param amount - the amount to be paid
    * @param currency - the currency code for the payment
    * @return Future<String> - a future that resolves to the payment intent
    */
-  static Future<String> createPaymentIntent(int amount, String currency) async {
+  static Future<Map<String, dynamic>> createPaymentIntent(int amount, String currency) async {
     try {
       final HttpsCallableResult result = await createPaymentIntentCallable.call(
         {
@@ -161,24 +212,58 @@ class Payment {
           'currency': currency,
         }
       );
-      return result.data;
-    } catch (e) {
-      return '';
+      return {'success': result.data['success'], 'response': result.data['response']};
+    } catch (error) {
+      return {'success': false, 'response': error};
     }
   }
 
   /*
-   * This method is used to show the payment sheet to make a payment.
-   * It should show the Apple Pay sheet for iOS and the Google Pay sheet 
-   * for Android (hopefully -- Android still needs testing).
+   * This method is used to confirm a payment intent and basically attach a payment method to it.
+   * @param clientSecret - the client secret of the payment intent
+   */
+  static Future<Map<String, bool>> confirmPayment(String clientSecret) async {
+    try {
+      // These are "okay" to be in the code because they are public keys,
+      // but they should be stored in a more secure location like .env
+      if (kDebugMode) {
+        Stripe.publishableKey = "pk_test_Cn8XIP0a25tKPaf80s04Lo1m00dQhI8R0u";
+      } else {
+        Stripe.publishableKey = "pk_live_2bHAGSfue3vfL7ZKKBUisTjT001a503e1U";
+      }
+      // Prepare payment method details
+      PaymentIntent paymentIntent = await Stripe.instance.confirmPayment(
+        paymentIntentClientSecret: clientSecret, 
+        data: const PaymentMethodParams.card(
+          paymentMethodData: PaymentMethodData(),
+        ),
+      );
+      // Payment confirmed
+      print('Payment confirmed: ${paymentIntent.id}');
+      return {'authorized': true};
+    } catch (e) {
+      print('Error confirming payment: $e');
+      return {'authorized': false};
+    }
+  }
+
+  /*
+   * This method is used to show the payment sheet to make an intent.
+   * I believe how this works is we create a payment intention in Stripe, which is set to manually be captured.
+   * Then we show the payment sheet to the user, and when the user confirms, the payment intent is mapped to the payment method.
+   * We can later capture the payment intent to actually charge the user.
    * @param label - the label for the payment
    * @param amount - the amount to be paid
    * @param currencyCode - the currency code for the payment
    * @param merchantCountryCode - the merchant country code
    */
-  static Future<bool> showPaymentSheetToMakePayment(String label, int amount, String currencyCode, String merchantCountryCode) async {
-    String paymentIntent = await createPaymentIntent(amount, currencyCode);
-    DocumentReference<Map<String, dynamic>> stripeCustomer = await FirebaseFirestore.instance
+  static Future<Map<String, dynamic>> showPaymentSheetToMakeIntent(String label, int amount, String currencyCode, String merchantCountryCode) async {
+    Map<String, dynamic> result = await createPaymentIntent(amount, currencyCode);
+    Map<String, dynamic> response = Map<String, dynamic>.from(result['response']);
+    String clientSecret = response['client_secret'];
+    String paymentIntentId = clientSecret.split('_secret_')[0];
+
+    DocumentReference<Map<String, dynamic>> stripeCustomer = FirebaseFirestore.instance
         .collection('stripe_customers')
         .doc(_firebaseUser?.uid);
 
@@ -190,7 +275,7 @@ class Payment {
       paymentSheetParameters: SetupPaymentSheetParameters(
         customerId: customerId,
         customFlow: false,
-        paymentIntentClientSecret: paymentIntent.toString(),
+        paymentIntentClientSecret: clientSecret,
         allowsDelayedPaymentMethods: false,
         removeSavedPaymentMethodMessage: 'Remove Payment Method',
         primaryButtonLabel: 'Pay',
@@ -214,11 +299,15 @@ class Payment {
     try {
       // Present the Payment Sheet
       await Stripe.instance.presentPaymentSheet();
-      print("Payment successful");
-      return true;
+      return {
+        "authorized": true,
+        "paymentIntentId": paymentIntentId,
+      };
     } catch (error) {
-      print("Payment failed: $error");
-      return false;
+      return {
+        "authorized": false,
+        "paymentIntentId": paymentIntentId,
+      };
     }
   }
 
@@ -234,8 +323,20 @@ class Payment {
     
     var documentSnapshot = await stripeCustomer.get();
     var customerId = documentSnapshot.data()?['customer_id'];
-          
-    // First check to see if finger print already exists in users payment methods
+    
+    // Attach the payment method to the customer in the Stripe API
+    HttpsCallableResult<dynamic> response = await attachPaymentMethodToCustomerCallable.call(
+      {
+        'paymentMethodId': paymentMethodId,
+        'customerId': customerId,
+      }
+    );
+
+    if (!response.data['success']) {
+      print('Error attaching payment method to customer: ${response.data['response']}');
+      return;
+    }
+    // Check to see if finger print already exists in users payment methods
     var querySnapshot = await stripeCustomer
         .collection('payment_methods')
         .where('fingerprint', isEqualTo: fingerprint)
@@ -255,14 +356,6 @@ class Payment {
             "fingerprint": fingerprint,
           });
     }
-
-    // Attach the payment method to the customer in the Stripe API
-    attachPaymentMethodToCustomerCallable.call(
-      {
-        'paymentMethodId': paymentMethodId,
-        'customerId': customerId,
-      }
-    );
   }
 
   /*
@@ -360,15 +453,13 @@ class Payment {
   * @return Map<String, dynamic>? - the payment method details
   */
   static Future<Map<String, dynamic>?> getPaymentMethodById(String paymentMethodId) async {
-    try {
-      final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
-      Map<String, dynamic> data = results.data;
-      data['id'] = paymentMethodId; // Add the payment method id to the data
-      return data;
-    } catch (e) {
-      // print('Error calling function: $e');
-      return null;
-    }
+    final results = await getPaymentMethodDetailsCallable.call({'paymentMethodId': paymentMethodId});
+
+    if (!results.data['success']) throw Exception('Error getting payment method details');
+
+    Map<String, dynamic> response = Map<String, dynamic>.from(results.data['response']);
+    response['id'] = paymentMethodId;
+    return response;
   }
 
   /*
@@ -391,7 +482,6 @@ class Payment {
   static void setPaymentMethodsCache(List<Map<String, dynamic>?> methods) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('paymentMethods', json.encode(methods));
-    // prefs.setString('paymentMethods', '');
   }
 
   /*

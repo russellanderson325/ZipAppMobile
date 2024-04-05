@@ -34,7 +34,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                 fontWeight: FontWeight.w500)),
       ),
       body: const Center(
-        child: mapwidget.Map(driver: true),
+        child: mapwidget.MapWidget(driver: true),
       ),
     );
   }
