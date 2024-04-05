@@ -100,25 +100,11 @@ class MapWidgetSampleState extends State<MapWidget> {
     );
   }
 
-  void angryMessage(message) {
-    print(message);
-    if (mounted) {
-      MessageOverlay(
-        message: message, 
-        duration: const Duration(seconds: 2),
-        color: "#F54747",
-        textColor: "#FFFFFF",
-        background: true,
-        opacity: 1,
-      ).show(context);
-    }
-  }
-
   //driver code
   void clockIn() async {
     // Prevent the user from spamming the clock in button
     if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastClockInButtonPress = DateTime.now();
@@ -128,7 +114,7 @@ class MapWidgetSampleState extends State<MapWidget> {
 
     // If the response is not successful, show an error message and return
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -144,14 +130,14 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   void clockOut() async {
     if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastClockOutButtonPress = DateTime.now();
 
     var response = await driverService.clockOut();
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -165,14 +151,14 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   void startBreak() async {
     if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastStartBreakButtonPress = DateTime.now();
 
     var response = await driverService.startBreak();
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -186,14 +172,14 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   void endBreak() async {
     if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastEndBreakButtonPress = DateTime.now();
 
     var response = await driverService.endBreak();
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -363,30 +349,31 @@ class MapWidgetSampleState extends State<MapWidget> {
           searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
               value.result!.geometry!.location!.lng!);
         });
-        PolylineResult? result = await _addSearchResult(searchResult);
-        _moveCamera(
-            latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
-                value.result!.geometry!.location!.lng!));
+        if (mounted) {
+          PolylineResult result = await _addSearchResult(searchResult);
+          _moveCamera(
+              latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
+                  value.result!.geometry!.location!.lng!));
 
-        // Show the vehicle request screen
-        VehiclesScreenState.showVehiclesScreen(
-          context, 
-          (result!.distanceValue)!.toDouble(), 
-          value.result!.geometry!.location!.lat!, 
-          value.result!.geometry!.location!.lng!,
-          _resetMarkers,
-        );
+          // Show the vehicle request screen
+          VehiclesScreenState.showVehiclesScreen(
+            context, 
+            (result.distanceValue)!.toDouble(), 
+            value.result!.geometry!.location!.lat!, 
+            value.result!.geometry!.location!.lng!,
+            _resetMarkers,
+          );
+        }
       },
     );
   }
 
-  Future<PolylineResult?> _addSearchResult(
+  Future<PolylineResult> _addSearchResult(
       LocalSearchResult searchResult) async {
     BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(size: Size(24, 24)),
       'assets/destination_map_marker.png',
     );
-    if (mounted) {
       _resetMarkers();
       setState(() {
         markers.add(Marker(
@@ -397,7 +384,6 @@ class MapWidgetSampleState extends State<MapWidget> {
         ));
       });
       return await _updatePolylines();
-    }
   }
 
   void _moveCamera({latlng, zoom = 17}) async {

@@ -5,12 +5,14 @@ import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/business/ride.dart";
 import "package:zipapp/constants/zip_design.dart";
 import "package:zipapp/services/payment.dart";
+import "package:zipapp/ui/widgets/message_overlay.dart";
 
 class VehicleRequestStatusScreen extends StatefulWidget {
   final double lat;
   final double long;
   final String label;
   final double price;
+  final String model;
   final String currencyCode;
   final String merchantCountryCode;
   final Map<String, dynamic>? primaryPaymentMethod;
@@ -21,7 +23,8 @@ class VehicleRequestStatusScreen extends StatefulWidget {
     required this.lat, 
     required this.long, 
     required this.label, 
-    required this.price, 
+    required this.price,
+    required this.model,
     required this.currencyCode, 
     required this.merchantCountryCode, 
     required this.primaryPaymentMethod,
@@ -55,8 +58,9 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
         widget.merchantCountryCode
         ).then((result) {
           if (result['authorized']) {
+            if (mounted) MessageOverlay.happyMessage(context, "Payment intent successfully authorized. Please wait for a driver to accept the ride.");
             // Send the request to the nearest driver, and so on...
-            ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price);
+            ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price, widget.model);
 
             // Below is the code to capture the payment intent
             // Payment.capturePaymentIntent(result['paymentIntentId']).then((result) {
@@ -68,6 +72,7 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
             // });
           } else {
             // Cancel the ride
+            if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
             ride?.cancelRide();
             Navigator.pop(context);
           }
@@ -78,9 +83,17 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
         String clientSecret = response['client_secret'];                
         Payment.confirmPayment(clientSecret).then((result) {
           if (result['authorized'] as bool) {
+          if (mounted) MessageOverlay.happyMessage(context, "Payment intent successfully authorized. Please wait for a driver to accept the ride.");
             // Send the request to the nearest driver, and so on...
-            ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price);
+            ride?.startRide(widget.lat, widget.long, statusUpdate, widget.price, widget.model);
 
+            Map<String, dynamic> paymentDetails = {
+              "paymentMethod": widget.primaryPaymentMethod?['id'],
+              "amount": widget.price,
+            };
+
+            print(widget.primaryPaymentMethod);
+            Payment.addPaymentDetailsToFirebase(paymentDetails, widget.primaryPaymentMethod?['last4']);
             // Below is the code to capture the payment intent
             // String paymentIntentId = clientSecret.split('_secret_')[0];
             // Payment.capturePaymentIntent(paymentIntentId).then((result) {
@@ -90,10 +103,12 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
             //   dispose();
             // });
           } else {
+            if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
             ride?.cancelRide();
             Navigator.pop(context);
           }
         }).catchError((error) {
+          if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
           ride?.cancelRide();
           Navigator.pop(context);
         });
@@ -114,7 +129,7 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("d"),
+        title: const Text("Ride Information"),
         automaticallyImplyLeading: false,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
@@ -205,7 +220,8 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
       double lat, 
       double long,
       String label,
-      double price, 
+      double price,
+      String model,
       String currencyCode, 
       String merchantCountryCode, 
       Map<String, dynamic>? primaryPaymentMethod,
@@ -214,7 +230,7 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
     // Show the bottom sheet
     showModalBottomSheet(
       clipBehavior: Clip.hardEdge,
-      barrierColor: Colors.transparent,
+      barrierColor: const Color.fromARGB(60, 0, 0, 0),
       context: context,
       isScrollControlled: true,
       isDismissible: false,
@@ -230,7 +246,8 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
             lat: lat, 
             long: long, 
             label: label, 
-            price: price, 
+            price: price,
+            model: model,
             currencyCode: currencyCode, 
             merchantCountryCode: merchantCountryCode, 
             primaryPaymentMethod: primaryPaymentMethod,

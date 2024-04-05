@@ -27,6 +27,8 @@ class Payment {
     card: false,
     paymentMethodId: '',
   );
+  static const currency = "USD";
+
 
   // Firebase Functions
   static final getPaymentMethodDetailsCallable = functions.httpsCallable('getPaymentMethodDetails');
@@ -36,17 +38,16 @@ class Payment {
   static final capturePaymentIntentCallable = functions.httpsCallable('capturePaymentIntent');
   static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
 
-
-  static void addPaymentDetailsToFirebase(paymentDetails, currency, last4) async {
+  static void addPaymentDetailsToFirebase(paymentDetails, last4) async {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     await FirebaseFirestore.instance
       .collection("stripe_customers")
       .doc(firebaseUser?.uid)
       .collection('payments')
       .add({
-        "amount": paymentDetails.amount,
+        "amount": paymentDetails['amount'],
         "currency": currency,
-        "payment_method": paymentDetails.paymentMethod,
+        "payment_method": paymentDetails['paymentMethod'],
         "receipt_email": firebaseUser?.email,
         "card_last4": last4,
       });

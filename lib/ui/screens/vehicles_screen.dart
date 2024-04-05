@@ -23,7 +23,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   // UniqueKey uniqueKey = UniqueKey();
   int refreshCounter = 0;
   String label = "X Golf Cart";
-  String cartSize = "X";
+  String model = "X";
   bool zipXL = false;
   double? price;
   String currencyCode = "USD";
@@ -39,7 +39,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   void initState() {
     super.initState();
     _paymentMethodDetailsFuture = Payment.getPrimaryPaymentMethodDetails();
-    setCartValues(label, cartSize, zipXL);
+    setCartValues(label, model, zipXL);
   }
 
   @override
@@ -62,6 +62,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
     } else {
       return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           scrolledUnderElevation: 0,
           backgroundColor: Colors.white,
           title: const Text("Cart Request"),
@@ -90,11 +91,11 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                           style: ButtonStyle(
                             padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
                             foregroundColor: MaterialStateProperty.all(Colors.black),
-                            backgroundColor: MaterialStateProperty.all(cartSize == 'X' ? ZipColors.primaryBackground : Colors.white),
+                            backgroundColor: MaterialStateProperty.all(model == 'X' ? ZipColors.primaryBackground : Colors.white),
                             shape: MaterialStateProperty.all(RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             )),
-                            side: MaterialStateProperty.all(BorderSide(color: cartSize == 'X' ? ZipColors.boxBorder : TailwindColors.gray500)),
+                            side: MaterialStateProperty.all(BorderSide(color: model == 'X' ? ZipColors.boxBorder : TailwindColors.gray500)),
                             fixedSize: MaterialStateProperty.all(const Size(160, 80)),
                           ),
                           child: const Image(
@@ -111,11 +112,11 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                           style: ButtonStyle(
                             padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
                             foregroundColor: MaterialStateProperty.all(Colors.black),
-                            backgroundColor: MaterialStateProperty.all(cartSize == 'XL' ? ZipColors.primaryBackground : Colors.white),
+                            backgroundColor: MaterialStateProperty.all(model == 'XL' ? ZipColors.primaryBackground : Colors.white),
                             shape: MaterialStateProperty.all(RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             )),
-                            side: MaterialStateProperty.all(BorderSide(color: cartSize == 'XL' ? ZipColors.boxBorder : Colors.grey)),
+                            side: MaterialStateProperty.all(BorderSide(color: model == 'XL' ? ZipColors.boxBorder : Colors.grey)),
                             fixedSize: MaterialStateProperty.all(const Size(160, 80)),
                           ),
                           child: const Image(
@@ -129,7 +130,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Size: $cartSize",
+                      "Size: $model",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
@@ -155,7 +156,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               const Text("Primary Payment Method"),
               const SizedBox(height: 8),
               FutureBuilder<Map<String, dynamic>?>(
@@ -250,7 +251,8 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                     widget.lat, 
                     widget.long, 
                     label, 
-                    price??0.0, 
+                    price??0.0,
+                    model,
                     currencyCode, 
                     merchantCountryCode, 
                     primaryPaymentMethodDetails,
@@ -315,7 +317,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
     amount = double.parse((amount).toStringAsFixed(2));
     setState(() {
       this.label = label;
-      cartSize = size;
+      model = size;
       price = amount;
     });
   }

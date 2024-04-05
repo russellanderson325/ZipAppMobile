@@ -65,7 +65,7 @@ class RideService {
    * @param paymentPrice: double - the price of the ride
    * @return void
    */
-  void startRide(double lat, double long, Function statusUpdateIn, double paymentPrice) async {
+  void startRide(double lat, double long, Function statusUpdateIn, double paymentPrice, String model) async {
     statusUpdate = statusUpdateIn;
     statusUpdate("SEARCHING");
     await _initializeRideInFirestore(lat, long);
@@ -84,7 +84,7 @@ class RideService {
     /// a driver accepts or if there are no drivers or no driver accepted, waits 60 seconds for
     /// availability to change and restart with a new list of drivers up to 5 times.
     while (isSearchingForRide) {
-      List<Driver> nearbyDrivers = await driverService.getNearbyDriversList(radius);
+      List<Driver> nearbyDrivers = await driverService.getNearbyDriversListWithModel(radius, model);
       print("Nearby drivers: $nearbyDrivers");
       if (nearbyDrivers.isNotEmpty && timesSearched < 6) {
         print('Nearby drivers not empty');
@@ -95,7 +95,7 @@ class RideService {
             print("Driver: ${nearbyDrivers[i].uid}");
             Driver driver = nearbyDrivers[i];
             await rideReference.update({'status': 'WAITING'});
-            bool driverAccepted = await _sendRequestToDriver(driver, paymentPrice);
+            bool driverAccepted = await _sendRequestToDriver(driver, model, paymentPrice);
             if (driverAccepted) acceptedDriver = driver;
           }
         }
@@ -157,7 +157,7 @@ class RideService {
   /// Sends a request to the specified driver using the service's current pickup and destination GeoFirePoints.
   /// Sets a 60 second timeout on the request for the driver to answer by, and waits for 70 seconds to get a responce
   /// before timing out locally.
-  Future<bool> _sendRequestToDriver(Driver driver, double paymentPrice) async {
+  Future<bool> _sendRequestToDriver(Driver driver, String model, double paymentPrice) async {
     GeoFirePoint destination = locationService.getCurrentGeoFirePoint();
     GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
     // Convert GeoFirePoint to Map before sending
@@ -186,6 +186,7 @@ class RideService {
           pickupAddress: pickupData,
           price: "\$$pAmount",
           photoURL: userService.user.profilePictureURL,
+          model: model,
           timeout: Timestamp.fromMillisecondsSinceEpoch(
             Timestamp.now().millisecondsSinceEpoch + 60000
           )

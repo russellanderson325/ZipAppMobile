@@ -425,11 +425,12 @@ class DriverService {
     return nearbyDriversListStream;
   }
 
-  Future<List<Driver>> getNearbyDriversList(double radius) async {
+  Future<List<Driver>> getNearbyDriversListWithModel(double radius, String model) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
     Query collectionReference =
         _firestore.collection('drivers')
-        .where('isAvailable', isEqualTo: true);
+        .where('isAvailable', isEqualTo: true)
+        .where('model', isEqualTo: model);
 
     Stream<List<Driver>> stream = geo
         .collection(collectionRef: collectionReference)
