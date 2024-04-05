@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 
@@ -38,7 +37,8 @@ class ZipDesign {
   );
   // ButtonStyles
   static final ButtonStyle yellowButtonStyle = ButtonStyle(
-    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+    shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
     padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
     iconColor: MaterialStateProperty.all(Colors.black),
     iconSize: MaterialStateProperty.all(16),
@@ -46,13 +46,25 @@ class ZipDesign {
     backgroundColor: MaterialStateProperty.all(ZipColors.zipYellow),
     textStyle: MaterialStateProperty.all(ZipDesign.labelText),
   );
-  static final ButtonStyle redButtonStyle = ButtonStyle(
-    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+  static final ButtonStyle disabledYellowButtonStyle = ButtonStyle(
+    shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
     padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
     iconColor: MaterialStateProperty.all(Colors.black),
     iconSize: MaterialStateProperty.all(16),
     foregroundColor: MaterialStateProperty.all(Colors.black),
-    backgroundColor: MaterialStateProperty.all(const Color.fromARGB(100, 255, 0, 0)),
+    backgroundColor: MaterialStateProperty.all(TailwindColors.gray300),
+    textStyle: MaterialStateProperty.all(ZipDesign.labelText),
+  );
+  static final ButtonStyle redButtonStyle = ButtonStyle(
+    shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+    padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+    iconColor: MaterialStateProperty.all(Colors.black),
+    iconSize: MaterialStateProperty.all(16),
+    foregroundColor: MaterialStateProperty.all(Colors.black),
+    backgroundColor:
+        MaterialStateProperty.all(const Color.fromARGB(100, 255, 0, 0)),
     textStyle: MaterialStateProperty.all(ZipDesign.labelText),
   );
 }
