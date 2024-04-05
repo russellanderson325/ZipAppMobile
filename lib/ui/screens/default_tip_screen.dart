@@ -108,13 +108,18 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-            icon: const Icon(Icons.close, color: Colors.black),
-            onPressed: () => Navigator.pop(context)),
         title: Text('Default Tip',
             style: ZipDesign.pageTitleText.copyWith(color: Colors.black)),
         backgroundColor: ZipColors.primaryBackground,
+        titleSpacing: 0,
         scrolledUnderElevation: 0,
+        leading: IconButton(
+          padding: const EdgeInsets.all(0),
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       backgroundColor: ZipColors.primaryBackground,
       body: SingleChildScrollView(
@@ -207,33 +212,46 @@ class DefaultTipScreenState extends State<DefaultTipScreen> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
+        height: 68,
         color: ZipColors.primaryBackground,
         surfaceTintColor: Colors.transparent,
-        child: SafeArea(
-          child: TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor:
-                  hasChanged && Validator.validateTipAmount(newTipAmount)
-                      ? ZipColors.zipYellow
-                      : TailwindColors.gray300,
-              minimumSize: const Size(double.infinity, 50),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-            ),
-            onPressed: hasChanged
-                ? () {
-                    saveChanges();
-                    Navigator.pop(context);
-                  }
-                : null,
-            child: Text(
-              'Save changes',
-              style: TextStyle(
-                color: hasChanged ? Colors.black : TailwindColors.gray500,
-                fontSize: 18,
-              ),
-            ),
+        child: TextButton(
+          onPressed: hasChanged
+              ? () {
+                  saveChanges();
+                  Navigator.pop(context);
+                }
+              : null,
+          style: hasChanged
+              ? ZipDesign.yellowButtonStyle
+              : ZipDesign.yellowButtonStyle.copyWith(
+                  backgroundColor:
+                      MaterialStateProperty.all(TailwindColors.gray300),
+                ),
+          child: Text(
+            'Save Changes',
+            style: hasChanged ? ZipDesign.bodyText : ZipDesign.disabledBodyText,
           ),
         ),
+        // child: SafeArea(
+        //   child: TextButton(
+        //     style: TextButton.styleFrom(
+        //       backgroundColor:
+        //           hasChanged && Validator.validateTipAmount(newTipAmount)
+        //               ? ZipColors.zipYellow
+        //               : TailwindColors.gray300,
+        //       minimumSize: const Size(double.infinity, 50),
+        //       padding: const EdgeInsets.symmetric(vertical: 15),
+        //     ),
+        //     child: Text(
+        //       'Save changes',
+        //       style: TextStyle(
+        //         color: hasChanged ? Colors.black : TailwindColors.gray500,
+        //         fontSize: 18,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ),
     );
   }
