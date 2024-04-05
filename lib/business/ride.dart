@@ -130,6 +130,7 @@ class RideService {
     statusUpdate("CANCELED");
     rideSubscription.cancel();
     DocumentSnapshot myRide = await rideReference.get();
+    if (acceptedDriver == null) return;
     _getDriverReference(acceptedDriver!.uid).collection('requests').doc(rideID).delete();
     // If the ride exists, remove the rider from the current rides collection
     if (myRide.exists) {

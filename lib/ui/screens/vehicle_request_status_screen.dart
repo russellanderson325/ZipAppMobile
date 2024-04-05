@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
+import "package:lucide_icons/lucide_icons.dart";
 import "package:zipapp/business/ride.dart";
 import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/business/ride.dart";
+import "package:zipapp/constants/zip_design.dart";
 import "package:zipapp/services/payment.dart";
 
 class VehicleRequestStatusScreen extends StatefulWidget {
@@ -67,7 +69,7 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
           } else {
             // Cancel the ride
             ride?.cancelRide();
-            dispose();
+            Navigator.pop(context);
           }
         });
     } else {
@@ -89,11 +91,11 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
             // });
           } else {
             ride?.cancelRide();
-            dispose();
+            Navigator.pop(context);
           }
         }).catchError((error) {
           ride?.cancelRide();
-          dispose();
+          Navigator.pop(context);
         });
       });
     }
@@ -102,32 +104,51 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
   @override
   void dispose() {
     _isMounted = false; // Set to false when the widget is about to be disposed
-    ride?.cancelRide(); // Still unsure if this is correct -Jordyn (4/1/24)
+    // ride?.cancelRide(); // Still unsure if this is correct -Jordyn (4/1/24)
     Future.microtask(() => widget.resetMap());
-    print("Ride cancelled");
 
-    try {
-      super.dispose();
-    } catch (e) {
-      // Do nothing
-    }
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text("d"),
+        automaticallyImplyLeading: false,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
       body: Container(
+        alignment: Alignment.center,
         padding: const EdgeInsets.only(left: 24, right: 24),
         child: ListView(
           children: <Widget>[
             Center(
               child: Text(statusMessage),
             ),
+            const SizedBox(height: 250),
+            TextButton.icon(
+              onPressed: () async {
+                ride?.cancelRide();
+                Navigator.pop(context);
+              },
+              icon: const Icon(LucideIcons.trash),
+              style: ZipDesign.redButtonStyle,
+              label: const Text('Cancel ride')
+            ),
+            const SizedBox(height: 5),
+            const Center(
+              child: Text(
+              "If the ride is cancelled, no charge will be made",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 10,
+              ),
+            )
+            ),
+
           ],
         ),
       )
@@ -195,8 +216,10 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
       clipBehavior: Clip.hardEdge,
       barrierColor: Colors.transparent,
       context: context,
-      isScrollControlled: true, // Set to true if your content might not fit
-      shape: const RoundedRectangleBorder( // Optional: to style the top corners
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
         side: BorderSide(color: ZipColors.boxBorder, width: 1.0),
       ),

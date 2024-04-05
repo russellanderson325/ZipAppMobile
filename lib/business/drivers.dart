@@ -100,6 +100,10 @@ class DriverService {
       return Driver.fromDocument(snapshot);
     }).listen((driver) {
       this.driver = driver;
+      print('Driver state updated: ${driver.isWorking}, ${driver.isAvailable}');
+      if (driver.isWorking && driver.isAvailable) {
+        initRequestSub();
+      }
     });
     //locationSub.cancel();
     locationSub = locationService.positionStream.listen(_updatePosition);
@@ -121,10 +125,10 @@ class DriverService {
         .doc(userService.userID)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
-      driverStates['isAvailable'] = documentSnapshot.get('isAvailable') ?? false;
-      driverStates['isWorking'] = documentSnapshot.get('isWorking') ?? false;
-      driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak') ?? false;
-    });
+          driverStates['isAvailable'] = documentSnapshot.get('isAvailable') ?? false;
+          driverStates['isWorking'] = documentSnapshot.get('isWorking') ?? false;
+          driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak') ?? false;
+        });
     return Future.value(driverStates);
   }
 
@@ -154,17 +158,24 @@ class DriverService {
    */
   void startDriving() async {
     print('Starting driver service');
-    requestStream = requestCollection
-        .snapshots()
-        .map((event) => event.docs
-            .map((e) => Request.fromDocument(e))
-            .toList())
-        .asBroadcastStream();
     driverReference.update({
       'lastActivity': DateTime.now(),
       'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
       'isAvailable': true,
     });
+    initRequestSub();
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  void initRequestSub() {
+    // If requestSub is not already listening, start listening
+    if (requestSub != null) return;
+    requestStream = requestCollection
+      .snapshots()
+      .map((event) => event.docs
+          .map((e) => Request.fromDocument(e))
+          .toList())
+      .asBroadcastStream();
     requestSub = requestStream.listen((List<Request> requests) {
       if (requests.isNotEmpty) {
         // Handle the first request
@@ -172,7 +183,6 @@ class DriverService {
         _onRequestRecieved(firstRequest);
       }
     });
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /*
@@ -182,7 +192,7 @@ class DriverService {
    * @param req The request that has been recieved
    * @return void
    */
-  _onRequestRecieved(Request req) {
+  void _onRequestRecieved(Request req) {
     if (kDebugMode) {
       acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
       print("Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
@@ -255,6 +265,7 @@ class DriverService {
   }
 
   void stopDriving() {
+    print('Stopping driver service');
     driverReference.update({
       'lastActivity': DateTime.now(),
       'currentRideID': '',
@@ -454,7 +465,7 @@ class DriverService {
       });
     } else {
       // TODO: Get rid of once server is constantly checking for abandoned drivers
-      stopDriving();
+      // stopDriving();
     }
   }
 
