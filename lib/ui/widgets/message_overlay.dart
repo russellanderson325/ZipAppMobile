@@ -47,7 +47,7 @@ class MessageOverlay {
                   message,
                   style: TextStyle(
                     color: Color(int.parse(textColor.substring(1, 7), radix: 16) + 0xFF000000), 
-                    fontSize: 16,
+                    fontSize: 14,
                   ),
                   textAlign: TextAlign.center,
                 ),

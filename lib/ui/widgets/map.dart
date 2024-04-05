@@ -105,7 +105,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     if (mounted) {
       MessageOverlay(
         message: message, 
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
         color: "#F54747",
         textColor: "#FFFFFF",
         background: true,
