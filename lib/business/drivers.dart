@@ -164,7 +164,6 @@ class DriverService {
       'lastActivity': DateTime.now(),
       'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
       'isAvailable': true,
-      //'isWorking': true
     });
     requestSub = requestStream.listen((List<Request> requests) {
       if (requests.isNotEmpty) {
@@ -259,7 +258,7 @@ class DriverService {
     driverReference.update({
       'lastActivity': DateTime.now(),
       'currentRideID': '',
-      'isAvailable': true,
+      'isAvailable': false,
     });
     // Clear requests from the driver on Firebase
     driverReference.collection('requests').get().then((value) {
@@ -464,13 +463,13 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock in operation
    */
   Future<Map<String, dynamic>> clockIn() async {
+    print(driver.daysOfWeek);
     HttpsCallableResult result = await driverClockInFunction.call(<String, dynamic>{
       'daysOfWeek': driver.daysOfWeek,
       'driveruid': driver.uid,
       'shiftuid': shiftuid
     });
     print(result.data);
-    //grab return values
     String response = result.data['response'];
     bool success = result.data['success'];
 
@@ -484,11 +483,11 @@ class DriverService {
   Future<Map<String, dynamic>> clockOut() async {
     HttpsCallableResult result = await driverClockOutFunction.call(
         <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-
+    print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
-    return {'response': response, 'success': success};
+    return {'success': success, 'response': response};
   }
 
   /*
@@ -498,7 +497,6 @@ class DriverService {
   Future<Map<String, dynamic>> startBreak() async {
     HttpsCallableResult result = await driverStartBreakFunction.call(
         <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print('startBreak');
     print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
@@ -517,7 +515,7 @@ class DriverService {
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
-    return {'response': response, 'success': success};
+    return {'success': success, 'response': response};
   }
   
   // I'm gonna be honest I dont know what the purpose of this was supposed to be

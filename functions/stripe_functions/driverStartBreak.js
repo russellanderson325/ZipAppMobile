@@ -9,7 +9,7 @@ const driverStartBreak = functions.https.onCall(async (data, context) => {
     const currentTime = new Date();
 
     const driverDoc = await admin.firestore().collection("drivers").doc(driveruid).get();
-    if (!driverDoc.exists) return {success: false, response: "No Driver Found"};
+    if (!driverDoc.exists) return {success: false, response: "No Driver found."};
 
     try {
         await admin.firestore().collection("drivers").doc(driveruid)
@@ -20,13 +20,13 @@ const driverStartBreak = functions.https.onCall(async (data, context) => {
         await admin.firestore().collection("drivers").doc(driveruid).update({
             "isOnBreak": true,
             "isAvailable": false,
-            "isWorking": false,
+            "isWorking": true,
         });
 
-        return {success: true, response: "Break has started successfully"};
+        return {success: true, response: "Break has started successfully."};
     } catch (error) {
         console.error("Error starting break:", error);
-        return {success: false, response: "An error occurred"};
+        return {success: false, response: "An error occurred."};
     }
 });
 

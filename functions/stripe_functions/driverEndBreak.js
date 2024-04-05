@@ -12,7 +12,7 @@ const driverEndBreak = functions.https.onCall(async (data, context) => {
         const driverDoc = await admin.firestore().collection("drivers").doc(driveruid).get();
 
         if (!driverDoc.exists) {
-            return {success: false, response: "No Driver Found"};
+            return {success: false, response: "No Driver found."};
         }
 
         const shiftDoc = await admin.firestore().collection("drivers").doc(driveruid)
@@ -30,13 +30,13 @@ const driverEndBreak = functions.https.onCall(async (data, context) => {
         await admin.firestore().collection("drivers").doc(driveruid).update({
             "isOnBreak": false,
             "isAvailable": true,
-            "isWorking": false,
+            "isWorking": true,
         });
 
-        return {success: true, response: "Break has ended successfully"};
+        return {success: true, response: "Break has ended successfully."};
     } catch (error) {
         console.error("Error ending break:", error);
-        return {success: false, response: "An error occurred"};
+        return {success: false, response: "An error occurred."};
     }
 });
 

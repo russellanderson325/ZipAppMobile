@@ -129,7 +129,7 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
                     print('Payment intent ID: ${result['paymentIntentId']}');
                     Payment.capturePaymentIntent(result['paymentIntentId']).then((result) {
                       bool success = result['success'];
-
+                      
                     });
                   } else {
                     // Cancel the ride

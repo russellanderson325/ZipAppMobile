@@ -17,7 +17,7 @@ class Driver {
   final bool isAvailable;
   final GeoFirePoint? geoFirePoint;
   final String currentRideID;
-  final List<String> daysOfWeek;
+  final List<int> daysOfWeek;
   final bool isOnBreak;
 
   Driver(
@@ -64,10 +64,8 @@ class Driver {
       isAvailable: doc['isAvailable'] ?? false,
       isOnBreak: doc['isOnBreak'] as bool,
       currentRideID: doc['currentRideID'] as String,
-      daysOfWeek: [], 
-      //daysOfWeekConvert(doc['daysOfWeek']),
+      daysOfWeek: List<int>.from(doc['daysOfWeek'] as List), 
     );
-    //totalHoursWorked: doc['totalHoursWorked']);
     return driver;
   }
 

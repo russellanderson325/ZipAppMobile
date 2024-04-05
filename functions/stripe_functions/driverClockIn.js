@@ -9,11 +9,13 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
     const {daysOfWeek, driveruid, shiftuid} = data;
 
     // Todo: This is problematic because we don't yet know/have the ability to know the driver's schedule.
+    // If you want to add a day to your schedule, go to Firebase and add integers in your driver fields to
+    // the "daysOfWeek" array ranging from 0 to 6 corresponding to the days of the week starting from Sunday.
     const currentTime = new Date();
     console.log("daysOfWeek", daysOfWeek);
     console.log("currentDay", currentTime.getDate());
     if (!daysOfWeek.includes(currentTime.getDay())) {
-        return {success: false, response: "Driver not scheduled today"};
+        return {success: false, response: "Driver is not scheduled to drive today."};
     }
 
     const shiftRef = await admin.firestore().collection("drivers").doc(driveruid)
@@ -21,20 +23,20 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
 
     if (!shiftRef.exists) {
         await createShift(driveruid, shiftuid, currentTime);
-        return {success: false, response: "Driver not scheduled"};
+        return {success: false, response: "Driver is not scheduled to drive today."};
     }
 
     // Todo: This is broken because the current time is not flexible to the difference in timezones.
     // ! Specifically, the time that is produced here on the server is not the same as the time that is produced on the client.
     const shift = shiftRef.data();
     if (currentTime.getTime() < shift.startTime.toDate().getTime() - 600000) {
-        return {success: false, response: "Too early for scheduled time"};
+        return {success: false, response: "Too early for scheduled time."};
     }
 
     try {
         await updateShiftAndDriverStatus(driveruid, shiftuid, currentTime);
         console.log("Capturing payment intent with ID", data.paymentIntentId);
-        return {success: true, response: "Clock in successful"};
+        return {success: true, response: "Clock in successful."};
     } catch (error) {
         console.error("Stripe error:", error);
         return {success: false, response: error};

@@ -100,98 +100,111 @@ class MapWidgetSampleState extends State<MapWidget> {
     );
   }
 
-  //driver code
-
-  // late bool clockedIn;
-  // late bool onBreak;
-
-  void clockIn() {
-    if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 10) {
+  void angryMessage(message) {
+    print(message);
+    if (mounted) {
       MessageOverlay(
-        message: "Please wait a few seconds before trying again.", 
+        message: message, 
         duration: const Duration(seconds: 3),
-        color: "#FF0000",
+        color: "#F54747",
         textColor: "#FFFFFF",
         background: true,
-        opacity: 0.8,
+        opacity: 1,
       ).show(context);
+    }
+  }
+
+  //driver code
+  void clockIn() async {
+    // Prevent the user from spamming the clock in button
+    if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
       return;
     }
     lastClockInButtonPress = DateTime.now();
 
-    setState(() {
-      driverStates['isWorking'] = true;
-      driverStates['isOnBreak'] = false;
-    });
-    driverService.clockIn();
+    // Clock in the driver
+    Map<String, dynamic> response = await driverService.clockIn();
+
+    // If the response is not successful, show an error message and return
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    // Start driving
     driverService.startDriving();
+
+    // Update the UI
+    setState(() {
+      driverStates['isOnBreak'] = false;
+      driverStates['isWorking'] = true;
+    });
   }
 
-  void clockOut() {
-    if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 10) {
-      MessageOverlay(
-        message: "Please wait a few seconds before trying again.", 
-        duration: const Duration(seconds: 3),
-        color: "#FF0000",
-        textColor: "#FFFFFF",
-        background: true,
-        opacity: 0.8,
-      ).show(context);
+  void clockOut() async {
+    if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
       return;
     }
     lastClockOutButtonPress = DateTime.now();
 
-    setState(() {
-      driverStates['isWorking'] = false;
-      driverStates['isOnBreak'] = false;
-    });
-    driverService.clockOut();
+    var response = await driverService.clockOut();
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
     driverService.stopDriving();
+
+    setState(() {
+      driverStates['isOnBreak'] = false;
+      driverStates['isWorking'] = false;
+    });
   }
 
-  void startBreak() {
-    if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 10) {
-      MessageOverlay(
-        message: "Please wait a few seconds before trying again.", 
-        duration: const Duration(seconds: 3),
-        color: "#FF0000",
-        textColor: "#FFFFFF",
-        background: true,
-        opacity: 0.8,
-      ).show(context);
+  void startBreak() async {
+    if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
       return;
     }
     lastStartBreakButtonPress = DateTime.now();
+
+    var response = await driverService.startBreak();
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    driverService.stopDriving();
 
     setState(() {
       driverStates['isOnBreak'] = true;
       driverStates['isWorking'] = true;
     });
-    driverService.startBreak();
-    driverService.stopDriving();
   }
 
-  void endBreak() {
-    if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 10) {
-      MessageOverlay(
-        message: "Please wait a few seconds before trying again.", 
-        duration: const Duration(seconds: 3),
-        color: "#FF0000",
-        textColor: "#FFFFFF",
-        background: true,
-        opacity: 0.8,
-      ).show(context);
+  void endBreak() async {
+    if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 5) {
+      angryMessage("Please wait a few seconds before trying again.");
       return;
     }
     lastEndBreakButtonPress = DateTime.now();
+
+    var response = await driverService.endBreak();
+    if (!response['success']) {
+      angryMessage(response['response']);
+      return;
+    }
+
+    driverService.startDriving();
 
     setState(() {
       driverStates['isOnBreak'] = false;
       driverStates['isWorking'] = true;
     });
-    driverService.endBreak();
-    driverService.startDriving();
   }
+
 
   Future<void> updateDriverStatus() async {
     // Fetch the driver states asynchronously.
