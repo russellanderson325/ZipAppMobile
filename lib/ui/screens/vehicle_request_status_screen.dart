@@ -129,7 +129,7 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
                     print('Payment intent ID: ${result['paymentIntentId']}');
                     Payment.capturePaymentIntent(result['paymentIntentId']).then((result) {
                       bool success = result['success'];
-                      
+
                     });
                   } else {
                     // Cancel the ride
@@ -145,6 +145,13 @@ class VehicleRequestStatusScreenState extends State<VehicleRequestStatusScreen> 
               Payment.createPaymentIntent((widget.price * 100).toInt(), widget.currencyCode).then((clientSecret) {
                     String paymentIntentId = clientSecret.split('_secret_')[0];
                     Payment.capturePaymentIntent(paymentIntentId).then((result) {
+                      if (result['success']) {
+                        print('Payment successful, ride will not be cancelled');
+                      } else {
+                        print('Payment failed, canceling ride');
+                        ride?.cancelRide();
+                        dispose();
+                      }
                       print(result);
                     }).catchError((error) {
                       print("Failed to capture payment intent: $error");

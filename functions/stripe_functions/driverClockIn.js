@@ -8,7 +8,10 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
 
     const {daysOfWeek, driveruid, shiftuid} = data;
 
+    // Todo: This is problematic because we don't yet know/have the ability to know the driver's schedule.
     const currentTime = new Date();
+    console.log("daysOfWeek", daysOfWeek);
+    console.log("currentDay", currentTime.getDate());
     if (!daysOfWeek.includes(currentTime.getDay())) {
         return {success: false, response: "Driver not scheduled today"};
     }

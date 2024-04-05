@@ -36,6 +36,22 @@ class Payment {
   static final capturePaymentIntentCallable = functions.httpsCallable('capturePaymentIntent');
   static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
 
+
+  static void addPaymentDetailsToFirebase(paymentDetails, currency, last4) async {
+    var firebaseUser = auth.FirebaseAuth.instance.currentUser;
+    await FirebaseFirestore.instance
+      .collection("stripe_customers")
+      .doc(firebaseUser?.uid)
+      .collection('payments')
+      .add({
+        "amount": paymentDetails.amount,
+        "currency": currency,
+        "payment_method": paymentDetails.paymentMethod,
+        "receipt_email": firebaseUser?.email,
+        "card_last4": last4,
+      });
+  }
+
   /*
    * Fetches the payment methods from the cache if they exist
    * Otherwise, fetches from the Stripe API

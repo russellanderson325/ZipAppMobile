@@ -152,10 +152,8 @@ class DriverService {
    * The callback function will be called when the driver service is started.
    * @return void
    */
-  void startDriving() {
+  void startDriving() async {
     print('Starting driver service');
-    // uiCallbackFunction = callback;
-    // uiCallbackFunction!(DriverBottomSheetStatus.searching);
     requestStream = requestCollection
         .snapshots()
         .map((event) => event.docs
@@ -173,12 +171,9 @@ class DriverService {
         // Handle the first request
         Request firstRequest = requests.first;
         _onRequestRecieved(firstRequest);
-      } else {
-        // No requests available
-        print('No requests available at the moment.');
-        // Optionally, perform some action when no requests are available
       }
     });
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /*
