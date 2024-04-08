@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/widgets/ride_activity_item.dart';
+import 'package:zipapp/ui/screens/driver/driver_activity_item.dart';
+
+
 
 class DriverActivityScreen extends StatefulWidget {
   const DriverActivityScreen({super.key});
@@ -12,6 +14,7 @@ class DriverActivityScreen extends StatefulWidget {
 
 class _DriverActivityScreenState extends State<DriverActivityScreen> {
   List<Ride> rides = [];
+  double averageRating = 0;
 
   @override
   void initState() {
@@ -21,58 +24,74 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
 
   void _populateRideActivityData() {
     List<Ride> tempRides = [];
+    //calculate the average rating
+
+
     tempRides = [
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
       Ride(
-        destination: 'Jordan Hare Stadium',
-        dateTime: DateTime(2024, 10, 12, 14, 30),
-        price: 12.23,
+          destination: 'Jordan Hare Stadium',
+          dateTime: DateTime(2024, 10, 12, 14, 30),
+          price: 12.23,
+          rating: 5.0
       ),
     ];
+    double sumRatings = tempRides.fold(0.0, (sum, item) => sum + item.rating);
+    averageRating = sumRatings / tempRides.length;
+
     setState(() {
       rides = tempRides;
     });
@@ -81,9 +100,9 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ZipColors.primaryBackground,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: ZipColors.primaryBackground,
+        backgroundColor: Colors.white,
         title: const Text(
           'Activity',
           style: ZipDesign.pageTitleText,
@@ -95,25 +114,62 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            const Text(
-              'Past',
-              textAlign: TextAlign.left,
+            Text(
+              '\nYour Average Rating',
               style: ZipDesign.sectionTitleText,
             ),
-            rides.isNotEmpty
-                ? Expanded(
-                    child: ListView.builder(
-                      itemCount: rides.length,
-                      itemBuilder: (context, index) {
-                        return RideActivityItem(
-                          destination: rides[index].destination,
-                          dateTime: rides[index].dateTime,
-                          price: rides[index].price,
-                        );
-                      },
-                    ),
-                  )
-                : const SizedBox(),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.star, color: Colors.amber, size: 40),
+                SizedBox(width: 10),
+                RichText(
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: [
+                      TextSpan(
+                        text: '${averageRating.toStringAsFixed(1)}', // Average rating value
+                        style: TextStyle(color: Colors.black,
+                            fontSize: 28),
+                      ),
+                      TextSpan(
+                        text: ' / 5.0',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24),
+            Divider(
+              color: Colors.grey,
+              thickness: 0.5,
+            ),
+
+            SizedBox(height: 16),
+            const Text(
+              'Completed Trips',
+              style: ZipDesign.sectionTitleText,
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: rides.length,
+                itemBuilder: (context, index) {
+                  return DriverActivityItem(
+                    destination: rides[index].destination,
+                    dateTime: rides[index].dateTime,
+                    price: rides[index].price,
+
+                    // rating: rides[index].rating,
+                  );
+                },
+              ),
+            )
+
           ],
         ),
       ),
@@ -121,11 +177,23 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
   }
 }
 
+
 class Ride {
   final String destination;
   final DateTime dateTime;
   final double price;
+  final double rating;
 
-  Ride(
-      {required this.destination, required this.dateTime, required this.price});
+
+  Ride({
+    required this.destination,
+    required this.dateTime,
+    required this.price,
+    this.rating = 5.0,
+  });
 }
+
+
+// Ensure that your RideActivityItem widget can accept and properly display
+// the destination, dateTime, and price properties.
+
