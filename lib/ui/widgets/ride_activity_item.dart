@@ -11,9 +11,9 @@ class RideActivityItem extends StatefulWidget {
   final double price;
   const RideActivityItem(
       {Key? key,
-      required this.destination,
-      required this.dateTime,
-      required this.price})
+        required this.destination,
+        required this.dateTime,
+        required this.price})
       : super(key: key);
   @override
   State<RideActivityItem> createState() => _RideActivityItemState();

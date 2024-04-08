@@ -15,9 +15,9 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ZipColors.primaryBackground,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: ZipColors.primaryBackground,
+        backgroundColor: Colors.white,
         title: const Text(
           'Income',
           style: ZipDesign.pageTitleText,
