@@ -12,6 +12,7 @@ import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
 import 'package:zipapp/ui/screens/terms_screen.dart';
 import 'package:zipapp/ui/widgets/underline_textbox.dart';
+import 'package:zipapp/ui/screens/report_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   final bool driver;
@@ -152,6 +153,30 @@ class _AccountScreenState extends State<AccountScreen> {
                             },
                             icon: const Icon(LucideIcons.shield),
                             label: const Text('Rules and Safety'),
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all(
+                                  const EdgeInsets.all(0)),
+                              iconColor:
+                                  MaterialStateProperty.all(Colors.black),
+                              iconSize: MaterialStateProperty.all(16),
+                              foregroundColor:
+                                  MaterialStateProperty.all(Colors.black),
+                              textStyle: MaterialStateProperty.all(
+                                  ZipDesign.labelText),
+                            ))),
+                    const SizedBox(height: 16),
+                    Align(
+                        alignment: Alignment.topLeft,
+                        child: TextButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ReportScreen()),
+                              );
+                            },
+                            icon: const Icon(LucideIcons.book),
+                            label: const Text('Report an issue'),
                             style: ButtonStyle(
                               padding: MaterialStateProperty.all(
                                   const EdgeInsets.all(0)),
