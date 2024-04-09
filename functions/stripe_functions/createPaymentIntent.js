@@ -14,7 +14,6 @@ const createPaymentIntent = functions.https.onCall(async (data, context) => {
             amount: data.amount,
             currency: data.currency,
             capture_method: "manual",
-
         });
         console.log("Payment intent created with ID", paymentIntent.id);
         return {success: true, response: paymentIntent};

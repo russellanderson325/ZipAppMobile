@@ -1,10 +1,14 @@
 import "package:flutter/material.dart";
+import "package:zipapp/business/ride.dart";
+import "package:zipapp/business/user.dart";
 import "package:zipapp/constants/tailwind_colors.dart";
 import "package:zipapp/constants/zip_colors.dart";
 import "package:zipapp/constants/zip_design.dart";
+import "package:zipapp/models/user.dart";
 import "package:zipapp/services/payment.dart";
 import "package:zipapp/ui/screens/payment_methods_selection_screen.dart";
-import "package:zipapp/ui/screens/vehicle_request_status_screen.dart";
+import "package:zipapp/ui/screens/vehicle_ride_status_confirmation_screen.dart";
+import "package:zipapp/ui/widgets/message_overlay.dart";
 import 'package:zipapp/utils.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -25,7 +29,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   String label = "X Golf Cart";
   String model = "X";
   bool zipXL = false;
-  double? price;
+  double price = -1;
   String currencyCode = "USD";
   String merchantCountryCode = "US";
   double distanceInMiles = 0.0;
@@ -34,25 +38,47 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   Map<String, dynamic>? primaryPaymentMethodDetails;
   Function? reset;
   bool requestMade = false;
+  RideService rideService = RideService();
+  UserService userService = UserService();
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
+    Future.microtask(() => _initializeAsyncData());
+
     _paymentMethodDetailsFuture = Payment.getPrimaryPaymentMethodDetails();
-    setCartValues(label, model, zipXL);
   }
+
+
+  Future<void> _initializeAsyncData() async {
+  try {
+    await setCartValues(label, model, zipXL);
+
+    setState(() {
+      loading = false;
+    });
+  } catch (error) {
+    print("Error initializing data: $error");
+    setState(() {
+      loading = false;
+    });
+  }
+}
+
 
   @override
   void dispose() {
     if (!requestMade) {
       Future.microtask(() => widget.resetMap());
     }
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (price == null) {
+    if (loading) {
       print("Loading...");
       return const Center(
         child: CircularProgressIndicator(
@@ -72,14 +98,12 @@ class VehiclesScreenState extends State<VehiclesScreen> {
           padding: const EdgeInsets.only(left: 24, right: 24),
           child: ListView(
             children: <Widget>[
-              // const SizedBox(height: 8),
               Container(
                 alignment: Alignment.topCenter,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   // List of cart sizes
                   children: [
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -145,7 +169,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "\$${price?.toStringAsFixed(2)}",
+                      "\$${price.toStringAsFixed(2)}",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 24,
@@ -160,10 +184,9 @@ class VehiclesScreenState extends State<VehiclesScreen> {
               const Text("Primary Payment Method"),
               const SizedBox(height: 8),
               FutureBuilder<Map<String, dynamic>?>(
-                key: ValueKey<int>(refreshCounter), // This remains unchanged
-                future: _paymentMethodDetailsFuture, // Use the cached future here
+                key: ValueKey<int>(refreshCounter),
+                future: _paymentMethodDetailsFuture,
                 builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
-                  // print(snapshot.data);
                   if (snapshot.connectionState == ConnectionState.done) {
                     primaryPaymentMethodDetails = snapshot.data!;
                       
@@ -242,22 +265,70 @@ class VehiclesScreenState extends State<VehiclesScreen> {
               ),
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   // Open a new screen to display the request status
                   requestMade = true;
-                  Navigator.pop(context); // Close the current screen
-                  VehicleRequestStatusScreenState.showVehicleRequestAwaitingConfirmationScreen(
-                    context, 
-                    widget.lat, 
-                    widget.long, 
-                    label, 
-                    price??0.0,
-                    model,
-                    currencyCode, 
-                    merchantCountryCode, 
-                    primaryPaymentMethodDetails,
-                    widget.resetMap,
-                  );
+                  if (primaryPaymentMethodDetails?['id'] == "apple_pay" || primaryPaymentMethodDetails?['id'] == "google_pay") {
+                    await Payment.showPaymentSheetToMakeIntent(
+                      label, 
+                      (price * 100).toInt(), 
+                      currencyCode, 
+                      merchantCountryCode
+                      ).then((result) async {
+                        print("Showing payment sheet");
+                        if (result['authorized']) {
+                          if (mounted) MessageOverlay.happyMessage(context, "Payment intent successfully authorized. Please wait for a driver to accept the ride.");
+                          Navigator.pop(context);
+                          VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, widget.resetMap);
+                          // Send the request to the nearest driver, and so on...
+                          await rideService.startRide(widget.lat, widget.long, price, model);
+                        } else {
+                          // Cancel the ride
+                          print(result['error']);
+                          if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                          rideService.cancelRide();
+                        }
+                      });
+                  } else {
+                      Payment.createPaymentIntent((price * 100).toInt(), currencyCode).then((result) {
+                      Map<String, dynamic> response = Map<String, dynamic>.from(result['response']);
+                      String clientSecret = response['client_secret'];                
+                      Payment.confirmPayment(clientSecret).then((result) async {
+                        if (result['authorized'] as bool) {
+                          if (mounted) MessageOverlay.happyMessage(context, "Payment intent successfully authorized. Please wait for a driver to accept the ride.");
+                          Navigator.pop(context);
+                          print("Showing vehicle request awaiting confirmation screen");
+                          VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, widget.resetMap);
+                          // Send the request to the nearest driver, and so on...
+                          await rideService.startRide(widget.lat, widget.long, price, model);
+
+                          Map<String, dynamic> paymentDetails = {
+                            "paymentMethod": primaryPaymentMethodDetails?['id'],
+                            "amount": price,
+                          };
+
+                          print(primaryPaymentMethodDetails);
+                          Payment.addPaymentDetailsToFirebase(paymentDetails, primaryPaymentMethodDetails?['last4']);
+                          // Below is the code to capture the payment intent
+                          // String paymentIntentId = clientSecret.split('_secret_')[0];
+                          // Payment.capturePaymentIntent(paymentIntentId).then((result) {
+                          //   print(result);
+                          // }).catchError((error) {
+                          //   ride?.cancelRide();
+                          //   dispose();
+                          // });
+                        } else {
+                          if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                          rideService.cancelRide();
+                        }
+                      }).catchError((error) {
+                        if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                        rideService.cancelRide();
+                        print(error.toString());
+                      });
+                    });
+                  }
+                  // Navigator.pop(context);
                 },
                 style: ZipDesign.yellowButtonStyle,
                 child: const Text('Request Pickup'),
@@ -297,7 +368,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
       builder: (BuildContext context) {
         return FractionallySizedBox(
           heightFactor: 0.5, // Adjust the height factor as needed, e.g., 0.9 for 90% of screen height
-          child: VehiclesScreen(distanceInMeters: distanceInMeters, lat: lat, long: long, resetMap: resetMap), // Pass the required parameters
+          child: VehiclesScreen(distanceInMeters: distanceInMeters, lat: lat, long: long, resetMap: resetMap),
         );
       },
     );
@@ -310,15 +381,18 @@ class VehiclesScreenState extends State<VehiclesScreen> {
    * @param zipXL Whether the cart is a ZipXL
    * @return void
    */
-  void setCartValues(String label, String size, bool zipXL) async {
+  Future<void> setCartValues(String label, String size, bool zipXL) async {
     distanceInMiles = widget.distanceInMeters / 1609.34;
-    double amount = await Payment.getAmmount(zipXL, distanceInMiles, 1);
+    double amount = await Payment.getAmount(zipXL, distanceInMiles, 1); // Assuming this is async
     // Round to 2 decimal places
     amount = double.parse((amount).toStringAsFixed(2));
-    setState(() {
-      this.label = label;
-      model = size;
-      price = amount;
-    });
+    if (mounted) {
+      setState(() {
+        this.label = label;
+        model = size;
+        price = amount;
+      });
+    }
   }
+
 }

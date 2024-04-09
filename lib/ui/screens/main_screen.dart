@@ -1027,7 +1027,7 @@ class _MainScreenState extends State<MainScreen> {
         pinDropDestination == true) {
       double length = await _rideDistance(pinDropDestination);
       price =
-          await paymentService.getAmmount(zipxl, length, currentNumberOfRides);
+          await paymentService.getAmount(zipxl, length, currentNumberOfRides);
       print('price calculated');
       setState(() {
         bottomSheetStatus = BottomSheetStatus.confirmation;

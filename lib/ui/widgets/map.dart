@@ -6,13 +6,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/drivers.dart';
+import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
 
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
+import 'package:zipapp/models/rides.dart';
+import 'package:zipapp/models/user.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/screens/vehicle_ride_status_confirmation_screen.dart';
 import 'package:zipapp/ui/screens/vehicles_screen.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/message_overlay.dart';
@@ -43,6 +47,10 @@ class MapWidgetSampleState extends State<MapWidget> {
   DateTime lastClockOutButtonPress = DateTime(0);
   DateTime lastStartBreakButtonPress = DateTime(0);
   DateTime lastEndBreakButtonPress = DateTime(0);
+  UserService userService = UserService();
+  RideService rideService = RideService();
+  bool isRiding = false;
+  int iterateKey = 0;
 
   @override
   void initState() {
@@ -52,6 +60,9 @@ class MapWidgetSampleState extends State<MapWidget> {
         .then((value) {
       mapTheme = value;
     });
+
+    // Listen to user.isRiding changes
+    userService.userStream.listen(updateUI);
 
     if (mounted) {
       positionService.getPosition().then((value) {
@@ -73,10 +84,11 @@ class MapWidgetSampleState extends State<MapWidget> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Column(
+      key: Key(iterateKey.toString()),
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        widget.driver ? driverBox(width, height) : searchBox(width, height),
+        widget.driver ? driverBox(width, height) : (userService.isRiding() ? currentRide(width, height) : searchBox(width, height)),
         Expanded(
           child: userLatLng == null
               ? const Center(child: CircularProgressIndicator())
@@ -89,8 +101,10 @@ class MapWidgetSampleState extends State<MapWidget> {
                   markers: markers.toSet(),
                   myLocationButtonEnabled: false,
                   onMapCreated: (GoogleMapController controller) {
+                    if (!_controller.isCompleted) {
+                      _controller.complete(controller);
+                    }
                     controller.setMapStyle(mapTheme);
-                    _controller.complete(controller);
                   },
                   polylines: polylines.toSet(),
                   zoomControlsEnabled: false,
@@ -201,8 +215,42 @@ class MapWidgetSampleState extends State<MapWidget> {
     });
   }
 
+  Future<void> updateUI(User user) async {
+    setState(() {
+      iterateKey++;
+    });
+  }
+
+
+  SizedBox currentRide(double screenWidth, double screenHeight) {
+    return SizedBox(
+      width: screenWidth,
+      height: 68,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: ZipColors.primaryBackground,
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: TextButton(
+          onPressed: () {
+            // Get the ride ID from the user service
+            String rideID = userService.user.currentRideId;
+            // Bring up the vehicle ride status confirmation screen
+            print("Showing vehicle request awaiting confirmation screen");
+            VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, _resetMarkers);
+            print("Vehicle request awaiting confirmation screen shown");
+          },
+          style: ZipDesign.yellowButtonStyle,
+          child: const Text('View Active Ride'),
+        ),
+      ),
+    );
+  }
 
   SizedBox driverBox(double screenWidth, double screenHeight) {
+    print(driverStates['isWorking']);
+    print(driverStates['isOnBreak']);
+
     return SizedBox(
       width: screenWidth,
       height: 68,
@@ -286,6 +334,7 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   //rider code
+  
 
   SizedBox searchBox(double screenWidth, double screenHeight) {
     return SizedBox(
@@ -345,28 +394,41 @@ class MapWidgetSampleState extends State<MapWidget> {
     GooglePlace googlePlace = GooglePlace(Keys.map);
     await googlePlace.details.get(searchResult.placeId).then(
       (value) async {
-        setState(() {
-          searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
-              value.result!.geometry!.location!.lng!);
-        });
-        if (mounted) {
-          PolylineResult result = await _addSearchResult(searchResult);
-          _moveCamera(
-              latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
+        if (value != null && value.result != null && value.result!.geometry != null && value.result!.geometry!.location != null) {
+          setState(() {
+            searchLatLng = LatLng(value.result!.geometry!.location!.lat!,
+                value.result!.geometry!.location!.lng!);
+          });
+          if (mounted) {
+            PolylineResult result = await _addSearchResult(searchResult);
+            if (result.distanceValue != null) {
+              // Show the vehicle request screen only if the distance value is not null
+              VehiclesScreenState.showVehiclesScreen(
+                context, 
+                result.distanceValue!.toDouble(), 
+                value.result!.geometry!.location!.lat!, 
+                value.result!.geometry!.location!.lng!,
+                _resetMarkers,
+              );
+            } else {
+              // Handle the case where distanceValue is null, perhaps notify the user or log an error
+              print("Error: PolylineResult returned null for distanceValue.");
+            }
+            _moveCamera(
+              latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015,
                   value.result!.geometry!.location!.lng!));
-
-          // Show the vehicle request screen
-          VehiclesScreenState.showVehiclesScreen(
-            context, 
-            (result.distanceValue)!.toDouble(), 
-            value.result!.geometry!.location!.lat!, 
-            value.result!.geometry!.location!.lng!,
-            _resetMarkers,
-          );
+          }
+        } else {
+          // Handle the case where GooglePlace details return null
+          print("Error: Failed to retrieve place details.");
         }
       },
-    );
+    ).catchError((error) {
+      // Handle potential errors like network issues
+      print("Error fetching place details: $error");
+    });
   }
+
 
   Future<PolylineResult> _addSearchResult(
       LocalSearchResult searchResult) async {

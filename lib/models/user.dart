@@ -16,26 +16,30 @@ class User {
   final double defaultTip;
   bool acceptedtc;
   bool acceptedPrivPolicy;
-
+  bool isRiding;
+  String currentRideId;
   var pastRides;
   var pastDrives;
 
-  User(
-      {required this.uid,
-      required this.firstName,
-      required this.lastName,
-      required this.phone,
-      required this.email,
-      this.credits = 0,
-      this.homeAddress = "",
-      required this.lastActivity,
-      required this.profilePictureURL,
-      this.isDriver = false,
-      this.defaultTip = 0,
-      this.acceptedtc = false,
-      this.acceptedPrivPolicy = false,
-      this.pastRides,
-      this.pastDrives});
+  User({
+    required this.uid,
+    required this.firstName,
+    required this.lastName,
+    required this.phone,
+    required this.email,
+    this.credits = 0,
+    this.homeAddress = "",
+    required this.lastActivity,
+    required this.profilePictureURL,
+    this.isDriver = false,
+    this.defaultTip = 0,
+    this.acceptedtc = false,
+    this.acceptedPrivPolicy = false,
+    this.isRiding = false,
+    this.currentRideId = "",
+    this.pastRides,
+    this.pastDrives
+  });
 
   Map<String, Object> toJson() {
     return {
@@ -52,6 +56,8 @@ class User {
       'defaultTip': defaultTip,
       'acceptedtc': acceptedtc,
       'acceptedPrivPolicy': acceptedPrivPolicy,
+      'isRiding': isRiding,
+      'currentRideId': currentRideId,
       'pastRides': pastRides ?? [],
       'pastDrives': pastDrives ?? []
     };
@@ -74,6 +80,8 @@ class User {
         isDriver: (doc['isDriver'] ?? false) as bool,
         acceptedtc: (doc['acceptedtc'] ?? false) as bool,
         acceptedPrivPolicy: (doc['acceptedPrivPolicy'] ?? false) as bool,
+        isRiding: (doc['isRiding'] ?? false) as bool,
+        currentRideId: doc['currentRideId'] ?? '',
         pastRides: doc['pastRides'] ?? [],
         pastDrives: doc['pastDrives'] ?? [],
         defaultTip: defTip.toDouble());
@@ -101,6 +109,8 @@ class User {
         isDriver: false,
         acceptedtc: false,
         acceptedPrivPolicy: false,
+        isRiding: false,
+        currentRideId: '',
         pastRides: [],
         pastDrives: [],
         defaultTip: 0.0);

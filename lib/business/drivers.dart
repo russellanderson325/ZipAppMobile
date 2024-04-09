@@ -36,12 +36,15 @@ class DriverService {
   StreamSubscription<List<Request>>? requestSub;
   late List<Request> currentRequests = [];
   late Request currentRequest;
+  bool _isCurrentRideInitialized = false;
+  bool _isRequestSubListening = false;
   // Ride specific varaibles
   late Stream<Ride> rideStream;
   StreamSubscription<Ride>? rideSub;
   late Ride currentRide;
   //Shift specific variables
   late String shiftuid;
+  int requestLength = 0;
 
   // Function? uiCallbackFunction;
 
@@ -100,9 +103,11 @@ class DriverService {
       return Driver.fromDocument(snapshot);
     }).listen((driver) {
       this.driver = driver;
-      print('Driver state updated: ${driver.isWorking}, ${driver.isAvailable}');
-      if (driver.isWorking && driver.isAvailable) {
-        initRequestSub();
+      if (driver.isWorking && driver.isAvailable && !_isRequestSubListening) {
+        startDriving();
+        // print('Driver is working and available');
+      } else {
+        // print('Driver is not working or not available');
       }
     });
     //locationSub.cancel();
@@ -163,12 +168,15 @@ class DriverService {
       'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
       'isAvailable': true,
     });
+    if (_isRequestSubListening) return;
     initRequestSub();
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 1000));
   }
 
   void initRequestSub() {
     // If requestSub is not already listening, start listening
+    print('Initiating request subscription');
+
     if (requestSub != null) return;
     requestStream = requestCollection
       .snapshots()
@@ -177,12 +185,22 @@ class DriverService {
           .toList())
       .asBroadcastStream();
     requestSub = requestStream.listen((List<Request> requests) {
-      if (requests.isNotEmpty) {
+      if (requestLength < requests.length) {
+        print('New request(s) recieved');
+        requestLength = requests.length;
         // Handle the first request
         Request firstRequest = requests.first;
         _onRequestRecieved(firstRequest);
+      } else if (requestLength > requests.length) {
+        print('Request(s) declined, maybe? But probably not, don\'t worry');
+        requestLength = requests.length;
+      } else {
+        print('No new requests');
+        // Do nothing
       }
     });
+
+    _isRequestSubListening = true;
   }
 
   /*
@@ -193,6 +211,7 @@ class DriverService {
    * @return void
    */
   void _onRequestRecieved(Request req) {
+    print('Request recieved');
     if (kDebugMode) {
       acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
       print("Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
@@ -200,9 +219,9 @@ class DriverService {
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
     Future.delayed(Duration(seconds: seconds)).then((value) {
-      if (kDebugMode) {
-        print("Request recieved from ${req.name} timed out");
-      }
+      // if (kDebugMode) {
+      //   print("Request recieved from ${req.name} timed out");
+      // }
       declineRequest(req.id);
     });
   }
@@ -228,19 +247,10 @@ class DriverService {
       await requestCollection.doc(requestID).delete();
       // uiCallbackFunction!(DriverBottomSheetStatus.searching);
     }
-    if (kDebugMode) {
-      print("Request is already deleted");
-    } // TODO: Delete
-    _firestore.collection('rides').doc(requestID).get().then((value) => print(
-        "Request status is ${value.data()?['status']}, should be 'WAITING'"));
   }
 
   Future<void> acceptRequest(String requestID) async {
-    if (kDebugMode) {
-      print("Accepting request: $requestID");
-    }
-    DocumentSnapshot requestRef =
-        await _firestore.collection('rides').doc(requestID).get();
+    DocumentSnapshot requestRef = await _firestore.collection('rides').doc(requestID).get();
     rideStream = _firestore
         .collection('rides')
         .doc(requestID)
@@ -281,6 +291,8 @@ class DriverService {
     requestSub?.cancel();
     driverSub?.cancel();
     rideSub?.cancel();
+
+    _isRequestSubListening = false;
   }
 
   void completeRide() async {
@@ -351,25 +363,26 @@ class DriverService {
    * @return void
    */
   void cancelRide() async {
+    if (!_isCurrentRideInitialized) return;
     if (currentRide.status != "CANCELED") {
       await _firestore.collection('rides').doc(driver.currentRideID).update({
         'lastActivity': DateTime.now(),
         'status': 'CANCELED',
       });
     }
-    stopDriving();
   }
 
   void _onRideUpdate(Ride updatedRide) {
-    if (showDebugPrints) {
-      if (kDebugMode) {
-        print("Updated ride status to ${updatedRide.status}");
-      }
+    try {
+      if (currentRide.status == updatedRide.status) return;
+    } catch (e) {
+      // do nothing
     }
+    print("Updated ride status to ${updatedRide.status}");
     currentRide = updatedRide;
+    _isCurrentRideInitialized = true;
     switch (updatedRide.status) {
       case 'CANCELED':
-        // uiCallbackFunction!(DriverBottomSheetStatus.closed);
         cancelRide();
         startDriving();
         if (showDebugPrints) {
@@ -379,7 +392,6 @@ class DriverService {
         }
         break;
       case 'IN_PROGRESS':
-        // uiCallbackFunction!(DriverBottomSheetStatus.rideDetails);
         if (showDebugPrints) {
           if (kDebugMode) {
             print("Ride is now IN_PROGRESS");
@@ -387,7 +399,6 @@ class DriverService {
         }
         break;
       case 'ENDED':
-        // uiCallbackFunction!(DriverBottomSheetStatus.closed);
         startDriving();
         if (showDebugPrints) {
           if (kDebugMode) {
@@ -425,12 +436,13 @@ class DriverService {
     return nearbyDriversListStream;
   }
 
-  Future<List<Driver>> getNearbyDriversListWithModel(double radius, String model) async {
+  Future<List<Driver>> getNearbyDriversListWithModel(double radius, String cartModel) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
+    print(driver.cartModel);
     Query collectionReference =
         _firestore.collection('drivers')
         .where('isAvailable', isEqualTo: true)
-        .where('model', isEqualTo: model);
+        .where('cartModel', isEqualTo: cartModel);
 
     Stream<List<Driver>> stream = geo
         .collection(collectionRef: collectionReference)
@@ -456,13 +468,18 @@ class DriverService {
         'uid': userService.userID,
         'firstName': userService.user.firstName,
         'lastName': userService.user.lastName,
+        'cartModel': "X",
         'profilePictureURL': userService.user.profilePictureURL,
         'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
         'lastActivity': DateTime.now(),
         'isAvailable': false,
         'isWorking': false,
         'isOnBreak': false,
-        'daysOfWeek': [" "]
+        'daysOfWeek': [],
+      }, SetOptions(merge: true)).then((_) {
+        print("Successfully started ride.");
+      }).catchError((error) {
+        print("Error starting ride: $error");
       });
     } else {
       // TODO: Get rid of once server is constantly checking for abandoned drivers

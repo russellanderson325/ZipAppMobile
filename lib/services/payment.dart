@@ -36,7 +36,7 @@ class Payment {
   static final attachPaymentMethodToCustomerCallable = functions.httpsCallable('attachPaymentMethodToCustomer');
   static final createPaymentIntentCallable = functions.httpsCallable('createPaymentIntent');
   static final capturePaymentIntentCallable = functions.httpsCallable('capturePaymentIntent');
-  static final getAmmountFunctionCallable = functions.httpsCallable('calculateCost');
+  static final getAmountFunctionCallable = functions.httpsCallable('calculateCost');
 
   static void addPaymentDetailsToFirebase(paymentDetails, last4) async {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
@@ -149,9 +149,9 @@ class Payment {
    * @param currentNumberOfRequests - the number of requests the user has made
    * @return Future<double> - a future that resolves to the cost of the ride
    */
-  static Future<double> getAmmount(bool zipXL, double length, int currentNumberOfRequests) async {
+  static Future<double> getAmount(bool zipXL, double length, int currentNumberOfRequests) async {
     double amount;
-    HttpsCallableResult result = await getAmmountFunctionCallable
+    HttpsCallableResult result = await getAmountFunctionCallable
         .call(<String, dynamic>{
       'miles': length,
       'zipXL': zipXL,
@@ -279,7 +279,7 @@ class Payment {
         paymentIntentClientSecret: clientSecret,
         allowsDelayedPaymentMethods: false,
         removeSavedPaymentMethodMessage: 'Remove Payment Method',
-        primaryButtonLabel: 'Pay',
+        primaryButtonLabel: 'Confirm',
         style: ThemeMode.system,
         applePay: PaymentSheetApplePay(
           merchantCountryCode: merchantCountryCode,

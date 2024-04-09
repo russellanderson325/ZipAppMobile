@@ -24,9 +24,9 @@ const driverClockOut = functions.https.onCall(async (data, context) => {
 
         const shiftRef = await driverRef.ref.collection("shifts").doc(shiftuid).get();
 
-        // if (!shiftRef.exists) {
-        //     throw new Error("No current shift");
-        // }
+        if (!shiftRef.exists) {
+            throw new Error("No current shift");
+        }
 
         const shiftData = shiftRef.data();
         const shiftDurationMs = currentTime - shiftData.shiftStart.toDate() - shiftData.totalBreakTime;

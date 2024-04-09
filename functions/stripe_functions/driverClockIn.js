@@ -13,7 +13,7 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
     // the "daysOfWeek" array ranging from 0 to 6 corresponding to the days of the week starting from Sunday.
     const currentTime = new Date();
     console.log("daysOfWeek", daysOfWeek);
-    console.log("currentDay", currentTime.getDate());
+    console.log("currentDay", currentTime.getDay());
     if (!daysOfWeek.includes(currentTime.getDay())) {
         return {success: false, response: "Driver is not scheduled to drive today."};
     }

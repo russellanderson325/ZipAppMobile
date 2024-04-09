@@ -67,7 +67,7 @@ class Driver {
       isWorking: doc['isWorking'] ?? false,
       isAvailable: doc['isAvailable'] ?? false,
       isOnBreak: doc['isOnBreak'] as bool,
-      currentRideID: doc['currentRideID'] as String,
+      currentRideID: doc['currentRideID'] ?? "",
       daysOfWeek: List<int>.from(doc['daysOfWeek'] as List), 
     );
     return driver;
