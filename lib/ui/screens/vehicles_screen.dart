@@ -33,7 +33,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   String currencyCode = "USD";
   String merchantCountryCode = "US";
   double distanceInMiles = 0.0;
-  DateTime lastAppleGooglePayButtonPress = DateTime(0);
+  DateTime lastRequestPress = DateTime(0);
   late Future<Map<String, dynamic>?> _paymentMethodDetailsFuture;
   Map<String, dynamic>? primaryPaymentMethodDetails;
   Function? reset;
@@ -41,6 +41,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   RideService rideService = RideService();
   UserService userService = UserService();
   bool loading = true;
+  
 
   @override
   void initState() {
@@ -69,7 +70,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
 
   @override
   void dispose() {
-    if (!requestMade) {
+    if (!requestMade || userService.isRiding()) {
       Future.microtask(() => widget.resetMap());
     }
 
@@ -80,11 +81,17 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   Widget build(BuildContext context) {
     if (loading) {
       print("Loading...");
-      return const Center(
+      return Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+        ),
+        child: const Center(
         child: CircularProgressIndicator(
           color: Colors.black,
         ),
+        ),
       );
+      
     } else {
       return Scaffold(
         appBar: AppBar(
@@ -266,6 +273,11 @@ class VehiclesScreenState extends State<VehiclesScreen> {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () async {
+                  if (DateTime.now().difference(lastRequestPress).inSeconds < 3) return;
+                  setState(() {
+                    loading = true;
+                  });
+                  lastRequestPress = DateTime.now();
                   // Open a new screen to display the request status
                   requestMade = true;
                   if (primaryPaymentMethodDetails?['id'] == "apple_pay" || primaryPaymentMethodDetails?['id'] == "google_pay") {
@@ -286,6 +298,7 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                           // Cancel the ride
                           print(result['error']);
                           if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                          loading = false;
                           rideService.cancelRide();
                         }
                       });
@@ -319,10 +332,12 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                           // });
                         } else {
                           if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                          loading = false;
                           rideService.cancelRide();
                         }
                       }).catchError((error) {
                         if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                        loading = false;
                         rideService.cancelRide();
                         print(error.toString());
                       });

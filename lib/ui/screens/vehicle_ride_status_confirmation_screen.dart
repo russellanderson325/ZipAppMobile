@@ -22,7 +22,7 @@ class VehicleRideStatusConfirmationScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VehicleRideStatusConfirmationScreen> createState() => VehicleRideStatusConfirmationScreenState(); // Modify this line
+  State<VehicleRideStatusConfirmationScreen> createState() => VehicleRideStatusConfirmationScreenState();
 }
 
 class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusConfirmationScreen> {
@@ -35,7 +35,7 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
   UserService userService = UserService();
   bool _isMounted = false;
   String status = "";
-  StreamSubscription<Ride>? _rideSubscription; // Declare this in your state class
+  StreamSubscription<Ride>? _rideSubscription;
 
 
   @override
@@ -52,7 +52,7 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
 
   @override
   void dispose() {
-    _rideSubscription?.cancel(); // Cancel the subscription
+    _rideSubscription?.cancel();
     if (!userService.isRiding()) {
       ride?.cancelRide();
     }
@@ -79,7 +79,7 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
             Center(
               child: Text(statusMessage),
             ),
-            const SizedBox(height: 250),
+            const SizedBox(height: 260),
             TextButton.icon(
               onPressed: () {
                 ride?.cancelRide();
@@ -89,15 +89,15 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
               label: const Text('Cancel Ride')
             ),
             const SizedBox(height: 5),
-            const Center(
-              child: Text(
-              "If the ride is cancelled, no charge will be made",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 10,
-              ),
-            )
-            ),
+            // const Center(
+            //   child: Text(
+            //     "If the ride is cancelled, no charge will be made",
+            //     style: TextStyle(
+            //       color: Colors.black,
+            //       fontSize: 10,
+            //     ),
+            //   )
+            // ),
 
           ],
         ),
@@ -166,14 +166,14 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
     // Show the bottom sheet
     showModalBottomSheet(
       clipBehavior: Clip.hardEdge,
-      barrierColor: const Color.fromARGB(60, 0, 0, 0),
+      barrierColor: const Color.fromARGB(0, 0, 0, 0),
       context: context,
       isScrollControlled: true,
       // isDismissible: false,
       // enableDrag: false,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-        // side: BorderSide(color: ZipColors.boxBorder, width: 1.0),
+        side: BorderSide(color: ZipColors.boxBorder, width: 1.0),
       ),
       builder: (BuildContext context) {
         return FractionallySizedBox(

@@ -295,7 +295,7 @@ class RideService {
   }
 
   Future<void> _initializeRideInFirestore(double lat, double long) async {
-    GeoFirePoint destination = locationService.getCurrentGeoFirePoint();
+    GeoFirePoint destination = GeoFirePoint(lat, long);
     GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
     DocumentSnapshot myRide = await rideReference.get();
     if (kDebugMode) {
@@ -365,7 +365,7 @@ class RideService {
     return paymentsMethods.snapshots();
   }
 
-    Future<Ride?> fetchRide(String rideID) async {
+  Future<Ride?> fetchRide(String rideID) async {
     try {
       DocumentSnapshot rideDoc = await _firestore.collection('rides').doc(rideID).get();
       if (rideDoc.exists) {
@@ -376,6 +376,20 @@ class RideService {
       return null;
     }
     return null;
+  }
+
+  Future<Map<String, dynamic>?> fetchRideDestination(String rideID) async {
+    try {
+      DocumentSnapshot rideDoc = await _firestore.collection('rides').doc(rideID).get();
+      dynamic destinationAddress = rideDoc.get('destinationAddress');
+      return {
+        'geopoint': destinationAddress['geopoint'],
+        'geohash': destinationAddress['geohash']
+      };
+    } catch (e) {
+      print("Error fetching ride: $e");
+      return null;
+    }
   }
 }
 

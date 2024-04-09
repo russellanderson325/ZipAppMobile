@@ -19,7 +19,7 @@ class MessageOverlay {
     required this.duration, 
     this.color = "#000000", 
     this.textColor = "#FFFFFF", 
-    this.opacity = 1, 
+    this.opacity = 0.8, 
     this.background = false
   });
 

@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -74,8 +76,24 @@ class MapWidgetSampleState extends State<MapWidget> {
             infoWindow: const InfoWindow(title: "You are here"),
           ));
         });
+        // Update the driver status
+        updateDriverStatus().then((value) async {
+          print(userService.user.isRiding);
+          if (userService.user.isRiding) {
+            // Ride? ride = await rideService.fetchRide(userService.user.currentRideId);
+            // GeoFirePoint? destinationGeoPoint = ride?.destinationAddress;
+            // print(destinationGeoPoint);
+            Map<String, dynamic>? destinationAddress = await rideService.fetchRideDestination(userService.user.currentRideId);
+            GeoPoint destinationGeoPoint = destinationAddress?['geopoint'];
+            // GeoFirePoint destinationGeoPoint = Ride.extractGeoFirePoint(destinationAddress);
+            double lat = destinationGeoPoint.latitude;
+            double lng = destinationGeoPoint.longitude;
+            print("lat: $lat, lng: $lng");
+            addSearchedMarkerByCoordinate(lat, lng);
+          }
+        });
       });
-      updateDriverStatus();
+
     }
   }
 
@@ -233,12 +251,8 @@ class MapWidgetSampleState extends State<MapWidget> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: TextButton(
           onPressed: () {
-            // Get the ride ID from the user service
-            String rideID = userService.user.currentRideId;
             // Bring up the vehicle ride status confirmation screen
-            print("Showing vehicle request awaiting confirmation screen");
             VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, _resetMarkers);
-            print("Vehicle request awaiting confirmation screen shown");
           },
           style: ZipDesign.yellowButtonStyle,
           child: const Text('View Active Ride'),
@@ -429,30 +443,49 @@ class MapWidgetSampleState extends State<MapWidget> {
     });
   }
 
+  void addSearchedMarkerByCoordinate(double latitude, double longitude) async {
+    setState(() {
+      searchLatLng = LatLng(latitude, longitude);
+    });
 
-  Future<PolylineResult> _addSearchResult(
-      LocalSearchResult searchResult) async {
+    if (mounted) {
+      // Assuming you have a function to create and add a marker based on latitude and longitude
+      await _addLatLngAsSearchResult(latitude, longitude);
+      _moveCamera(
+        latlng: LatLng(latitude - 0.0015, longitude)
+      );
+    }
+  }
+
+  Future<PolylineResult> _addLatLngAsSearchResult(double latitude, double longitude) async {
+    searchLatLng = LatLng(latitude, longitude);
+    LocalSearchResult searchResult = LocalSearchResult(name: "Custom Location", placeId: "custom");
+    return await _addSearchResult(searchResult);
+  }
+
+  Future<PolylineResult> _addSearchResult(LocalSearchResult searchResult) async {
     BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(size: Size(24, 24)),
       'assets/destination_map_marker.png',
     );
-      _resetMarkers();
-      setState(() {
-        markers.add(Marker(
-          markerId: MarkerId(searchResult.placeId),
-          position: searchLatLng!,
-          infoWindow: InfoWindow(title: searchResult.name),
-          icon: customIcon,
-        ));
-      });
-      return await _updatePolylines();
+    _resetMarkers();
+    print(searchResult.placeId);
+    setState(() {
+      markers.add(Marker(
+        markerId: MarkerId(searchResult.placeId),
+        position: searchLatLng!,
+        infoWindow: InfoWindow(title: searchResult.name),
+        icon: customIcon,
+      ));
+    });
+    print("Updating polylines");
+    return await _updatePolylines();
   }
 
   void _moveCamera({latlng, zoom = 17}) async {
     latlng ??= userLatLng!;
     final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: latlng, zoom: zoom.toDouble())));
+    await controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: latlng, zoom: zoom.toDouble())));
   }
 
   void _resetMarkers() {
@@ -466,6 +499,7 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   Future<PolylineResult> _updatePolylines() async {
+    print("Markers: ${markers.length}");
     if (markers.length > 1) {
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Keys.map,
@@ -474,6 +508,7 @@ class MapWidgetSampleState extends State<MapWidget> {
         PointLatLng(
             markers.last.position.latitude, markers.last.position.longitude),
       );
+
       if (result.points.isNotEmpty) {
         List<LatLng> polylineCoordinates = [];
         result.points.forEach((PointLatLng point) {

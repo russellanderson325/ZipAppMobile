@@ -105,7 +105,7 @@ class DriverService {
       this.driver = driver;
       if (driver.isWorking && driver.isAvailable && !_isRequestSubListening) {
         startDriving();
-        // print('Driver is working and available');
+        print('Driver is working and available <-----');
       } else {
         // print('Driver is not working or not available');
       }
