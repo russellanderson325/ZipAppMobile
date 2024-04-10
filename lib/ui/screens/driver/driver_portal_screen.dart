@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -6,7 +7,7 @@ import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_main_screen.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
 
 enum RequestStatus { unsubmitted, submitted, denied, approved }
@@ -21,6 +22,7 @@ class DriverPortal extends StatefulWidget {
 class _DriverPortalState extends State<DriverPortal> {
   AuthenticationDrawerWidgets adw = AuthenticationDrawerWidgets();
   final UserService userService = UserService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
@@ -66,6 +68,7 @@ class _DriverPortalState extends State<DriverPortal> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const SizedBox(height: 32.0),
             const Text(
@@ -253,11 +256,13 @@ class _DriverPortalState extends State<DriverPortal> {
       TextButton(
         onPressed: validDriverPasswords
             ? () {
+                updateDriverPassword(driverPasswordController.text);
+                Navigator.pop(context);
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const DriverVerificationScreen(),
+                    builder: (context) => const DriverMainScreen(),
                   ),
                 );
               }
@@ -269,6 +274,17 @@ class _DriverPortalState extends State<DriverPortal> {
       ),
       const SizedBox(height: 16.0)
     ]);
+  }
+
+  Future<void> updateDriverPassword(String password) async {
+    try {
+      await _firestore.collection('users').doc(userService.user.uid).update({
+        'driverPassword': password,
+        'isDriver': true,
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   bool _validatePassword() {
@@ -365,6 +381,7 @@ class _DriverPortalState extends State<DriverPortal> {
 
   Widget unsubmittedView() {
     return ListView(
+      shrinkWrap: true,
       children: <Widget>[
         adw.promptTextLabel('First Name'),
         const SizedBox(height: 8.0),

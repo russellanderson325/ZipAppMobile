@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:zipapp/business/user.dart';
 import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver/driver_main_screen.dart';
@@ -16,15 +17,13 @@ class DriverVerificationScreen extends StatefulWidget {
 
 class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
   final AuthenticationDrawerWidgets adw = AuthenticationDrawerWidgets();
+  final UserService userService = UserService();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-
-  late bool _validDriverPassword;
 
   @override
   void initState() {
     super.initState();
-    _validDriverPassword = false;
   }
 
 /*
@@ -67,10 +66,10 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
             const SizedBox(height: 32.0),
             adw.promptTextLabel('Password'),
             adw.inputTextField(
-                controller: passwordController,
-                obscureText: true,
-                validator: Validator.validatePassword,
-                onChanged: _validatePassword),
+              controller: passwordController,
+              obscureText: true,
+              validator: Validator.validatePassword,
+            ),
             const SizedBox(height: 16.0),
             TextButton(
               onPressed: () {},
@@ -82,46 +81,26 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
             ),
             const SizedBox(height: 32.0),
             TextButton(
-              onPressed: _validDriverPassword
-                  ? () {
-                      if (passwordController.text == 'password') {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DriverMainScreen(),
-                          ),
-                        );
-                      } else {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DriverMainScreen(),
-                          ),
-                        );
-                      }
-                    }
-                  : null,
-              style: _validDriverPassword
-                  ? ZipDesign.yellowButtonStyle
-                  : ZipDesign.disabledYellowButtonStyle,
+              onPressed: () {
+                if (passwordController.text ==
+                    userService.user.driverPassword) {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DriverMainScreen(),
+                    ),
+                  );
+                }
+              },
+              style: ZipDesign.yellowButtonStyle,
               child: const Text('Sign in as Driver'),
             ),
           ],
         ),
       ),
     );
-  }
-
-  bool _validatePassword() {
-    bool local = Validator.validatePassword(passwordController.text);
-    setState(() {
-      _validDriverPassword = local;
-    });
-    return local;
   }
 
   void _retryVerify() {

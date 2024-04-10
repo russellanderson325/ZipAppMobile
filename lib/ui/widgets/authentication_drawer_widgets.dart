@@ -61,39 +61,37 @@ class AuthenticationDrawerWidgets {
   }
 
   Widget infoIconTextBubble(String text, IconData icon) {
-    return Expanded(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Icon(icon, color: TailwindColors.gray500, size: 16.0),
-          Flexible(
-            child: Text(
-              text,
-              style: ZipDesign.disabledBodyText.copyWith(fontSize: 14),
-              overflow: TextOverflow.visible,
-            ),
-          )
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Icon(icon, color: TailwindColors.gray500, size: 16.0),
+        Flexible(
+          child: Text(
+            text,
+            style: ZipDesign.disabledBodyText.copyWith(fontSize: 14),
+            overflow: TextOverflow.visible,
+            softWrap: true,
+          ),
+        )
+      ],
     );
   }
 
   Widget infoTextBubble(String text) {
-    return Expanded(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Flexible(
-            child: Text(
-              text,
-              style: ZipDesign.disabledBodyText.copyWith(fontSize: 14),
-              overflow: TextOverflow.visible,
-            ),
-          )
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Flexible(
+          child: Text(
+            text,
+            style: ZipDesign.disabledBodyText.copyWith(fontSize: 14),
+            overflow: TextOverflow.visible,
+            softWrap: true,
+          ),
+        )
+      ],
     );
   }
 
