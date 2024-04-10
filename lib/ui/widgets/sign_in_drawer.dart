@@ -60,10 +60,14 @@ class _SignInDrawerState extends State<SignInDrawer> {
             const SizedBox(height: 26),
             adw.promptTextLabel('Email'),
             adw.inputTextField(
-                _emailController, false, Validator.validateEmail),
+                controller: _emailController,
+                obscureText: false,
+                validator: Validator.validateEmail),
             adw.promptTextLabel('Password'),
             adw.inputTextField(
-                _passwordController, true, Validator.validatePassword),
+                controller: _passwordController,
+                obscureText: true,
+                validator: Validator.validatePassword),
             Padding(
                 padding: const EdgeInsets.only(top: 32.0, bottom: 53.0),
                 child: CustomTextButton(

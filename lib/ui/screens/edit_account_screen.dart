@@ -86,26 +86,38 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
                   ),
                   const SizedBox(height: 32),
                   adw.promptTextLabel('first name'),
-                  adw.inputTextField(_firstNameController, false,
-                      () => Validator.validateName(_firstNameController.text)),
+                  adw.inputTextField(
+                      controller: _firstNameController,
+                      obscureText: false,
+                      validator: () =>
+                          Validator.validateName(_firstNameController.text)),
                   const SizedBox(height: 16),
                   adw.promptTextLabel('last name'),
-                  adw.inputTextField(_lastNameController, false,
-                      () => Validator.validateName(_lastNameController.text)),
+                  adw.inputTextField(
+                      controller: _lastNameController,
+                      obscureText: false,
+                      validator: () =>
+                          Validator.validateName(_lastNameController.text)),
                   const SizedBox(height: 16),
                   adw.promptTextLabel('email'),
-                  adw.inputTextField(_emailController, false,
-                      () => Validator.validateEmail(_emailController.text)),
+                  adw.inputTextField(
+                      controller: _emailController,
+                      obscureText: false,
+                      validator: () =>
+                          Validator.validateEmail(_emailController.text)),
                   const SizedBox(height: 16),
                   adw.promptTextLabel('phone number'),
-                  adw.inputTextField(_phoneController, false,
-                      () => Validator.validateNumber(_phoneController.text)),
+                  adw.inputTextField(
+                      controller: _phoneController,
+                      obscureText: false,
+                      validator: () =>
+                          Validator.validateNumber(_phoneController.text)),
                   const SizedBox(height: 16),
                   adw.promptTextLabel('password'),
                   adw.inputTextField(
-                      _passwordController,
-                      true,
-                      () =>
+                      controller: _passwordController,
+                      obscureText: true,
+                      validator: () =>
                           Validator.validatePassword(_passwordController.text)),
                   const SizedBox(height: 48),
                   CustomTextButton(
