@@ -30,6 +30,11 @@ class ZipDesign {
     fontFamily: 'Lexend',
     color: TailwindColors.gray500,
   );
+  static const TextStyle smallBlackText = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    fontFamily: 'Lexend',
+  );
   static const TextStyle tinyLightText = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w300,

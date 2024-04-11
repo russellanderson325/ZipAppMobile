@@ -212,9 +212,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           children: [
             const Icon(LucideIcons.locate, size: 16, color: Colors.black),
             const SizedBox(width: 16),
-            Text(address,
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+            Text(address, style: ZipDesign.smallBlackText),
           ],
         ),
         ZipFormats.activityDetailsTimeFormatter(dateTime),
@@ -232,9 +230,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           children: [
             const Icon(LucideIcons.mapPin, size: 16, color: Colors.black),
             const SizedBox(width: 16),
-            Text(address,
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+            Text(address, style: ZipDesign.smallBlackText),
           ],
         ),
         ZipFormats.activityDetailsTimeFormatter(dateTime),
@@ -251,7 +247,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
           const SizedBox(width: 16),
           Text(
             title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+            style: ZipDesign.smallBlackText,
           ),
         ]),
         SizedBox(
@@ -272,12 +268,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
             ),
             child: Text(
               buttonTitle,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Lexend',
-                color: Colors.black,
-              ),
+              style: ZipDesign.smallBlackText,
             ),
           ),
         )
@@ -357,11 +348,7 @@ class _RideDetailsScreenState extends State<RideDetailsScreen> {
         ),
         Text(
           '\$$price',
-          style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Lexend',
-              color: TailwindColors.gray500),
+          style: ZipDesign.tinyLightText,
         )
       ],
     );

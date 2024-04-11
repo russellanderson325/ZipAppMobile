@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver/driver_activity_item.dart';
-
-
 
 class DriverActivityScreen extends StatefulWidget {
   const DriverActivityScreen({super.key});
@@ -26,68 +23,57 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
     List<Ride> tempRides = [];
     //calculate the average rating
 
-
     tempRides = [
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
       Ride(
           destination: 'Jordan Hare Stadium',
           dateTime: DateTime(2024, 10, 12, 14, 30),
           price: 12.23,
-          rating: 5.0
-      ),
+          rating: 5.0),
     ];
     double sumRatings = tempRides.fold(0.0, (sum, item) => sum + item.rating);
     averageRating = sumRatings / tempRides.length;
@@ -114,25 +100,25 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(
+            const Text(
               '\nYour Average Rating',
               style: ZipDesign.sectionTitleText,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 40),
-                SizedBox(width: 10),
+                const Icon(Icons.star, color: Colors.amber, size: 40),
+                const SizedBox(width: 10),
                 RichText(
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style,
                     children: [
                       TextSpan(
-                        text: '${averageRating.toStringAsFixed(1)}', // Average rating value
-                        style: TextStyle(color: Colors.black,
-                            fontSize: 28),
+                        text: averageRating
+                            .toStringAsFixed(1), // Average rating value
+                        style: const TextStyle(color: Colors.black, fontSize: 28),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: ' / 5.0',
                         style: TextStyle(
                           color: Colors.grey,
@@ -144,13 +130,12 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 24),
-            Divider(
+            const SizedBox(height: 24),
+            const Divider(
               color: Colors.grey,
               thickness: 0.5,
             ),
-
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             const Text(
               'Completed Trips',
               style: ZipDesign.sectionTitleText,
@@ -169,7 +154,6 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
                 },
               ),
             )
-
           ],
         ),
       ),
@@ -177,13 +161,11 @@ class _DriverActivityScreenState extends State<DriverActivityScreen> {
   }
 }
 
-
 class Ride {
   final String destination;
   final DateTime dateTime;
   final double price;
   final double rating;
-
 
   Ride({
     required this.destination,
