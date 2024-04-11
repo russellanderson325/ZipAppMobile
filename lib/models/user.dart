@@ -13,6 +13,7 @@ class User {
   final String homeAddress;
   DateTime lastActivity;
   final bool isDriver;
+  String driverPassword;
   final double defaultTip;
   bool acceptedtc;
   bool acceptedPrivPolicy;
@@ -31,6 +32,7 @@ class User {
       required this.lastActivity,
       required this.profilePictureURL,
       this.isDriver = false,
+      this.driverPassword = '',
       this.defaultTip = 0,
       this.acceptedtc = false,
       this.acceptedPrivPolicy = false,
@@ -49,6 +51,7 @@ class User {
       'homeAddress': homeAddress,
       'profilePictureURL': profilePictureURL,
       'isDriver': isDriver,
+      'driverPassword': driverPassword,
       'defaultTip': defaultTip,
       'acceptedtc': acceptedtc,
       'acceptedPrivPolicy': acceptedPrivPolicy,
@@ -72,6 +75,7 @@ class User {
         homeAddress: (doc['homeAddress'] ?? '') as String,
         profilePictureURL: (doc['profilePictureURL'] ?? '') as String,
         isDriver: (doc['isDriver'] ?? false) as bool,
+        driverPassword: (doc['driverPassword'] ?? '') as String,
         acceptedtc: (doc['acceptedtc'] ?? false) as bool,
         acceptedPrivPolicy: (doc['acceptedPrivPolicy'] ?? false) as bool,
         pastRides: doc['pastRides'] ?? [],

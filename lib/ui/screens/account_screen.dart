@@ -5,6 +5,7 @@ import 'package:zipapp/business/current_user.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
+import 'package:zipapp/ui/screens/driver/driver_portal_screen.dart';
 import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/edit_account_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
@@ -15,7 +16,7 @@ import 'package:zipapp/ui/widgets/underline_textbox.dart';
 
 class AccountScreen extends StatefulWidget {
   final bool driver;
-  const AccountScreen({Key? key, required this.driver}) : super(key: key);
+  const AccountScreen({super.key, required this.driver});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -30,6 +31,8 @@ class _AccountScreenState extends State<AccountScreen> {
   late String email;
   late String phone;
 
+  late bool verifiedDriver;
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +40,7 @@ class _AccountScreenState extends State<AccountScreen> {
     lastName = userService.user.lastName;
     email = userService.user.email;
     phone = userService.user.phone;
+    verifiedDriver = userService.user.isDriver;
   }
 
   @override
@@ -252,14 +256,7 @@ class _AccountScreenState extends State<AccountScreen> {
       alignment: Alignment.topLeft,
       child: TextButton.icon(
         onPressed: () {
-          if (!widget.driver) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const DriverVerificationScreen(),
-              ),
-            );
-          } else {
+          if (widget.driver) {
             Navigator.pop(context);
             Navigator.push(
               context,
@@ -267,12 +264,29 @@ class _AccountScreenState extends State<AccountScreen> {
                 builder: (context) => const RiderMainScreen(),
               ),
             );
+          } else {
+            if (verifiedDriver) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DriverVerificationScreen(),
+                ),
+              );
+            } else {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const DriverPortal()));
+            }
           }
         },
         icon:
-            Icon(widget.driver ? LucideIcons.personStanding : LucideIcons.bus),
-        label: Text(
-            widget.driver ? 'Use our Rider Program' : 'Log In as a Driver'),
+            Icon(widget.driver ? LucideIcons.personStanding : LucideIcons.car),
+        label: Text(widget.driver
+            ? 'Use our Rider Program'
+            : verifiedDriver
+                ? 'Login as Driver'
+                : 'Become a Driver'),
         style: ButtonStyle(
           padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
           iconColor: MaterialStateProperty.all(Colors.black),

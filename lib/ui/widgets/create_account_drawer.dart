@@ -64,19 +64,29 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
             const SizedBox(height: 26),
             adw.promptTextLabel('First name'),
             adw.inputTextField(
-                _firstNameController, false, Validator.validateName),
+                controller: _firstNameController,
+                obscureText: false,
+                validator: Validator.validateName),
             adw.promptTextLabel('Last name'),
             adw.inputTextField(
-                _lastNameController, false, Validator.validateName),
+                controller: _lastNameController,
+                obscureText: false,
+                validator: Validator.validateName),
             adw.promptTextLabel('Email'),
             adw.inputTextField(
-                _emailController, false, Validator.validateEmail),
+                controller: _emailController,
+                obscureText: false,
+                validator: Validator.validateEmail),
             adw.promptTextLabel('Phone'),
             adw.inputTextField(
-                _phoneController, false, Validator.validateNumber),
+                controller: _phoneController,
+                obscureText: false,
+                validator: Validator.validateNumber),
             adw.promptTextLabel('Password'),
             adw.inputTextField(
-                _passwordController, true, Validator.validatePassword),
+                controller: _passwordController,
+                obscureText: true,
+                validator: Validator.validatePassword),
             Padding(
                 padding: const EdgeInsets.only(top: 32.0, bottom: 53.0),
                 child: CustomTextButton(
