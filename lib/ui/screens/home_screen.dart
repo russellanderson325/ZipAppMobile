@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
+//import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
+import 'package:zipapp/ui/widgets/mapWidget.dart' as mapwidget;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

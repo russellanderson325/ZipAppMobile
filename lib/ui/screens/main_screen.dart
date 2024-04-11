@@ -27,6 +27,7 @@ import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/payment_history_screen.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as main_map;
+import 'package:zipapp/ui/widgets/mapWidget.dart' as main_map;
 
 enum BottomSheetStatus {
   closed,
