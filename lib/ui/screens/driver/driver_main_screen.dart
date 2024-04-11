@@ -34,19 +34,19 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
       BottomNavigationBarItem(
           icon: Icon(Icons.map),
           label: 'Home',
-          backgroundColor: ZipColors.primaryBackground),
+          backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.sticky_note_2),
           label: 'Activity',
-          backgroundColor: ZipColors.primaryBackground),
+          backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.credit_card),
           label: 'Income',
-          backgroundColor: ZipColors.primaryBackground),
+          backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Account',
-          backgroundColor: ZipColors.primaryBackground),
+          backgroundColor: Colors.black),
     ];
     return Scaffold(
         body: Center(
@@ -57,10 +57,10 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
                 border: Border(top: BorderSide(color: ZipColors.boxBorder))),
             child: BottomNavigationBar(
               showUnselectedLabels: true,
-              selectedLabelStyle: const TextStyle(color: Colors.black),
-              selectedItemColor: Colors.black,
-              unselectedLabelStyle: const TextStyle(color: Colors.black),
-              unselectedItemColor: Colors.black,
+              selectedLabelStyle: const TextStyle(color: Colors.white),
+              selectedItemColor: Colors.white,
+              unselectedLabelStyle: const TextStyle(color: Colors.white70),
+              unselectedItemColor: Colors.white70,
               backgroundColor: ZipColors.primaryBackground,
               items: items,
               currentIndex: _selectedIndex,
