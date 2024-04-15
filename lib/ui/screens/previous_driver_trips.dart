@@ -10,7 +10,7 @@ class DriverHistoryScreen extends StatefulWidget {
   const DriverHistoryScreen({super.key});
 
   @override
-  _DriverHistoryScreenState createState() => _DriverHistoryScreenState();
+  State<DriverHistoryScreen> createState() => _DriverHistoryScreenState();
 }
 
 class _DriverHistoryScreenState extends State<DriverHistoryScreen> {

@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:lucide_icons/lucide_icons.dart";
 import "package:zipapp/business/ride.dart";
 import "package:zipapp/constants/zip_colors.dart";
-import "package:zipapp/business/ride.dart";
 import "package:zipapp/constants/zip_design.dart";
 import "package:zipapp/services/payment.dart";
 
@@ -17,7 +16,7 @@ class VehicleRequestStatusScreen extends StatefulWidget {
   final Function resetMap;
 
   const VehicleRequestStatusScreen({
-    Key? key, 
+    super.key, 
     required this.lat, 
     required this.long, 
     required this.label, 
@@ -26,7 +25,7 @@ class VehicleRequestStatusScreen extends StatefulWidget {
     required this.merchantCountryCode, 
     required this.primaryPaymentMethod,
     required this.resetMap,
-  }) : super(key: key);
+  });
 
   @override
   State<VehicleRequestStatusScreen> createState() => VehicleRequestStatusScreenState();

@@ -5,7 +5,6 @@ import 'package:zipapp/business/current_user.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/edit_account_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
@@ -16,7 +15,7 @@ import 'package:zipapp/ui/widgets/underline_textbox.dart';
 
 class DriverAccountScreen extends StatefulWidget {
   final bool driver;
-  const DriverAccountScreen({Key? key, required this.driver}) : super(key: key);
+  const DriverAccountScreen({super.key, required this.driver});
 
   @override
   State<DriverAccountScreen> createState() => _AccountScreenState();

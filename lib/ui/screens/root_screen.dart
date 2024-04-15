@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
-import 'package:zipapp/business/ride.dart';
-// import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/ui/screens/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:zipapp/ui/screens/main_screen.dart';
 
 class RootScreen extends StatefulWidget {
-  const RootScreen({Key? key}) : super(key: key);
+  const RootScreen({super.key});
   @override
   State<StatefulWidget> createState() => _RootScreenState();
 }
@@ -42,7 +39,6 @@ class _RootScreenState extends State<RootScreen> {
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
-            // TODO: create a splashscreen / loading screen
             color: Colors.white,
           );
         } else {

@@ -4,7 +4,7 @@ class VehiclesScreen extends StatefulWidget {
   const VehiclesScreen({super.key});
 
   @override
-  _VehiclesScreenState createState() => _VehiclesScreenState();
+  State<VehiclesScreen> createState() => _VehiclesScreenState();
 }
 
 class _VehiclesScreenState extends State<VehiclesScreen> {
@@ -72,16 +72,14 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
 }
 
 class TopRectangle extends StatelessWidget {
-  final color;
-  final height;
-  final width;
-  final child;
-  final posi;
+  final Color color;
+  final double height;
+  final double width;
+  final Widget child;
   const TopRectangle(
       {super.key,
-      this.posi,
-      this.child,
-      this.color,
+      required this.child,
+      required this.color,
       this.height = 100.0,
       this.width = 500.0});
 

@@ -11,7 +11,7 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
@@ -78,7 +78,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SafetyFeaturesScreen()));
+                              builder: (context) =>
+                                  const SafetyFeaturesScreen()));
                     }
 
                     //child: Icon(Icons.account_box, size: 28.0, color: Colors.white),
@@ -100,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => DefaultTipScreen()));
+                              builder: (context) => const DefaultTipScreen()));
                     }),
               ),
               SettingRec(
@@ -151,7 +152,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LegalInformationScreen()));
+                              builder: (context) =>
+                                  const LegalInformationScreen()));
                     }),
               ),
               SettingRec(
@@ -180,14 +182,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 class TopRectangle extends StatelessWidget {
-  final color;
-  final height;
-  final width;
-  final child;
+  final Color? color;
+  final double height;
+  final double width;
+  final Widget child;
 
   const TopRectangle(
       {super.key,
-      this.child,
+      required this.child,
       this.color,
       this.height = 100.0,
       this.width = 500.0});
@@ -208,18 +210,15 @@ void _logOut() async {
 }
 
 class SettingRec extends StatelessWidget {
-  final color;
-  final decoration;
-  final width;
-  final height;
-  // final borderWidth;
-  final child;
+  final Color? color;
+  final double width;
+  final double height;
+  final Widget child;
   const SettingRec(
       {super.key,
-      this.child,
+      required this.child,
       this.color,
       this.width = 500.0,
-      this.decoration,
       this.height = 55.0});
 
   @override

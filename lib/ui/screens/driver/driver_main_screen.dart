@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/ui/screens/driver/driver_activity_screen.dart';
 import 'package:zipapp/ui/screens/driver/driver_home_screen.dart';
 import 'package:zipapp/ui/screens/driver/driver_earnings_screen.dart';
@@ -29,14 +28,11 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
       const DriverHomeScreen(),
       const DriverActivityScreen(),
       const DriverIncomeScreen(),
-      const DriverAccountScreen(driver:true),
-
+      const DriverAccountScreen(driver: true),
     ];
     const List<BottomNavigationBarItem> items = [
       BottomNavigationBarItem(
-          icon: Icon(Icons.map),
-          label: 'Home',
-          backgroundColor: Colors.black),
+          icon: Icon(Icons.map), label: 'Home', backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.sticky_note_2),
           label: 'Activity',

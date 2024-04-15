@@ -10,7 +10,7 @@ class EarningsScreen extends StatefulWidget {
   const EarningsScreen({super.key});
 
   @override
-  _EarningsScreenState createState() => _EarningsScreenState();
+  State<EarningsScreen> createState() => _EarningsScreenState();
 }
 
 class _EarningsScreenState extends State<EarningsScreen> {
@@ -65,8 +65,8 @@ class _EarningsScreenState extends State<EarningsScreen> {
                             top: 10.0, bottom: 20.0, left: 15.0, right: 15.0),
                         child: Text(
                           "Cash Amount",
-                          style:
-                              TextStyle(color: ZipColors.zipYellow, fontSize: 22.0),
+                          style: TextStyle(
+                              color: ZipColors.zipYellow, fontSize: 22.0),
                           textAlign: TextAlign.center,
                         )),
                     Padding(

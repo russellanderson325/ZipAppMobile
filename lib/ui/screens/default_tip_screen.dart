@@ -7,7 +7,7 @@ import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 
 class DefaultTipScreen extends StatefulWidget {
-  const DefaultTipScreen({Key? key}) : super(key: key);
+  const DefaultTipScreen({super.key});
 
   @override
   State<DefaultTipScreen> createState() => DefaultTipScreenState();

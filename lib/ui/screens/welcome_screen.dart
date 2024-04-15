@@ -12,7 +12,7 @@ import 'package:zipapp/ui/widgets/create_account_drawer.dart';
 import 'package:zipapp/ui/widgets/sign_in_drawer.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
