@@ -16,9 +16,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ZipColors.primaryBackground,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: ZipColors.primaryBackground,
+        backgroundColor: Colors.white,
         titleSpacing: 0.0,
         leading: Padding(
             padding: const EdgeInsets.only(left: 16.0, right: 0),

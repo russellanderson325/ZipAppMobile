@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/screens/account_screen.dart';
+import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/ui/screens/driver/driver_activity_screen.dart';
 import 'package:zipapp/ui/screens/driver/driver_home_screen.dart';
-import 'package:zipapp/ui/screens/driver/driver_income_screen.dart';
+import 'package:zipapp/ui/screens/driver/driver_earnings_screen.dart';
+import 'driver_account_screen.dart';
 
 class DriverMainScreen extends StatefulWidget {
   const DriverMainScreen({super.key});
@@ -28,7 +29,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
       const DriverHomeScreen(),
       const DriverActivityScreen(),
       const DriverIncomeScreen(),
-      const AccountScreen(driver: true),
+      const DriverAccountScreen(driver:true),
+
     ];
     const List<BottomNavigationBarItem> items = [
       BottomNavigationBarItem(
@@ -41,7 +43,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
           backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.credit_card),
-          label: 'Income',
+          label: 'Earnings',
           backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.person),
