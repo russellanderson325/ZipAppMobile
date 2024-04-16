@@ -12,6 +12,7 @@ const cancelPaymentIntent = functions.https.onCall(async (data, context) => {
     try {
         const canceledIntent = await stripe.paymentIntents.cancel(data["paymentIntentId"]);
         console.log("Payment Intent was canceled successfully:", canceledIntent);
+        return {success: true, response: canceledIntent};
     } catch (error) {
         console.error("Error canceling the Payment Intent:", error);
     }

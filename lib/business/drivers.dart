@@ -225,9 +225,9 @@ class DriverService {
    * @return void
    */
   void _onRequestRecieved(Request req) {
-    // if (kDebugMode) {
-    //   acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
-    // }
+    if (kDebugMode) {
+      acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
+    }
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
     Future.delayed(Duration(seconds: seconds)).then((value) {
