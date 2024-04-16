@@ -19,7 +19,7 @@ class MessageOverlay {
     required this.duration, 
     this.color = "#000000", 
     this.textColor = "#FFFFFF", 
-    this.opacity = 1, 
+    this.opacity = 0.8, 
     this.background = false
   });
 
@@ -67,6 +67,28 @@ class MessageOverlay {
       overlayEntry.remove();
       _currentOverlayEntry = null; // Reset the static variable
     });
+  }
+
+  static void angryMessage(context, message) {
+    MessageOverlay(
+      message: message, 
+      duration: const Duration(seconds: 3),
+      color: "#F54747",
+      textColor: "#FFFFFF",
+      background: true,
+      opacity: 1,
+    ).show(context);
+  }
+
+  static void happyMessage(context, message) {
+    MessageOverlay(
+      message: message, 
+      duration: const Duration(seconds: 3),
+      color: "#02C436",
+      textColor: "#FFFFFF",
+      background: true,
+      opacity: 1,
+    ).show(context);
   }
 }
 

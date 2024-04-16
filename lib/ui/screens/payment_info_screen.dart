@@ -35,10 +35,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
         title: const Text("")
       ),
       body: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 32.0),
         child: ListView(
           children: <Widget>[
-            const SizedBox(height: 200),
+            const SizedBox(height: 210),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[

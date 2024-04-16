@@ -8,6 +8,7 @@ class Request {
   final String price;
   final String name;
   final String photoURL;
+  final String model;
   final Timestamp timeout;
 
   Request({
@@ -17,6 +18,7 @@ class Request {
     required this.price,
     required this.name,
     required this.photoURL,
+    required this.model,
     required this.timeout,
   });
 
@@ -28,6 +30,7 @@ class Request {
       'price': price,
       'name': name,
       'photoURL': photoURL,
+      'model': model,
       'timeout': timeout,
     };
   }
@@ -40,6 +43,7 @@ class Request {
       price: doc['price'] as String,
       name: doc['name'] as String,
       photoURL: doc['photoURL'] as String,
+      model: doc['model'] as String,
       timeout: doc['timeout'] as Timestamp,
     );
   }
