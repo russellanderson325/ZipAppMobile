@@ -1,3 +1,7 @@
+/*
+ * drivers.dart
+ * This file contains the driver service class which is responsible for handling all driver related operations.
+ */
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -9,6 +13,7 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
+import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/ui/screens/driver_main_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -45,6 +50,7 @@ class DriverService {
   //Shift specific variables
   late String shiftuid;
   int requestLength = 0;
+  bool isDriving = false;
 
   // Function? uiCallbackFunction;
 
@@ -80,9 +86,6 @@ class DriverService {
   // TODO: Update to use user.isDriver before initializing since only driver users will need the service.
 
   DriverService._internal() {
-    if (kDebugMode) {
-      print("DriverService Created");
-    }
     driversCollection = _firestore.collection('drivers');
     driverReference = driversCollection.doc(userService.userID);
     requestCollection = driverReference.collection('requests');
@@ -95,25 +98,40 @@ class DriverService {
    * @return Future<bool> True if the driver service was setup successfully, false otherwise
    */
   Future<bool> setupService() async {
-    print('Setting up driver service');
     await _updateDriverRecord();
     driverSub = driverReference
         .snapshots(includeMetadataChanges: true)
         .map((DocumentSnapshot snapshot) {
-      return Driver.fromDocument(snapshot);
+      Driver driver = Driver.fromDocument(snapshot);
+      if (driver.currentRideID.isNotEmpty) {
+        setupRideStream(driver.currentRideID);
+      }
+      return driver;
     }).listen((driver) {
       this.driver = driver;
-      if (driver.isWorking && driver.isAvailable && !_isRequestSubListening) {
-        startDriving();
-        print('Driver is working and available <-----');
-      } else {
-        // print('Driver is not working or not available');
-      }
+      handleDriverAvailability(driver);
     });
-    //locationSub.cancel();
     locationSub = locationService.positionStream.listen(_updatePosition);
     return true;
   }
+
+  void handleDriverAvailability(Driver driver) {
+    if (driver.isWorking && driver.isAvailable && !isDriving) {
+        startDriving();
+    }
+  }
+
+  void setupRideStream(String rideId) {
+      if (rideSub != null) {
+          rideSub?.cancel();
+      }
+      DocumentReference rideRef = _firestore.collection('rides').doc(rideId);
+      rideStream = rideRef.snapshots().map((snapshot) => Ride.fromDocument(snapshot));
+      rideSub = rideStream.listen((ride) {
+          _onRideUpdate(ride);
+      });
+  }
+
 
   /*
    * Get the driver's current state (isAvailable, isWorking, isOnBreak)
@@ -163,20 +181,19 @@ class DriverService {
    */
   void startDriving() async {
     print('Starting driver service');
+    isDriving = true;
     driverReference.update({
       'lastActivity': DateTime.now(),
       'geoFirePoint': locationService.getCurrentGeoFirePoint().data,
       'isAvailable': true,
     });
-    if (_isRequestSubListening) return;
+    // if (_isRequestSubListening) return;
     initRequestSub();
     await Future.delayed(const Duration(milliseconds: 1000));
   }
 
   void initRequestSub() {
     // If requestSub is not already listening, start listening
-    print('Initiating request subscription');
-
     if (requestSub != null) return;
     requestStream = requestCollection
       .snapshots()
@@ -186,16 +203,13 @@ class DriverService {
       .asBroadcastStream();
     requestSub = requestStream.listen((List<Request> requests) {
       if (requestLength < requests.length) {
-        print('New request(s) recieved');
         requestLength = requests.length;
         // Handle the first request
-        Request firstRequest = requests.first;
+        Request firstRequest = requests.last;
         _onRequestRecieved(firstRequest);
       } else if (requestLength > requests.length) {
-        print('Request(s) declined, maybe? But probably not, don\'t worry');
         requestLength = requests.length;
       } else {
-        print('No new requests');
         // Do nothing
       }
     });
@@ -211,17 +225,12 @@ class DriverService {
    * @return void
    */
   void _onRequestRecieved(Request req) {
-    print('Request recieved');
     if (kDebugMode) {
       acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
-      print("Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
     }
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
     Future.delayed(Duration(seconds: seconds)).then((value) {
-      // if (kDebugMode) {
-      //   print("Request recieved from ${req.name} timed out");
-      // }
       declineRequest(req.id);
     });
   }
@@ -232,20 +241,13 @@ class DriverService {
    * @return void
    */
   Future<void> declineRequest(String requestID) async {
-    if (kDebugMode) {
-      print("Declining request: $requestID");
-    }
     DocumentSnapshot requestRef = await requestCollection.doc(requestID).get();
     if (requestRef.exists) {
-      if (kDebugMode) {
-        print("Request $requestID exists and will be deleted.");
-      }
       await _firestore
           .collection('rides')
           .doc(requestID)
           .update({'status': "SEARCHING"});
       await requestCollection.doc(requestID).delete();
-      // uiCallbackFunction!(DriverBottomSheetStatus.searching);
     }
   }
 
@@ -258,10 +260,6 @@ class DriverService {
         .map((event) => Ride.fromDocument(event));
     rideSub = rideStream.listen(_onRideUpdate);
     if (requestRef.exists) {
-      if (kDebugMode) {
-        print(
-            "Request $requestID exists and will be deleted after acceptance.");
-      }
       await driverReference
           .update({'isAvailable': false, 'currentRideID': requestID});
       await _firestore.collection('rides').doc(requestID).update({
@@ -275,7 +273,7 @@ class DriverService {
   }
 
   void stopDriving() {
-    print('Stopping driver service');
+    isDriving = false;
     driverReference.update({
       'lastActivity': DateTime.now(),
       'currentRideID': '',
@@ -309,10 +307,7 @@ class DriverService {
         'driverPhotoURL': driver.profilePictureURL
       });
     }
-    if (kDebugMode) {
-      print(driver.uid);
-    }
-    stopDriving();
+    // stopDriving();
   }
 
   /*
@@ -321,9 +316,6 @@ class DriverService {
    * @return void
    */
   void _addRideToDriver(rideID) async {
-    if (kDebugMode) {
-      print('Adding ride $rideID to driver list of past drives');
-    }
     var rideObj = await _firestore.collection('rides').doc(rideID).get();
     var rideDriver = rideObj.get('drid');
 
@@ -343,9 +335,6 @@ class DriverService {
    * @return void
    */
   void _addRideToRider(rideID) async {
-    if (kDebugMode) {
-      print('Adding ride $rideID to rider list of past rides');
-    }
     var rideObj = await _firestore.collection('rides').doc(rideID).get();
     var rideRider = rideObj.get('uid');
     var riderPastRides =
@@ -372,39 +361,32 @@ class DriverService {
     }
   }
 
+  /*
+   * On ride update, update the ride status and handle the ride accordingly
+   * @param updatedRide The updated ride
+   */
   void _onRideUpdate(Ride updatedRide) {
     try {
       if (currentRide.status == updatedRide.status) return;
     } catch (e) {
-      // do nothing
+      print("Error updating ride status:  Current ride is not initialized.");
     }
-    print("Updated ride status to ${updatedRide.status}");
     currentRide = updatedRide;
     _isCurrentRideInitialized = true;
     switch (updatedRide.status) {
       case 'CANCELED':
         cancelRide();
         startDriving();
-        if (showDebugPrints) {
-          if (kDebugMode) {
-            print("Ride is canceled");
-          }
-        }
+        Payment.cancelPaymentIntentFromFirebaseByUserIdAndRideId(updatedRide.uid, driver.currentRideID);
         break;
       case 'IN_PROGRESS':
-        if (showDebugPrints) {
-          if (kDebugMode) {
-            print("Ride is now IN_PROGRESS");
-          }
-        }
+        // Payment intent is created on the rider side
         break;
       case 'ENDED':
+        completeRide();
         startDriving();
-        if (showDebugPrints) {
-          if (kDebugMode) {
-            print("Ride has ended.");
-          }
-        }
+        // Capture payment from stripe_customer payment that contains the rideID
+        Payment.capturePaymentIntentFromFirebaseByUserIdAndRideId(updatedRide.uid, driver.currentRideID);
         break;
       default:
     }
@@ -438,7 +420,6 @@ class DriverService {
 
   Future<List<Driver>> getNearbyDriversListWithModel(double radius, String cartModel) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
-    print(driver.cartModel);
     Query collectionReference =
         _firestore.collection('drivers')
         .where('isAvailable', isEqualTo: true)
@@ -455,9 +436,6 @@ class DriverService {
             event.map((e) => Driver.fromDocument(e)).take(10).toList());
 
     List<Driver> nearbyDrivers = await stream.first;
-    nearbyDrivers.forEach((driver) {
-      print("${driver.firstName} is available and in range.");
-    });
     return nearbyDrivers;
   }
 
@@ -492,13 +470,11 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock in operation
    */
   Future<Map<String, dynamic>> clockIn() async {
-    print(driver.daysOfWeek);
     HttpsCallableResult result = await driverClockInFunction.call(<String, dynamic>{
       'daysOfWeek': driver.daysOfWeek,
       'driveruid': driver.uid,
       'shiftuid': shiftuid
     });
-    print(result.data);
     String response = result.data['response'];
     bool success = result.data['success'];
 
@@ -512,7 +488,6 @@ class DriverService {
   Future<Map<String, dynamic>> clockOut() async {
     HttpsCallableResult result = await driverClockOutFunction.call(
         <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -526,7 +501,6 @@ class DriverService {
   Future<Map<String, dynamic>> startBreak() async {
     HttpsCallableResult result = await driverStartBreakFunction.call(
         <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -540,7 +514,6 @@ class DriverService {
   Future<Map<String, dynamic>> endBreak() async {
     HttpsCallableResult result = await driverEndBreakFunction.call(
         <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 

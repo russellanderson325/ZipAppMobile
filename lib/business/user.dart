@@ -1,3 +1,7 @@
+/*
+ * user.dart
+ * This file contains the User class and the UserService class.
+ */
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';

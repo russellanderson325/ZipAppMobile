@@ -9,10 +9,11 @@ const removePaymentMethod = require("./stripe_functions/removePaymentMethod");
 const attachPaymentMethodToCustomer = require("./stripe_functions/attachPaymentMethodToCustomer");
 const createPaymentIntent = require("./stripe_functions/createPaymentIntent");
 const capturePaymentIntent = require("./stripe_functions/capturePaymentIntent");
-const driverClockOut = require("./stripe_functions/driverClockOut");
-const driverClockIn = require("./stripe_functions/driverClockIn");
-const driverStartBreak = require("./stripe_functions/driverStartBreak");
-const driverEndBreak = require("./stripe_functions/driverEndBreak");
+const cancelPaymentIntent = require("./stripe_functions/cancelPaymentIntent");
+const driverClockOut = require("./driver/driverClockOut");
+const driverClockIn = require("./driver/driverClockIn");
+const driverStartBreak = require("./driver/driverStartBreak");
+const driverEndBreak = require("./driver/driverEndBreak");
 
 // Export the functions
 exports.getPaymentMethodDetails = getPaymentMethodDetails;
@@ -24,3 +25,4 @@ exports.driverClockOut = driverClockOut;
 exports.driverClockIn = driverClockIn;
 exports.driverStartBreak = driverStartBreak;
 exports.driverEndBreak = driverEndBreak;
+exports.cancelPaymentIntent = cancelPaymentIntent;

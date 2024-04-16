@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:zipapp/business/drivers.dart";
 import "package:zipapp/business/ride.dart";
 import "package:zipapp/business/user.dart";
 import "package:zipapp/constants/tailwind_colors.dart";
@@ -60,7 +61,6 @@ class VehiclesScreenState extends State<VehiclesScreen> {
       loading = false;
     });
   } catch (error) {
-    print("Error initializing data: $error");
     setState(() {
       loading = false;
     });
@@ -80,7 +80,6 @@ class VehiclesScreenState extends State<VehiclesScreen> {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      print("Loading...");
       return Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -281,27 +280,44 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                   // Open a new screen to display the request status
                   requestMade = true;
                   if (primaryPaymentMethodDetails?['id'] == "apple_pay" || primaryPaymentMethodDetails?['id'] == "google_pay") {
+                    try {
                     await Payment.showPaymentSheetToMakeIntent(
                       label, 
                       (price * 100).toInt(), 
                       currencyCode, 
                       merchantCountryCode
                       ).then((result) async {
-                        print("Showing payment sheet");
                         if (result['authorized']) {
                           if (mounted) MessageOverlay.happyMessage(context, "Payment intent successfully authorized. Please wait for a driver to accept the ride.");
                           Navigator.pop(context);
+                          rideService.initializeRideWithoutID();
                           VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, widget.resetMap);
                           // Send the request to the nearest driver, and so on...
                           await rideService.startRide(widget.lat, widget.long, price, model);
+
+                          Payment.addPaymentDetailsToFirebase({
+                            "paymentIntentId": result['paymentIntentId'] ,
+                            "paymentMethod": primaryPaymentMethodDetails?['id'],
+                            "amount": price,
+                            "last4": primaryPaymentMethodDetails?['last4'],
+                            "rideId": userService.user.currentRideId,
+                          });
                         } else {
                           // Cancel the ride
-                          print(result['error']);
                           if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
-                          loading = false;
+                          setState(() {
+                            loading = false;
+                          });                          
                           rideService.cancelRide();
                         }
                       });
+                    } catch (error) {
+                      if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
+                      setState(() {
+                        loading = false;
+                      });     
+                      rideService.cancelRide();
+                    }
                   } else {
                       Payment.createPaymentIntent((price * 100).toInt(), currencyCode).then((result) {
                       Map<String, dynamic> response = Map<String, dynamic>.from(result['response']);
@@ -310,36 +326,31 @@ class VehiclesScreenState extends State<VehiclesScreen> {
                         if (result['authorized'] as bool) {
                           if (mounted) MessageOverlay.happyMessage(context, "Payment intent successfully authorized. Please wait for a driver to accept the ride.");
                           Navigator.pop(context);
-                          print("Showing vehicle request awaiting confirmation screen");
+                          rideService.initializeRideWithoutID();
                           VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, widget.resetMap);
                           // Send the request to the nearest driver, and so on...
                           await rideService.startRide(widget.lat, widget.long, price, model);
 
-                          Map<String, dynamic> paymentDetails = {
+                          Payment.addPaymentDetailsToFirebase({
+                            "paymentIntentId": clientSecret.split('_secret_')[0],
                             "paymentMethod": primaryPaymentMethodDetails?['id'],
                             "amount": price,
-                          };
-
-                          print(primaryPaymentMethodDetails);
-                          Payment.addPaymentDetailsToFirebase(paymentDetails, primaryPaymentMethodDetails?['last4']);
-                          // Below is the code to capture the payment intent
-                          // String paymentIntentId = clientSecret.split('_secret_')[0];
-                          // Payment.capturePaymentIntent(paymentIntentId).then((result) {
-                          //   print(result);
-                          // }).catchError((error) {
-                          //   ride?.cancelRide();
-                          //   dispose();
-                          // });
+                            "last4": primaryPaymentMethodDetails?['last4'],
+                            "rideId": userService.user.currentRideId,
+                          });
                         } else {
                           if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
-                          loading = false;
+                          setState(() {
+                            loading = false;
+                          });
                           rideService.cancelRide();
                         }
                       }).catchError((error) {
                         if (mounted) MessageOverlay.angryMessage(context, "Payment intent unable to authorize, please check your payment method and try again.");
-                        loading = false;
+                        setState(() {
+                          loading = false;
+                        });
                         rideService.cancelRide();
-                        print(error.toString());
                       });
                     });
                   }

@@ -44,7 +44,7 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
     _isMounted = true;
     statusMessage = "";
     ride = widget.ride;
-    print("Ride ID: ${ride!.rideID}");
+
     _rideSubscription = ride?.getRideStream().listen((ride) {
       statusUpdate(ride.status);
     });
@@ -54,7 +54,9 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
   void dispose() {
     _rideSubscription?.cancel();
     if (!userService.isRiding()) {
+      Future.microtask(() => widget.resetMap());
       ride?.cancelRide();
+      
     }
     _isMounted = false;
     super.dispose();
@@ -82,11 +84,15 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
             const SizedBox(height: 260),
             TextButton.icon(
               onPressed: () {
-                ride?.cancelRide();
+                if (status != "CANCELED") {
+                  ride?.cancelRide();
+                } else {
+                  Navigator.pop(context);
+                }
               },
               icon: const Icon(LucideIcons.trash),
               style: ZipDesign.redButtonStyle,
-              label: const Text('Cancel Ride')
+              label: Text((status != "CANCELED" || status == "ENDED") ? 'Cancel Ride' : 'Close')
             ),
             const SizedBox(height: 5),
             // const Center(
@@ -111,8 +117,6 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
    * @return void
    */
   void statusUpdate(String status) {
-    if (status == this.status) return;
-    print("statusUpdate: $status");
     this.status = status;
     if (_isMounted) {
       setState(() {
@@ -120,31 +124,24 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
         incrementKey++;
         switch (status) {
           case "INITIALIZING":
-            print("Searching");
             statusMessage = "Searching for a driver...";
             break;
           case "WAITING":
-            print("Waiting");
             statusMessage = "Waiting for driver to accept...";
             break;
           case "IN_PROGRESS":
-            print("In Progress");
             statusMessage = "Driver connected and en route..."; 
-            print("Starting in progress ride with ID: ${ride!.rideID}");
             userService.startRide(ride!.rideID);
             break;
           case "ENDED":
-            print("Ended");
             statusMessage = "Ride has ended, thank you for riding with us. Your payment has been processed.";
             userService.endRide();
             Future.microtask(() => widget.resetMap());
             break;
           case "CANCELED":
-            print("Canceled");
-            statusMessage = "Ride has been canceled. No charge has been made.";
+            statusMessage = "Ride canceled. No charge has been made.";
             userService.endRide();
             Future.microtask(() => widget.resetMap());
-            Navigator.pop(context);
             break;
         }
       });
@@ -162,7 +159,6 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
       RideService ride,
       Function resetMap,
     ) {
-    print("Showing VehicleRequestAwaitingConfirmationScreenState with ride ID: ${ride.rideID}");
     // Show the bottom sheet
     showModalBottomSheet(
       clipBehavior: Clip.hardEdge,

@@ -23,15 +23,15 @@ const driverClockIn = functions.https.onCall(async (data, context) => {
 
     if (!shiftRef.exists) {
         await createShift(driveruid, shiftuid, currentTime);
-        return {success: false, response: "Driver is not scheduled to drive today."};
+        // return {success: false, response: "Driver is not scheduled to drive today."};
     }
 
     // Todo: This is broken because the current time is not flexible to the difference in timezones.
     // ! Specifically, the time that is produced here on the server is not the same as the time that is produced on the client.
-    const shift = shiftRef.data();
-    if (currentTime.getTime() < shift.startTime.toDate().getTime() - 600000) {
-        return {success: false, response: "Too early for scheduled time."};
-    }
+    // const shift = shiftRef.data();
+    // if (currentTime.getTime() < shift.startTime.toDate().getTime() - 600000) {
+    //     return {success: false, response: "Too early for scheduled time."};
+    // }
 
     try {
         await updateShiftAndDriverStatus(driveruid, shiftuid, currentTime);

@@ -70,25 +70,22 @@ class MapWidgetSampleState extends State<MapWidget> {
       positionService.getPosition().then((value) {
         setState(() {
           userLatLng = LatLng(value.latitude, value.longitude);
-          markers.add(Marker(
-            markerId: const MarkerId("userPosition"),
-            position: userLatLng!,
-            infoWindow: const InfoWindow(title: "You are here"),
-          ));
+          // if (userService.isRiding()) {
+          //   markers.add(Marker(
+          //     markerId: const MarkerId("userPosition"),
+          //     position: userLatLng!,
+          //     infoWindow: const InfoWindow(title: "You are here"),
+          //   ));
+          // }
         });
         // Update the driver status
         updateDriverStatus().then((value) async {
-          print(userService.user.isRiding);
           if (userService.user.isRiding) {
-            // Ride? ride = await rideService.fetchRide(userService.user.currentRideId);
-            // GeoFirePoint? destinationGeoPoint = ride?.destinationAddress;
-            // print(destinationGeoPoint);
             Map<String, dynamic>? destinationAddress = await rideService.fetchRideDestination(userService.user.currentRideId);
             GeoPoint destinationGeoPoint = destinationAddress?['geopoint'];
-            // GeoFirePoint destinationGeoPoint = Ride.extractGeoFirePoint(destinationAddress);
+
             double lat = destinationGeoPoint.latitude;
             double lng = destinationGeoPoint.longitude;
-            print("lat: $lat, lng: $lng");
             addSearchedMarkerByCoordinate(lat, lng);
           }
         });
@@ -262,9 +259,6 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   SizedBox driverBox(double screenWidth, double screenHeight) {
-    print(driverStates['isWorking']);
-    print(driverStates['isOnBreak']);
-
     return SizedBox(
       width: screenWidth,
       height: 68,
@@ -399,8 +393,6 @@ class MapWidgetSampleState extends State<MapWidget> {
         context, MaterialPageRoute(builder: (context) => const SearchScreen()));
     if (result != null) {
       addSearchedMarker(result);
-    } else {
-      print('result is null');
     }
   }
 
@@ -415,6 +407,9 @@ class MapWidgetSampleState extends State<MapWidget> {
           });
           if (mounted) {
             PolylineResult result = await _addSearchResult(searchResult);
+            _moveCamera(
+              latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015, value.result!.geometry!.location!.lng!)
+            );
             if (result.distanceValue != null) {
               // Show the vehicle request screen only if the distance value is not null
               VehiclesScreenState.showVehiclesScreen(
@@ -428,9 +423,6 @@ class MapWidgetSampleState extends State<MapWidget> {
               // Handle the case where distanceValue is null, perhaps notify the user or log an error
               print("Error: PolylineResult returned null for distanceValue.");
             }
-            _moveCamera(
-              latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015,
-                  value.result!.geometry!.location!.lng!));
           }
         } else {
           // Handle the case where GooglePlace details return null
@@ -464,12 +456,16 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   Future<PolylineResult> _addSearchResult(LocalSearchResult searchResult) async {
+    _resetMarkers();
+    markers.add(Marker(
+      markerId: const MarkerId("userPosition"),
+      position: userLatLng!,
+      infoWindow: const InfoWindow(title: "You are here"),
+    ));
     BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(size: Size(24, 24)),
       'assets/destination_map_marker.png',
     );
-    _resetMarkers();
-    print(searchResult.placeId);
     setState(() {
       markers.add(Marker(
         markerId: MarkerId(searchResult.placeId),
@@ -478,7 +474,6 @@ class MapWidgetSampleState extends State<MapWidget> {
         icon: customIcon,
       ));
     });
-    print("Updating polylines");
     return await _updatePolylines();
   }
 
@@ -491,15 +486,13 @@ class MapWidgetSampleState extends State<MapWidget> {
   void _resetMarkers() {
     if (mounted) {
       setState(() {
-        markers
-            .removeWhere((element) => element.markerId.value != "userPosition");
+        markers.clear();
       });
     }
     _updatePolylines();
   }
 
   Future<PolylineResult> _updatePolylines() async {
-    print("Markers: ${markers.length}");
     if (markers.length > 1) {
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Keys.map,

@@ -1,3 +1,7 @@
+/*
+ * ride.dart
+ * This file contains the RideService class which is responsible for managing the user's ride.
+ */
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -58,12 +62,20 @@ class RideService {
     if (userService.user.currentRideId != "" && userService.user.isRiding) {
       rideID = userService.user.currentRideId;
       rideReference = _firestore.collection('rides').doc(rideID);
-    } else {
-      rideReference = _firestore.collection('rides').doc();
-      rideID = rideReference.id;
     }
+
     currentRidesReference =
         _firestore.collection('CurrentRides').doc('currentRides');
+  }
+
+  void initializeRideWithoutID() async {
+    rideReference = _firestore.collection('rides').doc();
+    rideID = rideReference.id;
+    currentRidesReference = _firestore.collection('CurrentRides').doc('currentRides');
+    ride = await rideReference.get().then((snapshot) {
+      return Ride.fromDocument(snapshot);
+    });
+    setupService();
   }
 
 //   // /*
@@ -124,14 +136,9 @@ class RideService {
     /// availability to change and restart with a new list of drivers up to 5 times.
     while (isSearchingForRide) {
       List<Driver> nearbyDrivers = await driverService.getNearbyDriversListWithModel(radius, model);
-      print("Nearby drivers: $nearbyDrivers");
       if (nearbyDrivers.isNotEmpty && timesSearched < 6) {
-        print('Nearby drivers not empty');
         for (int i = 0; i < nearbyDrivers.length; i++) {
-          print(i);
           if (isSearchingForRide) {
-            print("Is searching for ride...");
-            print("Driver: ${nearbyDrivers[i].uid}");
             Driver driver = nearbyDrivers[i];
             await rideReference.update({'status': 'WAITING'});
             bool driverAccepted = await _sendRequestToDriver(driver, model, paymentPrice);
@@ -150,9 +157,9 @@ class RideService {
       }
     }
     if (ride.status == "IN_PROGRESS") {
-      if (kDebugMode) {
-        print("Ride is in progress with user: ${ride.driverName}");
-      }
+      // if (kDebugMode) {
+      //   print("Ride is in progress with user: ${ride.driverName}");
+      // }
     } else {
       await rideReference.update({'lastActivity': DateTime.now(), 'status': "CANCELED"});
     }
@@ -180,7 +187,10 @@ class RideService {
         'lastActivity': DateTime.now(),
         'status': "CANCELED",
       });
+      // reset rideReference
+      rideReference = _firestore.collection('rides').doc();
     }
+    // 
   }
 
   void endRide() async {
@@ -189,6 +199,7 @@ class RideService {
       'lastActivity': DateTime.now(),
       'status': "ENDED",
     });
+    rideReference = _firestore.collection('rides').doc();
   }
 
   _getDriverReference(String driverID) {
@@ -259,19 +270,17 @@ class RideService {
   // Use it to keep the UI state in sync and the local Ride object updated.
   void _onRideUpdate(Ride updatedRide) {
     if (updatedRide.uid != userService.userID) return; // Only update the ride if it's the user's ride
-    bool wasRideAlreadyCanceled = false;
-    if (updatedRide.status == "CANCELED" && ride.status == "CANCELED") {
-      wasRideAlreadyCanceled = true;
-    }
+    // bool wasRideAlreadyCanceled = false;
+    // if (updatedRide.status == "CANCELED" && ride.status == "CANCELED") {
+    //   wasRideAlreadyCanceled = true;
+    // }
     ride = updatedRide;
     switch (updatedRide.status) {
       case 'CANCELED':
         removeRide = true;
         isSearchingForRide = false;
-        // updateUI(BottomSheetStatus.closed);
-        if (!wasRideAlreadyCanceled) {
-          cancelRide();
-        }
+
+        cancelRide();
         break;
       case 'IN_PROGRESS':
         isSearchingForRide = false;
@@ -288,6 +297,7 @@ class RideService {
         removeRide = true;
         isSearchingForRide = false;
         goToNextDriver = false;
+        endRide();
         removeCurrentRider();
         break;
       default:
@@ -298,9 +308,6 @@ class RideService {
     GeoFirePoint destination = GeoFirePoint(lat, long);
     GeoFirePoint pickup = locationService.getCurrentGeoFirePoint();
     DocumentSnapshot myRide = await rideReference.get();
-    if (kDebugMode) {
-      print('** rideReference = ${myRide.id}');
-    }
     addCurrentRider();
     if (!myRide.exists) {
       // Create new ride document for the user
@@ -358,10 +365,7 @@ class RideService {
         .collection('rides')
         .doc(firebaseUser?.uid)
         .collection('payments');
-    var paymentHist = paymentsMethods;
-    if (kDebugMode) {
-      print('payment history: $paymentHist');
-    }
+    // var paymentHist = paymentsMethods;
     return paymentsMethods.snapshots();
   }
 
