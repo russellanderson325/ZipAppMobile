@@ -5,7 +5,7 @@ class DocumentsScreen extends StatefulWidget {
   const DocumentsScreen({super.key});
 
   @override
-  _DocumentsScreenState createState() => _DocumentsScreenState();
+  State<DocumentsScreen> createState() => _DocumentsScreenState();
 }
 
 class _DocumentsScreenState extends State<DocumentsScreen> {
@@ -88,16 +88,14 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 }
 
 class TopRectangle extends StatelessWidget {
-  final color;
-  final height;
-  final width;
-  final child;
-  final posi;
+  final Color color;
+  final double height;
+  final double width;
+  final Widget child;
   const TopRectangle(
       {super.key,
-      this.posi,
-      this.child,
-      this.color,
+      required this.child,
+      required this.color,
       this.height = 100.0,
       this.width = 500.0});
 

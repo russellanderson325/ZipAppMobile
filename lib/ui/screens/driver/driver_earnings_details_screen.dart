@@ -3,11 +3,9 @@ import 'dart:math' as math;
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
 class EarningsDetailsScreen extends StatefulWidget {
   final double totalEarnings;
-  EarningsDetailsScreen({required this.totalEarnings});
+  const EarningsDetailsScreen({super.key, required this.totalEarnings});
 
   @override
   EarningsDetailsScreenState createState() => EarningsDetailsScreenState();
@@ -24,7 +22,6 @@ class EarningsDetailsScreenState extends State<EarningsDetailsScreen> {
   double get fare => totalEarnings * 0.7;
   double get tips => totalEarnings * 0.3;
 
-
   @override
   void initState() {
     super.initState();
@@ -35,8 +32,8 @@ class EarningsDetailsScreenState extends State<EarningsDetailsScreen> {
     // Ideally passed through the constructor or obtained from a user session
     String driverId = "your_driver_id";
     try {
-      DocumentSnapshot driverDoc = await _firestore.collection('drivers').doc(
-          driverId).get();
+      DocumentSnapshot driverDoc =
+          await _firestore.collection('drivers').doc(driverId).get();
       if (driverDoc.exists && driverDoc.data() != null) {
         Map<String, dynamic> data = driverDoc.data() as Map<String, dynamic>;
         if (data.containsKey('earnings')) {
@@ -50,17 +47,18 @@ class EarningsDetailsScreenState extends State<EarningsDetailsScreen> {
       print("Error loading daily earnings: $e");
     }
   }
+
   void showEarningsDetails(BuildContext context, double earnings) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Daily Earnings'),
+          title: const Text('Daily Earnings'),
           content: Text('\$${earnings.toStringAsFixed(2)}'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -72,9 +70,9 @@ class EarningsDetailsScreenState extends State<EarningsDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Earnings Details'),
+        title: const Text('Earnings Details'),
         leading: IconButton(
-          icon: Icon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: () {
             Navigator.of(context).pop(totalEarnings);
           },
@@ -84,36 +82,35 @@ class EarningsDetailsScreenState extends State<EarningsDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.chevron_left),
+                    icon: const Icon(Icons.chevron_left),
                     onPressed: () {
                       // TODO: Decrease week range
                     },
                   ),
                   Column(
                     children: [
-                      Text(
+                      const Text(
                         'April 1 - April 7',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
                       ),
                       Text(
                         '\$${totalEarnings.toStringAsFixed(2)}',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                       ),
-
                     ],
-
                   ),
-
                   IconButton(
-                    icon: Icon(Icons.chevron_right),
+                    icon: const Icon(Icons.chevron_right),
                     onPressed: () {
                       // TODO: Increase week range
                     },
@@ -124,22 +121,28 @@ class EarningsDetailsScreenState extends State<EarningsDetailsScreen> {
             BarChart(
               dailyEarnings: dailyEarnings,
               maxEarnings: maxEarnings,
-
             ),
-            Divider(),
+            const Divider(),
             ListTile(
-              title: Text('\nFare', style: TextStyle(fontSize: 18)),
-              trailing: Text('\n\$${fare.toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              title: const Text('\nFare', style: TextStyle(fontSize: 18)),
+              trailing: Text('\n\$${fare.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ),
-            Divider(),
+            const Divider(),
             ListTile(
-              title: Text('Tip', style: TextStyle(fontSize: 18)),
-              trailing: Text('\$${tips.toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              title: const Text('Tip', style: TextStyle(fontSize: 18)),
+              trailing: Text('\$${tips.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ),
-            Divider(),
+            const Divider(),
             ListTile(
-              title: Text('Earnings Total', style: TextStyle(fontSize: 18)),
-              trailing: Text('\$${totalEarnings.toStringAsFixed(2)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              title:
+                  const Text('Earnings Total', style: TextStyle(fontSize: 18)),
+              trailing: Text('\$${totalEarnings.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -153,13 +156,13 @@ class BarChart extends StatefulWidget {
   final double maxEarnings;
 
   const BarChart({
-    Key? key,
+    super.key,
     required this.dailyEarnings,
     required this.maxEarnings,
-  }) : super(key: key);
+  });
 
   @override
-  _BarChartState createState() => _BarChartState();
+  State<BarChart> createState() => _BarChartState();
 }
 
 class _BarChartState extends State<BarChart> {
@@ -178,7 +181,7 @@ class _BarChartState extends State<BarChart> {
     final labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return Container(
       height: 220,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -209,12 +212,12 @@ class Bar extends StatelessWidget {
   final double? value;
 
   const Bar({
-    Key? key,
+    super.key,
     required this.label,
     required this.height,
     required this.color,
     this.value,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -223,10 +226,11 @@ class Bar extends StatelessWidget {
       children: [
         value != null
             ? Text(
-          '\$${value!.toStringAsFixed(2)}',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-        )
-            : SizedBox.shrink(),
+                '\$${value!.toStringAsFixed(2)}',
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              )
+            : const SizedBox.shrink(),
         Container(
           width: 20,
           height: height,

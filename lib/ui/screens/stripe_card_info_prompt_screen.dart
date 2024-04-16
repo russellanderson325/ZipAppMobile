@@ -6,7 +6,7 @@ import 'package:zipapp/constants/zip_colors.dart';
 class StripeCardInfoPromptScreen extends StatefulWidget {
   final Function refreshKey;
 
-  const StripeCardInfoPromptScreen({Key? key, required this.refreshKey}) : super(key: key);
+  const StripeCardInfoPromptScreen({super.key, required this.refreshKey});
 
   @override
   StripeCardInfoPromptScreenState createState() => StripeCardInfoPromptScreenState();

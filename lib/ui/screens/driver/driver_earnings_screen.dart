@@ -1,26 +1,18 @@
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:zipapp/ui/widgets/driver_bank_account.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/constants/zip_design.dart';
 import 'driver_earnings_details_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 class DriverIncomeScreen extends StatefulWidget {
   const DriverIncomeScreen({super.key});
 
   @override
   State<DriverIncomeScreen> createState() => _DriverIncomeScreenState();
-
 }
 
 class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   double totalEarnings = 0.0;
-
 
   @override
   void initState() {
@@ -33,8 +25,8 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
     String driverId = "your_driver_id";
 
     try {
-      DocumentSnapshot driverDoc = await _firestore.collection('drivers').doc(
-          driverId).get();
+      DocumentSnapshot driverDoc =
+          await _firestore.collection('drivers').doc(driverId).get();
       if (driverDoc.exists) {
         setState(() {
           totalEarnings = driverDoc.get('totalEarnings') ?? 0.0;
@@ -59,21 +51,20 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final TextStyle titleStyle = TextStyle(
+    const TextStyle titleStyle = TextStyle(
       color: Colors.grey,
       fontSize: 16,
       fontWeight: FontWeight.bold,
     );
 
-    final TextStyle valueStyle = TextStyle(
+    const TextStyle valueStyle = TextStyle(
       color: Colors.black,
       fontSize: 16,
     );
 
-    final TextStyle detailStyle = TextStyle(
+    const TextStyle detailStyle = TextStyle(
       color: Colors.grey,
       fontSize: 14,
     );
@@ -102,44 +93,45 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
               'April 1 - April 7',
               label: '\$${totalEarnings.toStringAsFixed(2)}',
               titleStyle: titleStyle,
-              valueStyle: TextStyle(color: Colors.black,
+              valueStyle: const TextStyle(
+                  color: Colors.black,
                   fontSize: 22,
                   fontWeight: FontWeight.bold),
               showDetailButton: true,
-
             ),
             const Divider(),
             _buildInfoSection(
-          '',
-          label: 'Online',
-          // Label on the left
-          value: '10 h 23m',
+              '',
+              label: 'Online',
+              // Label on the left
+              value: '10 h 23m',
 
-          titleStyle: TextStyle(color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold),
+              titleStyle: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
               valueStyle: valueStyle,
-              rightAlignedValueStyle: TextStyle(color: Colors.grey, fontSize: 16,
-             ),
+              rightAlignedValueStyle: const TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+              ),
 
-            isValueRightAligned: true,
+              isValueRightAligned: true,
             ),
-
-
-
             const Divider(),
             _buildInfoSection(
               '',
               label: 'Trips Completed',
               value: '25',
-
-              titleStyle: TextStyle(color: Colors.black,
+              titleStyle: const TextStyle(
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold),
               valueStyle: valueStyle,
-              rightAlignedValueStyle: TextStyle(color: Colors.grey, fontSize: 16,
-                ),
-
+              rightAlignedValueStyle: const TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+              ),
               isValueRightAligned: true,
             ),
             const Divider(),
@@ -147,47 +139,45 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
               '',
               label: 'Average Tip',
               value: '\$3.40',
-
-              titleStyle: TextStyle(color: Colors.black,
+              titleStyle: const TextStyle(
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold),
               valueStyle: valueStyle,
-              rightAlignedValueStyle: TextStyle(color: Colors.grey, fontSize: 16,
-               ),
-
+              rightAlignedValueStyle: const TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+              ),
               isValueRightAligned: true,
             ),
-
             const Divider(),
-
             _buildInfoSection(
               'Payment',
               label: '\nAccount Balance',
               // Label on the left
               value: '\n\$${totalEarnings.toStringAsFixed(2)}',
 
-              titleStyle: TextStyle(color: Colors.black,
+              titleStyle: const TextStyle(
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold),
               valueStyle: valueStyle,
-              rightAlignedValueStyle: TextStyle(
+              rightAlignedValueStyle: const TextStyle(
                 color: Colors.grey,
                 fontSize: 16,
-
               ),
               detailText: 'Payment scheduled for April 7',
               detailTextStyle: detailStyle,
               isValueRightAligned: true,
             ),
-
-
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoSection(String title, {
+  Widget _buildInfoSection(
+    String title, {
     String label = '',
     String value = '',
     bool showDetailButton = false,
@@ -212,10 +202,11 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
               Expanded(
                 child: Text(
                   value,
-                  style: isValueRightAligned ? (rightAlignedValueStyle ??
-                      valueStyle) : valueStyle,
-                  textAlign: isValueRightAligned ? TextAlign.right : TextAlign
-                      .left,
+                  style: isValueRightAligned
+                      ? (rightAlignedValueStyle ?? valueStyle)
+                      : valueStyle,
+                  textAlign:
+                      isValueRightAligned ? TextAlign.right : TextAlign.left,
                 ),
               ),
               if (showDetailButton)
@@ -224,22 +215,19 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
                     final updatedTotalEarnings = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            EarningsDetailsScreen(
-                              totalEarnings: totalEarnings,
-                            ),
+                        builder: (context) => EarningsDetailsScreen(
+                          totalEarnings: totalEarnings,
+                        ),
                       ),
                     );
 
                     if (updatedTotalEarnings != null) {
                       setState(() {
-                        totalEarnings =
-                        updatedTotalEarnings as double;
+                        totalEarnings = updatedTotalEarnings as double;
                       });
                       //  update earnings in Firestore here
                     }
                   },
-                  child: const Text('See details'),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black, // Text color
                     backgroundColor: ZipColors.zipYellow, // Background color
@@ -247,6 +235,7 @@ class _DriverIncomeScreenState extends State<DriverIncomeScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  child: const Text('See details'),
                 ),
             ],
           ),

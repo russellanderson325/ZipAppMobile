@@ -9,7 +9,7 @@ import 'package:zipapp/ui/widgets/payment_select_list_item.dart';
 class PaymentMethodsSelectionScreen extends StatefulWidget {
   final Function refreshKey;
 
-  const PaymentMethodsSelectionScreen({Key? key, required this.refreshKey}) : super(key: key);
+  const PaymentMethodsSelectionScreen({super.key, required this.refreshKey});
 
   @override
   State<PaymentMethodsSelectionScreen> createState() => PaymentMethodsSelectionScreenState();

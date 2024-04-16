@@ -6,7 +6,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/drivers.dart';
-import 'package:zipapp/business/user.dart';
 
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
@@ -14,12 +13,11 @@ import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/vehicles_screen.dart';
-import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/message_overlay.dart';
 
 class MapWidget extends StatefulWidget {
   final bool driver;
-  const MapWidget({Key? key, required this.driver}) : super(key: key);
+  const MapWidget({super.key, required this.driver});
 
   @override
   State<MapWidget> createState() => MapWidgetSampleState();
@@ -28,7 +26,8 @@ class MapWidget extends StatefulWidget {
 class MapWidgetSampleState extends State<MapWidget> {
   //general map code
   String mapTheme = '';
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
   PositionService positionService = PositionService();
   LatLng? userLatLng, searchLatLng;
   final markers = <Marker>[];
@@ -101,10 +100,9 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   void angryMessage(message) {
-    print(message);
     if (mounted) {
       MessageOverlay(
-        message: message, 
+        message: message,
         duration: const Duration(seconds: 2),
         color: "#F54747",
         textColor: "#FFFFFF",
@@ -205,7 +203,6 @@ class MapWidgetSampleState extends State<MapWidget> {
     });
   }
 
-
   Future<void> updateDriverStatus() async {
     // Fetch the driver states asynchronously.
     Map<String, bool> states = await driverService.getDriverStates();
@@ -214,7 +211,6 @@ class MapWidgetSampleState extends State<MapWidget> {
       driverStates = states;
     });
   }
-
 
   SizedBox driverBox(double screenWidth, double screenHeight) {
     return SizedBox(
@@ -232,7 +228,8 @@ class MapWidgetSampleState extends State<MapWidget> {
                 children: [
                   Expanded(
                     child: TextButton.icon(
-                      onPressed: driverStates['isOnBreak']! ? endBreak : startBreak,
+                      onPressed:
+                          driverStates['isOnBreak']! ? endBreak : startBreak,
                       icon: driverStates['isOnBreak']!
                           ? const Icon(LucideIcons.play)
                           : const Icon(LucideIcons.pause),
@@ -370,9 +367,9 @@ class MapWidgetSampleState extends State<MapWidget> {
 
         // Show the vehicle request screen
         VehiclesScreenState.showVehiclesScreen(
-          context, 
-          (result!.distanceValue)!.toDouble(), 
-          value.result!.geometry!.location!.lat!, 
+          context,
+          (result!.distanceValue)!.toDouble(),
+          value.result!.geometry!.location!.lat!,
           value.result!.geometry!.location!.lng!,
           _resetMarkers,
         );
@@ -386,18 +383,17 @@ class MapWidgetSampleState extends State<MapWidget> {
       const ImageConfiguration(size: Size(24, 24)),
       'assets/destination_map_marker.png',
     );
-    if (mounted) {
-      _resetMarkers();
-      setState(() {
-        markers.add(Marker(
-          markerId: MarkerId(searchResult.placeId),
-          position: searchLatLng!,
-          infoWindow: InfoWindow(title: searchResult.name),
-          icon: customIcon,
-        ));
-      });
-      return await _updatePolylines();
-    }
+
+    _resetMarkers();
+    setState(() {
+      markers.add(Marker(
+        markerId: MarkerId(searchResult.placeId),
+        position: searchLatLng!,
+        infoWindow: InfoWindow(title: searchResult.name),
+        icon: customIcon,
+      ));
+    });
+    return await _updatePolylines();
   }
 
   void _moveCamera({latlng, zoom = 17}) async {

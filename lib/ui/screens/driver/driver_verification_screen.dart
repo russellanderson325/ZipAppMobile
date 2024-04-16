@@ -5,7 +5,6 @@ import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver/driver_main_screen.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
-import 'package:zipapp/ui/screens/main_screen.dart';
 
 class DriverVerificationScreen extends StatefulWidget {
   const DriverVerificationScreen({super.key});
@@ -101,11 +100,5 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
         ),
       ),
     );
-  }
-
-  void _retryVerify() {
-    Navigator.of(context).pop();
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const MainScreen()));
   }
 }

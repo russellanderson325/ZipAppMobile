@@ -13,7 +13,7 @@ class HistoryScreen extends StatefulWidget {
 
   // final Payment payment;
   @override
-  _HistoryScreenState createState() => _HistoryScreenState();
+  State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {

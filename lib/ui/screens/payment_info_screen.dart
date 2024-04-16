@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
@@ -12,12 +11,12 @@ class PaymentInfo extends StatefulWidget {
   final String lastFourDigits;
 
   const PaymentInfo({
-    Key? key, 
+    super.key, 
     required this.paymentMethodId,
     required this.cardType, 
     required this.lastFourDigits,
     required this.refreshKey
-    }) : super(key: key);
+    });
 
   @override
   State<PaymentInfo> createState() => _PaymentInfoState();

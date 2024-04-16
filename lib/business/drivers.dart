@@ -9,7 +9,6 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
-import 'package:zipapp/ui/screens/driver_main_screen.dart';
 import 'package:intl/intl.dart';
 
 class DriverService {
@@ -125,10 +124,11 @@ class DriverService {
         .doc(userService.userID)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
-          driverStates['isAvailable'] = documentSnapshot.get('isAvailable') ?? false;
-          driverStates['isWorking'] = documentSnapshot.get('isWorking') ?? false;
-          driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak') ?? false;
-        });
+      driverStates['isAvailable'] =
+          documentSnapshot.get('isAvailable') ?? false;
+      driverStates['isWorking'] = documentSnapshot.get('isWorking') ?? false;
+      driverStates['isOnBreak'] = documentSnapshot.get('isOnBreak') ?? false;
+    });
     return Future.value(driverStates);
   }
 
@@ -139,15 +139,10 @@ class DriverService {
    */
   void _updatePosition(Position pos) {
     if (driver.isWorking) {
-      myLocation = geo.point(
-        latitude: pos.latitude, 
-        longitude: pos.longitude
-      );
+      myLocation = geo.point(latitude: pos.latitude, longitude: pos.longitude);
       // TODO: Check for splitting driver and position into seperate documents in firebase as an optimization
-      driverReference.update({
-        'lastActivity': DateTime.now(), 
-        'geoFirePoint': myLocation.data
-      });
+      driverReference.update(
+          {'lastActivity': DateTime.now(), 'geoFirePoint': myLocation.data});
     }
   }
 
@@ -171,11 +166,9 @@ class DriverService {
     // If requestSub is not already listening, start listening
     if (requestSub != null) return;
     requestStream = requestCollection
-      .snapshots()
-      .map((event) => event.docs
-          .map((e) => Request.fromDocument(e))
-          .toList())
-      .asBroadcastStream();
+        .snapshots()
+        .map((event) => event.docs.map((e) => Request.fromDocument(e)).toList())
+        .asBroadcastStream();
     requestSub = requestStream.listen((List<Request> requests) {
       if (requests.isNotEmpty) {
         // Handle the first request
@@ -194,8 +187,10 @@ class DriverService {
    */
   void _onRequestRecieved(Request req) {
     if (kDebugMode) {
-      acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
-      print("Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
+      acceptRequest(req
+          .id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
+      print(
+          "Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
     }
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
@@ -418,18 +413,17 @@ class DriverService {
   // TODO: Audit
   Stream<List<Driver>> getNearbyDriversStream() {
     nearbyDriversListStream = geo
-          .collection(collectionRef: driversCollection)
-          .within(center: myLocation, radius: 50, field: 'geoFirePoint')
-          .map((snapshots) =>
-              snapshots.map((e) => Driver.fromDocument(e)).take(10).toList());
+        .collection(collectionRef: driversCollection)
+        .within(center: myLocation, radius: 50, field: 'geoFirePoint')
+        .map((snapshots) =>
+            snapshots.map((e) => Driver.fromDocument(e)).take(10).toList());
     return nearbyDriversListStream;
   }
 
   Future<List<Driver>> getNearbyDriversList(double radius) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
     Query collectionReference =
-        _firestore.collection('drivers')
-        .where('isAvailable', isEqualTo: true);
+        _firestore.collection('drivers').where('isAvailable', isEqualTo: true);
 
     Stream<List<Driver>> stream = geo
         .collection(collectionRef: collectionReference)
@@ -475,7 +469,8 @@ class DriverService {
    */
   Future<Map<String, dynamic>> clockIn() async {
     print(driver.daysOfWeek);
-    HttpsCallableResult result = await driverClockInFunction.call(<String, dynamic>{
+    HttpsCallableResult result = await driverClockInFunction
+        .call(<String, dynamic>{
       'daysOfWeek': driver.daysOfWeek,
       'driveruid': driver.uid,
       'shiftuid': shiftuid
@@ -492,8 +487,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock out operation
    */
   Future<Map<String, dynamic>> clockOut() async {
-    HttpsCallableResult result = await driverClockOutFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    HttpsCallableResult result = await driverClockOutFunction
+        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
@@ -506,8 +501,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the start break operation
    */
   Future<Map<String, dynamic>> startBreak() async {
-    HttpsCallableResult result = await driverStartBreakFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    HttpsCallableResult result = await driverStartBreakFunction
+        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
@@ -520,15 +515,15 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the end break operation
    */
   Future<Map<String, dynamic>> endBreak() async {
-    HttpsCallableResult result = await driverEndBreakFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    HttpsCallableResult result = await driverEndBreakFunction
+        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     print(result.data);
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
     return {'success': success, 'response': response};
   }
-  
+
   // I'm gonna be honest I dont know what the purpose of this was supposed to be
   Future<String> overrideClockIn() async {
     late String message;

@@ -10,7 +10,7 @@ class RideDetails extends StatelessWidget {
   final DriverService driverService = DriverService();
   final UserService userService = UserService();
   final RideService rideService = RideService();
-  double screenHeight, screenWidth;
+  final double screenHeight, screenWidth;
 
   RideDetails({
     super.key,
@@ -21,8 +21,6 @@ class RideDetails extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.3,
       child: Stack(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SafetyScreen extends StatefulWidget {
-  const SafetyScreen({Key? key}) : super(key: key);
+  const SafetyScreen({super.key});
 
   @override
   State<SafetyScreen> createState() => _SafetyScreenState();
