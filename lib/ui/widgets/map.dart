@@ -1,17 +1,24 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/drivers.dart';
+import 'package:zipapp/business/ride.dart';
+import 'package:zipapp/business/user.dart';
 
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
+import 'package:zipapp/models/rides.dart';
+import 'package:zipapp/models/user.dart';
 import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
+import 'package:zipapp/ui/screens/vehicle_ride_status_confirmation_screen.dart';
 import 'package:zipapp/ui/screens/vehicles_screen.dart';
 import 'package:zipapp/ui/widgets/message_overlay.dart';
 
@@ -42,6 +49,10 @@ class MapWidgetSampleState extends State<MapWidget> {
   DateTime lastClockOutButtonPress = DateTime(0);
   DateTime lastStartBreakButtonPress = DateTime(0);
   DateTime lastEndBreakButtonPress = DateTime(0);
+  UserService userService = UserService();
+  RideService rideService = RideService();
+  bool isRiding = false;
+  int iterateKey = 0;
 
   @override
   void initState() {
@@ -52,18 +63,34 @@ class MapWidgetSampleState extends State<MapWidget> {
       mapTheme = value;
     });
 
+    // Listen to user.isRiding changes
+    userService.userStream.listen(updateUI);
+
     if (mounted) {
       positionService.getPosition().then((value) {
         setState(() {
           userLatLng = LatLng(value.latitude, value.longitude);
-          markers.add(Marker(
-            markerId: const MarkerId("userPosition"),
-            position: userLatLng!,
-            infoWindow: const InfoWindow(title: "You are here"),
-          ));
+          // if (userService.isRiding()) {
+          //   markers.add(Marker(
+          //     markerId: const MarkerId("userPosition"),
+          //     position: userLatLng!,
+          //     infoWindow: const InfoWindow(title: "You are here"),
+          //   ));
+          // }
+        });
+        // Update the driver status
+        updateDriverStatus().then((value) async {
+          if (userService.user.isRiding) {
+            Map<String, dynamic>? destinationAddress = await rideService.fetchRideDestination(userService.user.currentRideId);
+            GeoPoint destinationGeoPoint = destinationAddress?['geopoint'];
+
+            double lat = destinationGeoPoint.latitude;
+            double lng = destinationGeoPoint.longitude;
+            addSearchedMarkerByCoordinate(lat, lng);
+          }
         });
       });
-      updateDriverStatus();
+
     }
   }
 
@@ -72,10 +99,11 @@ class MapWidgetSampleState extends State<MapWidget> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Column(
+      key: Key(iterateKey.toString()),
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        widget.driver ? driverBox(width, height) : searchBox(width, height),
+        widget.driver ? driverBox(width, height) : (userService.isRiding() ? currentRide(width, height) : searchBox(width, height)),
         Expanded(
           child: userLatLng == null
               ? const Center(child: CircularProgressIndicator())
@@ -88,8 +116,10 @@ class MapWidgetSampleState extends State<MapWidget> {
                   markers: markers.toSet(),
                   myLocationButtonEnabled: false,
                   onMapCreated: (GoogleMapController controller) {
+                    if (!_controller.isCompleted) {
+                      _controller.complete(controller);
+                    }
                     controller.setMapStyle(mapTheme);
-                    _controller.complete(controller);
                   },
                   polylines: polylines.toSet(),
                   zoomControlsEnabled: false,
@@ -99,24 +129,11 @@ class MapWidgetSampleState extends State<MapWidget> {
     );
   }
 
-  void angryMessage(message) {
-    if (mounted) {
-      MessageOverlay(
-        message: message,
-        duration: const Duration(seconds: 2),
-        color: "#F54747",
-        textColor: "#FFFFFF",
-        background: true,
-        opacity: 1,
-      ).show(context);
-    }
-  }
-
   //driver code
   void clockIn() async {
     // Prevent the user from spamming the clock in button
     if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastClockInButtonPress = DateTime.now();
@@ -126,7 +143,7 @@ class MapWidgetSampleState extends State<MapWidget> {
 
     // If the response is not successful, show an error message and return
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -142,14 +159,14 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   void clockOut() async {
     if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastClockOutButtonPress = DateTime.now();
 
     var response = await driverService.clockOut();
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -163,14 +180,14 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   void startBreak() async {
     if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastStartBreakButtonPress = DateTime.now();
 
     var response = await driverService.startBreak();
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -184,14 +201,14 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   void endBreak() async {
     if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 5) {
-      angryMessage("Please wait a few seconds before trying again.");
+      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
       return;
     }
     lastEndBreakButtonPress = DateTime.now();
 
     var response = await driverService.endBreak();
     if (!response['success']) {
-      angryMessage(response['response']);
+      if (mounted) MessageOverlay.angryMessage(context, response['response']);
       return;
     }
 
@@ -210,6 +227,34 @@ class MapWidgetSampleState extends State<MapWidget> {
     setState(() {
       driverStates = states;
     });
+  }
+
+  Future<void> updateUI(User user) async {
+    setState(() {
+      iterateKey++;
+    });
+  }
+
+
+  SizedBox currentRide(double screenWidth, double screenHeight) {
+    return SizedBox(
+      width: screenWidth,
+      height: 68,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: ZipColors.primaryBackground,
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: TextButton(
+          onPressed: () {
+            // Bring up the vehicle ride status confirmation screen
+            VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, _resetMarkers);
+          },
+          style: ZipDesign.yellowButtonStyle,
+          child: const Text('View Active Ride'),
+        ),
+      ),
+    );
   }
 
   SizedBox driverBox(double screenWidth, double screenHeight) {
@@ -297,6 +342,7 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   //rider code
+  
 
   SizedBox searchBox(double screenWidth, double screenHeight) {
     return SizedBox(
@@ -347,8 +393,6 @@ class MapWidgetSampleState extends State<MapWidget> {
         context, MaterialPageRoute(builder: (context) => const SearchScreen()));
     if (result != null) {
       addSearchedMarker(result);
-    } else {
-      print('result is null');
     }
   }
 
@@ -356,35 +400,72 @@ class MapWidgetSampleState extends State<MapWidget> {
     GooglePlace googlePlace = GooglePlace(Keys.map);
     await googlePlace.details.get(searchResult.placeId).then(
       (value) async {
-        setState(() {
-          searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
-              value.result!.geometry!.location!.lng!);
-        });
-        PolylineResult? result = await _addSearchResult(searchResult);
-        _moveCamera(
-            latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
-                value.result!.geometry!.location!.lng!));
-
-        // Show the vehicle request screen
-        VehiclesScreenState.showVehiclesScreen(
-          context,
-          (result!.distanceValue)!.toDouble(),
-          value.result!.geometry!.location!.lat!,
-          value.result!.geometry!.location!.lng!,
-          _resetMarkers,
-        );
+        if (value != null && value.result != null && value.result!.geometry != null && value.result!.geometry!.location != null) {
+          setState(() {
+            searchLatLng = LatLng(value.result!.geometry!.location!.lat!,
+                value.result!.geometry!.location!.lng!);
+          });
+          if (mounted) {
+            PolylineResult result = await _addSearchResult(searchResult);
+            _moveCamera(
+              latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015, value.result!.geometry!.location!.lng!)
+            );
+            if (result.distanceValue != null) {
+              // Show the vehicle request screen only if the distance value is not null
+              VehiclesScreenState.showVehiclesScreen(
+                context, 
+                result.distanceValue!.toDouble(), 
+                value.result!.geometry!.location!.lat!, 
+                value.result!.geometry!.location!.lng!,
+                _resetMarkers,
+              );
+            } else {
+              // Handle the case where distanceValue is null, perhaps notify the user or log an error
+              print("Error: PolylineResult returned null for distanceValue.");
+            }
+          }
+        } else {
+          // Handle the case where GooglePlace details return null
+          print("Error: Failed to retrieve place details.");
+        }
       },
-    );
+    ).catchError((error) {
+      // Handle potential errors like network issues
+      print("Error fetching place details: $error");
+    });
   }
 
-  Future<PolylineResult?> _addSearchResult(
-      LocalSearchResult searchResult) async {
+  void addSearchedMarkerByCoordinate(double latitude, double longitude) async {
+    setState(() {
+      searchLatLng = LatLng(latitude, longitude);
+    });
+
+    if (mounted) {
+      // Assuming you have a function to create and add a marker based on latitude and longitude
+      await _addLatLngAsSearchResult(latitude, longitude);
+      _moveCamera(
+        latlng: LatLng(latitude - 0.0015, longitude)
+      );
+    }
+  }
+
+  Future<PolylineResult> _addLatLngAsSearchResult(double latitude, double longitude) async {
+    searchLatLng = LatLng(latitude, longitude);
+    LocalSearchResult searchResult = LocalSearchResult(name: "Custom Location", placeId: "custom");
+    return await _addSearchResult(searchResult);
+  }
+
+  Future<PolylineResult> _addSearchResult(LocalSearchResult searchResult) async {
+    _resetMarkers();
+    markers.add(Marker(
+      markerId: const MarkerId("userPosition"),
+      position: userLatLng!,
+      infoWindow: const InfoWindow(title: "You are here"),
+    ));
     BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(size: Size(24, 24)),
       'assets/destination_map_marker.png',
     );
-
-    _resetMarkers();
     setState(() {
       markers.add(Marker(
         markerId: MarkerId(searchResult.placeId),
@@ -399,15 +480,13 @@ class MapWidgetSampleState extends State<MapWidget> {
   void _moveCamera({latlng, zoom = 17}) async {
     latlng ??= userLatLng!;
     final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: latlng, zoom: zoom.toDouble())));
+    await controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: latlng, zoom: zoom.toDouble())));
   }
 
   void _resetMarkers() {
     if (mounted) {
       setState(() {
-        markers
-            .removeWhere((element) => element.markerId.value != "userPosition");
+        markers.clear();
       });
     }
     _updatePolylines();
@@ -422,6 +501,7 @@ class MapWidgetSampleState extends State<MapWidget> {
         PointLatLng(
             markers.last.position.latitude, markers.last.position.longitude),
       );
+
       if (result.points.isNotEmpty) {
         List<LatLng> polylineCoordinates = [];
         result.points.forEach((PointLatLng point) {

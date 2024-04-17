@@ -10,6 +10,7 @@ class Driver {
   final String uid;
   final String firstName;
   final String lastName;
+  final String cartModel;
   final String profilePictureURL;
   final DateTime lastActivity;
   final String fcmToken; // Firebase Cloud Messaging Token
@@ -24,6 +25,7 @@ class Driver {
       {required this.uid,
       required this.firstName,
       required this.lastName,
+      required this.cartModel,
       required this.lastActivity,
       required this.profilePictureURL,
       this.geoFirePoint,
@@ -39,6 +41,7 @@ class Driver {
       'uid': uid,
       'firstName': firstName,
       'lastName': lastName,
+      'cartModel': cartModel,
       'lastActivity': lastActivity,
       'profilePictureURL': profilePictureURL,
       'geoFirePoint': geoFirePoint as Object,
@@ -56,6 +59,7 @@ class Driver {
       uid: doc['uid'] as String,
       firstName: doc['firstName'] as String,
       lastName: doc['lastName'] as String,
+      cartModel: doc['cartModel'] ?? "X",
       lastActivity: convertStamp(doc['lastActivity'] as Timestamp),
       profilePictureURL: doc['profilePictureURL'] as String,
       geoFirePoint: extractGeoFirePoint(doc['geoFirePoint']),
@@ -63,7 +67,7 @@ class Driver {
       isWorking: doc['isWorking'] ?? false,
       isAvailable: doc['isAvailable'] ?? false,
       isOnBreak: doc['isOnBreak'] as bool,
-      currentRideID: doc['currentRideID'] as String,
+      currentRideID: doc['currentRideID'] ?? "",
       daysOfWeek: List<int>.from(doc['daysOfWeek'] as List), 
     );
     return driver;

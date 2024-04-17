@@ -17,7 +17,8 @@ class User {
   final double defaultTip;
   bool acceptedtc;
   bool acceptedPrivPolicy;
-
+  bool isRiding;
+  String currentRideId;
   var pastRides;
   var pastDrives;
 
@@ -37,7 +38,10 @@ class User {
       this.acceptedtc = false,
       this.acceptedPrivPolicy = false,
       this.pastRides,
-      this.pastDrives});
+      this.pastDrives,
+      this.isRiding = false,
+      this.currentRideId = "",
+  });
 
   Map<String, Object> toJson() {
     return {
@@ -55,6 +59,8 @@ class User {
       'defaultTip': defaultTip,
       'acceptedtc': acceptedtc,
       'acceptedPrivPolicy': acceptedPrivPolicy,
+      'isRiding': isRiding,
+      'currentRideId': currentRideId,
       'pastRides': pastRides ?? [],
       'pastDrives': pastDrives ?? []
     };
@@ -78,6 +84,8 @@ class User {
         driverPassword: (doc['driverPassword'] ?? '') as String,
         acceptedtc: (doc['acceptedtc'] ?? false) as bool,
         acceptedPrivPolicy: (doc['acceptedPrivPolicy'] ?? false) as bool,
+        isRiding: (doc['isRiding'] ?? false) as bool,
+        currentRideId: doc['currentRideId'] ?? '',
         pastRides: doc['pastRides'] ?? [],
         pastDrives: doc['pastDrives'] ?? [],
         defaultTip: defTip.toDouble());
@@ -105,6 +113,8 @@ class User {
         isDriver: false,
         acceptedtc: false,
         acceptedPrivPolicy: false,
+        isRiding: false,
+        currentRideId: '',
         pastRides: [],
         pastDrives: [],
         defaultTip: 0.0);

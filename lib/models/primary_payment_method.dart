@@ -25,6 +25,6 @@ class PrimaryPaymentMethod {
         applePay: json['applePay'],
         googlePay: json['googlePay'],
         card: json['cardPayment'],
-        paymentMethodId: json['paymentMethodId'],
+        paymentMethodId: json['paymentMethodId'] ?? '',
       );
 }

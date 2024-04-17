@@ -22,14 +22,14 @@ class Payment {
   //var paymentMethodList;
   //Payment(amount, currency, paymentMethod, fireBaseUser);
 
-  HttpsCallable getAmmountFunction = FirebaseFunctions.instance.httpsCallable(
+  HttpsCallable getAmountFunction = FirebaseFunctions.instance.httpsCallable(
     'calculateCost',
   );
 
-  Future<double> getAmmount(
+  Future<double> getAmount(
       bool zipXL, double length, int currentNumberOfRequests) async {
     double message;
-    HttpsCallableResult result = await getAmmountFunction
+    HttpsCallableResult result = await getAmountFunction
         .call(<String, dynamic>{
       'miles': length,
       'zipXL': zipXL,
