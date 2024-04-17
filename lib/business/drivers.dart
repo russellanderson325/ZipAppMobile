@@ -13,11 +13,8 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
-<<<<<<< HEAD
 import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/ui/screens/driver_main_screen.dart';
-=======
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
 import 'package:intl/intl.dart';
 
 class DriverService {
@@ -223,14 +220,7 @@ class DriverService {
    */
   void _onRequestRecieved(Request req) {
     if (kDebugMode) {
-<<<<<<< HEAD
       acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
-=======
-      acceptRequest(req
-          .id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
-      print(
-          "Request recieved from ${req.name} recieved, timeout at ${req.timeout}");
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
     }
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
@@ -425,13 +415,9 @@ class DriverService {
   Future<List<Driver>> getNearbyDriversListWithModel(double radius, String cartModel) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
     Query collectionReference =
-<<<<<<< HEAD
         _firestore.collection('drivers')
         .where('isAvailable', isEqualTo: true)
         .where('cartModel', isEqualTo: cartModel);
-=======
-        _firestore.collection('drivers').where('isAvailable', isEqualTo: true);
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
 
     Stream<List<Driver>> stream = geo
         .collection(collectionRef: collectionReference)
@@ -478,13 +464,7 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock in operation
    */
   Future<Map<String, dynamic>> clockIn() async {
-<<<<<<< HEAD
     HttpsCallableResult result = await driverClockInFunction.call(<String, dynamic>{
-=======
-    print(driver.daysOfWeek);
-    HttpsCallableResult result = await driverClockInFunction
-        .call(<String, dynamic>{
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
       'daysOfWeek': driver.daysOfWeek,
       'driveruid': driver.uid,
       'shiftuid': shiftuid
@@ -500,14 +480,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock out operation
    */
   Future<Map<String, dynamic>> clockOut() async {
-<<<<<<< HEAD
     HttpsCallableResult result = await driverClockOutFunction.call(
         <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-=======
-    HttpsCallableResult result = await driverClockOutFunction
-        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print(result.data);
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -519,14 +493,9 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the start break operation
    */
   Future<Map<String, dynamic>> startBreak() async {
-<<<<<<< HEAD
     HttpsCallableResult result = await driverStartBreakFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-=======
-    HttpsCallableResult result = await driverStartBreakFunction
-        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print(result.data);
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
+      <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid}
+    );
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -538,14 +507,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the end break operation
    */
   Future<Map<String, dynamic>> endBreak() async {
-<<<<<<< HEAD
     HttpsCallableResult result = await driverEndBreakFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-=======
-    HttpsCallableResult result = await driverEndBreakFunction
-        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-    print(result.data);
->>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
+      <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -557,8 +520,7 @@ class DriverService {
     late String message;
     try {
       HttpsCallableResult result = await overrideClockInFunction.call(
-          <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
-
+        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
       message = (result.data['response']).toString();
     } catch (e) {
       if (kDebugMode) {
