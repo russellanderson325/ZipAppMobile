@@ -25,7 +25,7 @@ class CustomTextField extends StatefulWidget {
       required this.customTextIcon});
 
   @override
-  _CustomTextFieldState createState() => _CustomTextFieldState();
+  State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
@@ -107,7 +107,7 @@ class CustomTextField2 extends StatefulWidget {
       required this.isEditable});
 
   @override
-  _CustomTextFieldState2 createState() => _CustomTextFieldState2();
+  State<CustomTextField2> createState() => _CustomTextFieldState2();
 }
 
 class _CustomTextFieldState2 extends State<CustomTextField2> {

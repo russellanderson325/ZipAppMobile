@@ -17,7 +17,6 @@ import 'package:zipapp/constants/privacy_policies.dart';
 import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/models/driver.dart';
-import 'package:zipapp/services/payment.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/settings_screen.dart';
 import 'package:zipapp/ui/screens/previous_trips_screen.dart';
@@ -44,7 +43,7 @@ typedef MyMarkerReset = void Function(
     BuildContext context, void Function() methodFromChild);
 
 class MainScreen extends StatefulWidget {
-  const  MainScreen({super.key});
+  const MainScreen({super.key});
 
   /*final GlobalKey<MapScreen> mapScaffoldKey;
   MainScreen(this.mapScaffoldKey);*/
@@ -908,7 +907,8 @@ class _MainScreenState extends State<MainScreen> {
                 const Padding(
                   padding: EdgeInsets.only(bottom: 20.0),
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(ZipColors.zipYellow),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(ZipColors.zipYellow),
                   ),
                 ),
                 const Text("Looking for driver",

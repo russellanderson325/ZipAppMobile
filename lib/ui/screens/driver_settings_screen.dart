@@ -12,7 +12,7 @@ class DriverSettingsScreen extends StatefulWidget {
   const DriverSettingsScreen({super.key});
 
   @override
-  _DriverSettingsScreenState createState() => _DriverSettingsScreenState();
+  State<DriverSettingsScreen> createState() => _DriverSettingsScreenState();
 }
 
 class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
@@ -174,15 +174,15 @@ void _logOut() async {
 }
 
 class TopRectangle extends StatelessWidget {
-  final color;
-  final height;
-  final width;
-  final child;
+  final Color color;
+  final double height;
+  final double width;
+  final Widget child;
 
   const TopRectangle(
       {super.key,
-      this.child,
-      this.color,
+      required this.child,
+      required this.color,
       this.height = 100.0,
       this.width = 500.0});
 
@@ -198,18 +198,16 @@ class TopRectangle extends StatelessWidget {
 }
 
 class SettingRec extends StatelessWidget {
-  final color;
-  final decoration;
-  final width;
-  final height;
+  final Color? color;
+  final double width;
+  final double height;
   // final borderWidth;
-  final child;
+  final Widget child;
   const SettingRec(
       {super.key,
-      this.child,
+      required this.child,
       this.color,
       this.width = 500.0,
-      this.decoration,
       this.height = 55.0});
 
   @override

@@ -8,8 +8,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/drivers.dart';
+<<<<<<< HEAD
 import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
+=======
+>>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
 
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
@@ -20,12 +23,11 @@ import 'package:zipapp/services/position_service.dart';
 import 'package:zipapp/ui/screens/search_screen.dart';
 import 'package:zipapp/ui/screens/vehicle_ride_status_confirmation_screen.dart';
 import 'package:zipapp/ui/screens/vehicles_screen.dart';
-import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/message_overlay.dart';
 
 class MapWidget extends StatefulWidget {
   final bool driver;
-  const MapWidget({Key? key, required this.driver}) : super(key: key);
+  const MapWidget({super.key, required this.driver});
 
   @override
   State<MapWidget> createState() => MapWidgetSampleState();
@@ -34,7 +36,8 @@ class MapWidget extends StatefulWidget {
 class MapWidgetSampleState extends State<MapWidget> {
   //general map code
   String mapTheme = '';
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
   PositionService positionService = PositionService();
   LatLng? userLatLng, searchLatLng;
   final markers = <Marker>[];
@@ -129,6 +132,22 @@ class MapWidgetSampleState extends State<MapWidget> {
     );
   }
 
+<<<<<<< HEAD
+=======
+  void angryMessage(message) {
+    if (mounted) {
+      MessageOverlay(
+        message: message,
+        duration: const Duration(seconds: 2),
+        color: "#F54747",
+        textColor: "#FFFFFF",
+        background: true,
+        opacity: 1,
+      ).show(context);
+    }
+  }
+
+>>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
   //driver code
   void clockIn() async {
     // Prevent the user from spamming the clock in button
@@ -220,7 +239,6 @@ class MapWidgetSampleState extends State<MapWidget> {
     });
   }
 
-
   Future<void> updateDriverStatus() async {
     // Fetch the driver states asynchronously.
     Map<String, bool> states = await driverService.getDriverStates();
@@ -230,6 +248,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     });
   }
 
+<<<<<<< HEAD
   Future<void> updateUI(User user) async {
     setState(() {
       iterateKey++;
@@ -258,6 +277,8 @@ class MapWidgetSampleState extends State<MapWidget> {
     );
   }
 
+=======
+>>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
   SizedBox driverBox(double screenWidth, double screenHeight) {
     return SizedBox(
       width: screenWidth,
@@ -274,7 +295,8 @@ class MapWidgetSampleState extends State<MapWidget> {
                 children: [
                   Expanded(
                     child: TextButton.icon(
-                      onPressed: driverStates['isOnBreak']! ? endBreak : startBreak,
+                      onPressed:
+                          driverStates['isOnBreak']! ? endBreak : startBreak,
                       icon: driverStates['isOnBreak']!
                           ? const Icon(LucideIcons.play)
                           : const Icon(LucideIcons.pause),
@@ -400,6 +422,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     GooglePlace googlePlace = GooglePlace(Keys.map);
     await googlePlace.details.get(searchResult.placeId).then(
       (value) async {
+<<<<<<< HEAD
         if (value != null && value.result != null && value.result!.geometry != null && value.result!.geometry!.location != null) {
           setState(() {
             searchLatLng = LatLng(value.result!.geometry!.location!.lat!,
@@ -428,6 +451,25 @@ class MapWidgetSampleState extends State<MapWidget> {
           // Handle the case where GooglePlace details return null
           print("Error: Failed to retrieve place details.");
         }
+=======
+        setState(() {
+          searchLatLng = LatLng(value!.result!.geometry!.location!.lat!,
+              value.result!.geometry!.location!.lng!);
+        });
+        PolylineResult? result = await _addSearchResult(searchResult);
+        _moveCamera(
+            latlng: LatLng(value!.result!.geometry!.location!.lat! - 0.0015,
+                value.result!.geometry!.location!.lng!));
+
+        // Show the vehicle request screen
+        VehiclesScreenState.showVehiclesScreen(
+          context,
+          (result!.distanceValue)!.toDouble(),
+          value.result!.geometry!.location!.lat!,
+          value.result!.geometry!.location!.lng!,
+          _resetMarkers,
+        );
+>>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
       },
     ).catchError((error) {
       // Handle potential errors like network issues
@@ -466,6 +508,11 @@ class MapWidgetSampleState extends State<MapWidget> {
       const ImageConfiguration(size: Size(24, 24)),
       'assets/destination_map_marker.png',
     );
+<<<<<<< HEAD
+=======
+
+    _resetMarkers();
+>>>>>>> 074a72517d70b78102eba13b2ec681cf82df1495
     setState(() {
       markers.add(Marker(
         markerId: MarkerId(searchResult.placeId),

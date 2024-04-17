@@ -13,12 +13,11 @@ class DriverActivityItem extends StatefulWidget {
   final double rating;
 
   const DriverActivityItem({
-    Key? key,
+    super.key,
     required this.destination,
     required this.dateTime,
     required this.price,
-    this.rating = 5.0,})
-      : super(key: key);
+    this.rating = 5.0,});
   @override
   State<DriverActivityItem> createState() => _DriverActivityItemState();
 }

@@ -11,7 +11,7 @@ import 'package:zipapp/ui/screens/default_tip_screen.dart';
 import 'package:zipapp/business/user.dart';
 
 class PaymentsScreen extends StatefulWidget {
-  const PaymentsScreen({Key? key}) : super(key: key);
+  const PaymentsScreen({super.key});
 
   @override
   State<PaymentsScreen> createState() => PaymentsScreenState();

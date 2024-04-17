@@ -18,12 +18,11 @@ class RatingDrawer extends StatefulWidget {
   final Function setSubmitted;
   final ClearDataBuilder builder;
   const RatingDrawer(
-      {Key? key,
+      {super.key,
       required this.closeDrawer,
       required this.getSubmitted,
       required this.setSubmitted,
-      required this.builder})
-      : super(key: key);
+      required this.builder});
 
   @override
   State<RatingDrawer> createState() => _RatingDrawerState();

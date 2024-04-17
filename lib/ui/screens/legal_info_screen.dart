@@ -5,7 +5,7 @@ class LegalInformationScreen extends StatefulWidget {
   const LegalInformationScreen({super.key});
 
   @override
-  _LegalInformationScreenState createState() => _LegalInformationScreenState();
+  State<LegalInformationScreen> createState() => _LegalInformationScreenState();
 }
 
 var tipAmount = '';
@@ -92,10 +92,8 @@ class TopRectangle extends StatelessWidget {
   final double height;
   final double width;
   final dynamic child;
-  final posi;
   const TopRectangle(
       {super.key,
-      this.posi,
       this.child,
       required this.color,
       this.height = 100.0,

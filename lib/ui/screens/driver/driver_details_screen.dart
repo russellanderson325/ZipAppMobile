@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/tailwind_colors.dart';
-import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/constants/zip_formats.dart';
 
@@ -48,21 +47,28 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
               _buildNameDatePriceRow(),
               const Padding(
                 padding: EdgeInsets.only(top: 32, bottom: 16),
-                child: Text('Location', textAlign: TextAlign.left, style: ZipDesign.sectionTitleText),
+                child: Text('Location',
+                    textAlign: TextAlign.left,
+                    style: ZipDesign.sectionTitleText),
               ),
-              _buildStartLocation('250 W. Glenn Ave, Auburn, AL 36830', DateTime(2024, 10, 12, 14, 35)),
+              _buildStartLocation('250 W. Glenn Ave, Auburn, AL 36830',
+                  DateTime(2024, 10, 12, 14, 35)),
               const SizedBox(height: 16),
-              _buildEndLocation('251 S. Donahue Dr, Auburn, AL 36849', DateTime(2024, 10, 12, 14, 49)),
+              _buildEndLocation('251 S. Donahue Dr, Auburn, AL 36849',
+                  DateTime(2024, 10, 12, 14, 49)),
               const Padding(
                 padding: EdgeInsets.only(top: 32, bottom: 16),
-                child: Text('Tip and Rating', textAlign: TextAlign.left, style: ZipDesign.sectionTitleText),
+                child: Text('Tip and Rating',
+                    textAlign: TextAlign.left,
+                    style: ZipDesign.sectionTitleText),
               ),
               _buildTipOrRatingRow(LucideIcons.coins, '\$3.40'),
               const SizedBox(height: 16),
               _buildTipOrRatingRow(LucideIcons.star, '4 stars'),
               const Padding(
                 padding: EdgeInsets.only(top: 32, bottom: 16),
-                child: Text('Comments/Concerns', style: ZipDesign.sectionTitleText),
+                child: Text('Comments/Concerns',
+                    style: ZipDesign.sectionTitleText),
               ),
               Card(
                 color: Colors.white,
@@ -70,16 +76,20 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: comments.map((comment) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text(comment,style: TextStyle(color: Colors.black)),
-                    )).toList(),
+                    children: comments
+                        .map((comment) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text(comment,
+                                  style: const TextStyle(color: Colors.black)),
+                            ))
+                        .toList(),
                   ),
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.only(bottom:16),
-                child: Text('Trip ID: a2sg6h-24c7hjfd-565fgng-8jge34323', style: ZipDesign.tinyLightText),
+                padding: EdgeInsets.only(bottom: 16),
+                child: Text('Trip ID: a2sg6h-24c7hjfd-565fgng-8jge34323',
+                    style: ZipDesign.tinyLightText),
               ),
             ],
           ),
@@ -87,6 +97,7 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
       ),
     );
   }
+
   Widget _buildNameDatePriceRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,13 +106,14 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Ride with ${userService.user.firstName} ${userService.user
-                  .lastName[0]}.',
+              'Ride with ${userService.user.firstName} ${userService.user.lastName[0]}.',
               textAlign: TextAlign.left,
               style: ZipDesign.sectionTitleText,
             ),
             ZipFormats.activityDetailsDatePriceFormatter(
-              widget.dateTime, widget.price,),
+              widget.dateTime,
+              widget.price,
+            ),
           ],
         ),
         Container(
@@ -130,7 +142,7 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
             const SizedBox(width: 16),
             Text(address,
                 style:
-                const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
           ],
         ),
         ZipFormats.activityDetailsTimeFormatter(dateTime),
@@ -150,7 +162,7 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
             const SizedBox(width: 16),
             Text(address,
                 style:
-                const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
           ],
         ),
         ZipFormats.activityDetailsTimeFormatter(dateTime),
@@ -174,5 +186,4 @@ class _DriverDetailsScreenState extends State<DriverDetailsScreen> {
       ],
     );
   }
-
 }
