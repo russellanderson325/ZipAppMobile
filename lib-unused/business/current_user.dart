@@ -62,7 +62,7 @@ class CurrentUserService {
         }
       }
     } catch (e) {
-      print("Error fetching default tip amount: $e");
+      // print("Error fetching default tip amount: $e");
     }
     return 20.0; // Default value if none is found
   }

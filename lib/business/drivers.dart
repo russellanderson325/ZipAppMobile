@@ -14,7 +14,6 @@ import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
 import 'package:zipapp/services/payment.dart';
-import 'package:zipapp/ui/screens/driver_main_screen.dart';
 import 'package:intl/intl.dart';
 
 class DriverService {
@@ -42,7 +41,6 @@ class DriverService {
   late List<Request> currentRequests = [];
   late Request currentRequest;
   bool _isCurrentRideInitialized = false;
-  bool _isRequestSubListening = false;
   // Ride specific varaibles
   late Stream<Ride> rideStream;
   StreamSubscription<Ride>? rideSub;
@@ -117,21 +115,21 @@ class DriverService {
 
   void handleDriverAvailability(Driver driver) {
     if (driver.isWorking && driver.isAvailable && !isDriving) {
-        startDriving();
+      startDriving();
     }
   }
 
   void setupRideStream(String rideId) {
-      if (rideSub != null) {
-          rideSub?.cancel();
-      }
-      DocumentReference rideRef = _firestore.collection('rides').doc(rideId);
-      rideStream = rideRef.snapshots().map((snapshot) => Ride.fromDocument(snapshot));
-      rideSub = rideStream.listen((ride) {
-          _onRideUpdate(ride);
-      });
+    if (rideSub != null) {
+      rideSub?.cancel();
+    }
+    DocumentReference rideRef = _firestore.collection('rides').doc(rideId);
+    rideStream =
+        rideRef.snapshots().map((snapshot) => Ride.fromDocument(snapshot));
+    rideSub = rideStream.listen((ride) {
+      _onRideUpdate(ride);
+    });
   }
-
 
   /*
    * Get the driver's current state (isAvailable, isWorking, isOnBreak)
@@ -207,8 +205,6 @@ class DriverService {
         // Do nothing
       }
     });
-
-    _isRequestSubListening = true;
   }
 
   /*
@@ -220,7 +216,8 @@ class DriverService {
    */
   void _onRequestRecieved(Request req) {
     if (kDebugMode) {
-      acceptRequest(req.id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
+      acceptRequest(req
+          .id); // THIS IS PURELY FOR TESTING PURPOSES, REMOVE IT IF YOU STILL SEE IT HERE DURING PRODUCTION
     }
     currentRequest = req;
     var seconds = (req.timeout.seconds - Timestamp.now().seconds);
@@ -246,7 +243,8 @@ class DriverService {
   }
 
   Future<void> acceptRequest(String requestID) async {
-    DocumentSnapshot requestRef = await _firestore.collection('rides').doc(requestID).get();
+    DocumentSnapshot requestRef =
+        await _firestore.collection('rides').doc(requestID).get();
     rideStream = _firestore
         .collection('rides')
         .doc(requestID)
@@ -283,8 +281,6 @@ class DriverService {
     requestSub?.cancel();
     driverSub?.cancel();
     rideSub?.cancel();
-
-    _isRequestSubListening = false;
   }
 
   void completeRide() async {
@@ -371,7 +367,8 @@ class DriverService {
       case 'CANCELED':
         cancelRide();
         startDriving();
-        Payment.cancelPaymentIntentFromFirebaseByUserIdAndRideId(updatedRide.uid, driver.currentRideID);
+        Payment.cancelPaymentIntentFromFirebaseByUserIdAndRideId(
+            updatedRide.uid, driver.currentRideID);
         break;
       case 'IN_PROGRESS':
         // Payment intent is created on the rider side
@@ -380,7 +377,8 @@ class DriverService {
         completeRide();
         startDriving();
         // Capture payment from stripe_customer payment that contains the rideID
-        Payment.capturePaymentIntentFromFirebaseByUserIdAndRideId(updatedRide.uid, driver.currentRideID);
+        Payment.capturePaymentIntentFromFirebaseByUserIdAndRideId(
+            updatedRide.uid, driver.currentRideID);
         break;
       default:
     }
@@ -412,10 +410,11 @@ class DriverService {
     return nearbyDriversListStream;
   }
 
-  Future<List<Driver>> getNearbyDriversListWithModel(double radius, String cartModel) async {
+  Future<List<Driver>> getNearbyDriversListWithModel(
+      double radius, String cartModel) async {
     GeoFirePoint centerPoint = locationService.getCurrentGeoFirePoint();
-    Query collectionReference =
-        _firestore.collection('drivers')
+    Query collectionReference = _firestore
+        .collection('drivers')
         .where('isAvailable', isEqualTo: true)
         .where('cartModel', isEqualTo: cartModel);
 
@@ -464,7 +463,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock in operation
    */
   Future<Map<String, dynamic>> clockIn() async {
-    HttpsCallableResult result = await driverClockInFunction.call(<String, dynamic>{
+    HttpsCallableResult result = await driverClockInFunction
+        .call(<String, dynamic>{
       'daysOfWeek': driver.daysOfWeek,
       'driveruid': driver.uid,
       'shiftuid': shiftuid
@@ -480,8 +480,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the clock out operation
    */
   Future<Map<String, dynamic>> clockOut() async {
-    HttpsCallableResult result = await driverClockOutFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    HttpsCallableResult result = await driverClockOutFunction
+        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -493,9 +493,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the start break operation
    */
   Future<Map<String, dynamic>> startBreak() async {
-    HttpsCallableResult result = await driverStartBreakFunction.call(
-      <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid}
-    );
+    HttpsCallableResult result = await driverStartBreakFunction
+        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -507,8 +506,8 @@ class DriverService {
    * @return Future<Map<String, dynamic>> The result of the end break operation
    */
   Future<Map<String, dynamic>> endBreak() async {
-    HttpsCallableResult result = await driverEndBreakFunction.call(
-      <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+    HttpsCallableResult result = await driverEndBreakFunction
+        .call(<String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
     String response = (result.data['response']).toString();
     bool success = result.data['success'];
 
@@ -520,7 +519,7 @@ class DriverService {
     late String message;
     try {
       HttpsCallableResult result = await overrideClockInFunction.call(
-        <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
+          <String, dynamic>{'driveruid': driver.uid, 'shiftuid': shiftuid});
       message = (result.data['response']).toString();
     } catch (e) {
       if (kDebugMode) {

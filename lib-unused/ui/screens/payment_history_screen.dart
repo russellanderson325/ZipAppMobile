@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
-// import 'package:stripe_payment/stripe_payment.dart';
-import 'package:zipapp/business/payment.dart';
+import '../../business/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:strings/strings.dart';
 
@@ -53,19 +52,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
               debugPrint("build widget: ${snapshot.data}");
               List<QueryDocumentSnapshot> paymentList = snapshot.data!.docs;
               List successfulPaymentsList = [];
-              print("payment list: $paymentList");
-              print("id of payment list[1]: ${paymentList[1].id}");
+              // print("payment list: $paymentList");
+              // print("id of payment list[1]: ${paymentList[1].id}");
               for (var element in paymentList) {
                 if (element["status"] == "succeeded") {
-                  print("payment list element data: ${element.data()}");
+                  // print("payment list element data: ${element.data()}");
                   successfulPaymentsList.add(element);
-                  print(
-                      "length of successful payments list: ${successfulPaymentsList.length}");
-                  print("length of payment list: ${paymentList.length}");
+                  // print(
+                  // "length of successful payments list: ${successfulPaymentsList.length}");
+                  // print("length of payment list: ${paymentList.length}");
                   //print("TEST: TSTET: TEST ${element["refund"]}");
                 }
               }
-              print("OK: ${successfulPaymentsList.length}");
+              // print("OK: ${successfulPaymentsList.length}");
               return ListView.builder(
                   itemCount: successfulPaymentsList.length,
                   itemBuilder: (context, index) {

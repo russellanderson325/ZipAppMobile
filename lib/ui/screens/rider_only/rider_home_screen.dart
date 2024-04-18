@@ -3,14 +3,14 @@ import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/ui/widgets/map.dart' as mapwidget;
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class RiderHomeScreen extends StatefulWidget {
+  const RiderHomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<RiderHomeScreen> createState() => _RiderHomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _RiderHomeScreenState extends State<RiderHomeScreen> {
   final UserService userService = UserService();
 
   @override

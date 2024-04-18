@@ -4,7 +4,6 @@
  */
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
@@ -13,7 +12,6 @@ import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/models/rides.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:zipapp/ui/screens/driver_main_screen.dart';
 
 class RideService {
   static final RideService _instance = RideService._internal();

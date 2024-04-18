@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
-import 'package:zipapp/ui/screens/account_screen.dart';
-import 'package:zipapp/ui/screens/activity_screen.dart';
-import 'package:zipapp/ui/screens/home_screen.dart';
-import 'package:zipapp/ui/screens/payments_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_activity_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_home_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_earnings_screen.dart';
+import 'driver_account_screen.dart';
 
-class RiderMainScreen extends StatefulWidget {
-  const RiderMainScreen({super.key});
+class DriverMainScreen extends StatefulWidget {
+  const DriverMainScreen({super.key});
 
   @override
-  State<RiderMainScreen> createState() => _RiderMainScreenState();
+  State<DriverMainScreen> createState() => _DriverMainScreenState();
 }
 
-class _RiderMainScreenState extends State<RiderMainScreen> {
+class _DriverMainScreenState extends State<DriverMainScreen> {
   final UserService userService = UserService();
   int _selectedIndex = 0;
 
@@ -25,30 +25,27 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
-      const HomeScreen(),
-      const ActivityScreen(),
-      const PaymentsScreen(),
-      const AccountScreen(driver: false),
+      const DriverHomeScreen(),
+      const DriverActivityScreen(),
+      const DriverIncomeScreen(),
+      const DriverAccountScreen(driver: true),
     ];
     const List<BottomNavigationBarItem> items = [
       BottomNavigationBarItem(
-          icon: Icon(Icons.map),
-          label: 'Home',
-          backgroundColor: ZipColors.primaryBackground),
+          icon: Icon(Icons.map), label: 'Home', backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.sticky_note_2),
           label: 'Activity',
-          backgroundColor: ZipColors.primaryBackground),
+          backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.credit_card),
-          label: 'Payments',
-          backgroundColor: ZipColors.primaryBackground),
+          label: 'Earnings',
+          backgroundColor: Colors.black),
       BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Account',
-          backgroundColor: ZipColors.primaryBackground),
+          backgroundColor: Colors.black),
     ];
-
     return Scaffold(
         body: Center(
           child: pages.elementAt(_selectedIndex),
@@ -58,10 +55,10 @@ class _RiderMainScreenState extends State<RiderMainScreen> {
                 border: Border(top: BorderSide(color: ZipColors.boxBorder))),
             child: BottomNavigationBar(
               showUnselectedLabels: true,
-              selectedLabelStyle: const TextStyle(color: Colors.black),
-              selectedItemColor: Colors.black,
-              unselectedLabelStyle: const TextStyle(color: Colors.black),
-              unselectedItemColor: Colors.black,
+              selectedLabelStyle: const TextStyle(color: Colors.white),
+              selectedItemColor: Colors.white,
+              unselectedLabelStyle: const TextStyle(color: Colors.white70),
+              unselectedItemColor: Colors.white70,
               backgroundColor: ZipColors.primaryBackground,
               items: items,
               currentIndex: _selectedIndex,

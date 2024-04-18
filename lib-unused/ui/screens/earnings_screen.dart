@@ -2,7 +2,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:zipapp/business/auth.dart";
 import "package:zipapp/business/user.dart";
-import "package:zipapp/business/payment.dart";
+import "../../business/payment.dart";
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 

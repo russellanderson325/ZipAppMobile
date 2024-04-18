@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/driver/driver_activity_item.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_activity_item.dart';
 
 class DriverActivityScreen extends StatefulWidget {
   const DriverActivityScreen({super.key});

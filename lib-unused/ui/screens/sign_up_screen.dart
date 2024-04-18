@@ -4,9 +4,8 @@ import 'package:zipapp/business/auth.dart';
 import 'package:zipapp/business/validator.dart';
 import 'package:flutter/services.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
-import 'package:zipapp/models/user.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
-import 'package:zipapp/ui/widgets/custom_text_field.dart';
+import '../widgets/custom_text_field.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -249,17 +248,17 @@ class SignUpScreenState extends State<SignUpScreen> {
         SystemChannels.textInput.invokeMethod('TextInput.hide');
         _changeBlackVisible();
         await auth.signUp(email, password).then((uid) {
-          auth.addUser(User(
-            uid: uid,
-            email: email,
-            firstName: firstname,
-            lastName: lastname,
-            phone: number,
-            profilePictureURL: '',
-            lastActivity: DateTime.now(),
-            pastRides: [],
-            pastDrives: [],
-          ));
+          // auth.addUser(User(
+          //   uid: uid,
+          //   email: email,
+          //   firstName: firstname,
+          //   lastName: lastname,
+          //   phone: number,
+          //   profilePictureURL: '',
+          //   lastActivity: DateTime.now(),
+          //   pastRides: [],
+          //   pastDrives: [],
+          // ));
           onBackPress();
         });
       } catch (e) {

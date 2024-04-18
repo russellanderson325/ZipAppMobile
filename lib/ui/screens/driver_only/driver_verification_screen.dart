@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/driver/driver_main_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_main_screen.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
 
 class DriverVerificationScreen extends StatefulWidget {

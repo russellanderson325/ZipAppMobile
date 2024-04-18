@@ -1,21 +1,20 @@
 import "package:flutter/material.dart";
-//import 'package:zip/ui/screens/profile_screen.dart';
-//import 'package:zip/ui/screens/defaultTip_screen.dart';
-import 'package:zipapp/ui/screens/profile_screen.dart';
-import 'package:zipapp/ui/screens/legal_info_screen.dart';
-import 'package:zipapp/ui/screens/old_vehicles_screen.dart';
-import 'package:zipapp/ui/screens/documents_screen.dart';
-//import 'package:zip/services/payment_screen.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'documents_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/default_tip_screen.dart';
+import 'legal_info_screen.dart';
+import 'safety_features_screen.dart';
 import 'package:zipapp/business/auth.dart';
+import 'package:mailto/mailto.dart';
 
-class DriverSettingsScreen extends StatefulWidget {
-  const DriverSettingsScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  State<DriverSettingsScreen> createState() => _DriverSettingsScreenState();
+  State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen> {
   late VoidCallback onBackPress;
   @override
   void initState() {
@@ -30,6 +29,7 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
     return PopScope(
       canPop: true,
       child: Scaffold(
+        //backgroundColor: Colors.grey[70],
         backgroundColor: Colors.black,
         body: Padding(
           padding: const EdgeInsets.only(
@@ -42,9 +42,7 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
             mainAxisSize: MainAxisSize.max,
             // mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              //TopRectangle(
-              Container(
-                color: Colors.black,
+              TopRectangle(
                 child: Row(
                   children: <Widget>[
                     Padding(
@@ -58,7 +56,6 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                     const Text("Settings",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            backgroundColor: Colors.black,
                             color: Color.fromRGBO(255, 242, 0, 1.0),
                             fontSize: 36.0,
                             fontWeight: FontWeight.w300,
@@ -66,8 +63,62 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                   ],
                 ),
               ),
-              //),
+              SettingRec(
+                child: ListTile(
+                    leading: const Icon(Icons.account_box,
+                        size: 28.0, color: Color.fromRGBO(255, 242, 0, 1.0)),
+                    title: const Text("Rules & Safety",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            color: Color.fromRGBO(255, 242, 0, 1.0),
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.w300,
+                            fontFamily: "Bebas")),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const SafetyFeaturesScreen()));
+                    }
 
+                    //child: Icon(Icons.account_box, size: 28.0, color: Colors.white),
+
+                    ),
+              ),
+              SettingRec(
+                child: ListTile(
+                    leading: const Icon(Icons.monetization_on,
+                        size: 28.0, color: Color.fromRGBO(255, 242, 0, 1.0)),
+                    title: const Text("Default Tip",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            color: Color.fromRGBO(255, 242, 0, 1.0),
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.w300,
+                            fontFamily: "Bebas")),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const DefaultTipScreen()));
+                    }),
+              ),
+              SettingRec(
+                child: ListTile(
+                    leading: const Icon(Icons.drive_eta,
+                        size: 28.0, color: Color.fromRGBO(255, 242, 0, 1.0)),
+                    title: const Text("Drive with Zip",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            color: Color.fromRGBO(255, 242, 0, 1.0),
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.w300,
+                            fontFamily: "Bebas")),
+                    onTap: () {
+                      funcOpenMailComposer();
+                    }),
+              ),
               SettingRec(
                 child: ListTile(
                     leading: const Icon(Icons.assignment,
@@ -75,7 +126,7 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                     title: const Text("Terms and Conditions",
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Color.fromRGBO(255, 242, 0, 1.0),
                             fontSize: 24.0,
                             fontWeight: FontWeight.w300,
                             fontFamily: "Bebas")),
@@ -86,44 +137,6 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                               builder: (context) => const DocumentsScreen()));
                     }),
               ),
-
-              SettingRec(
-                child: ListTile(
-                    leading: const Icon(Icons.monetization_on,
-                        size: 28.0, color: Color.fromRGBO(255, 242, 0, 1.0)),
-                    title: const Text("Payment",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.w300,
-                            fontFamily: "Bebas")),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const VehiclesScreen()));
-                      //builder: (context) => PaymentScreen()));
-                    }),
-              ),
-              SettingRec(
-                child: ListTile(
-                    leading: const Icon(Icons.account_box,
-                        size: 28.0, color: Color.fromRGBO(255, 242, 0, 1.0)),
-                    title: const Text("Edit Account",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.w300,
-                            fontFamily: "Bebas")),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ProfileScreen()));
-                    }),
-              ),
               SettingRec(
                 child: ListTile(
                     leading: const Icon(Icons.lock,
@@ -131,7 +144,7 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                     title: const Text("Privacy Policy",
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Color.fromRGBO(255, 242, 0, 1.0),
                             fontSize: 24.0,
                             fontWeight: FontWeight.w300,
                             fontFamily: "Bebas")),
@@ -143,15 +156,14 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
                                   const LegalInformationScreen()));
                     }),
               ),
-
               SettingRec(
                 child: ListTile(
-                    leading: const Icon(Icons.not_interested,
+                    leading: const Icon(Icons.lock,
                         size: 28.0, color: Color.fromRGBO(255, 242, 0, 1.0)),
-                    title: const Text("Log Out",
+                    title: const Text("Sign Out",
                         textAlign: TextAlign.left,
                         style: TextStyle(
-                            color: Colors.white,
+                            color: Color.fromRGBO(255, 242, 0, 1.0),
                             fontSize: 24.0,
                             fontWeight: FontWeight.w300,
                             fontFamily: "Bebas")),
@@ -169,12 +181,8 @@ class _DriverSettingsScreenState extends State<DriverSettingsScreen> {
   }
 }
 
-void _logOut() async {
-  AuthService().signOut();
-}
-
 class TopRectangle extends StatelessWidget {
-  final Color color;
+  final Color? color;
   final double height;
   final double width;
   final Widget child;
@@ -182,7 +190,7 @@ class TopRectangle extends StatelessWidget {
   const TopRectangle(
       {super.key,
       required this.child,
-      required this.color,
+      this.color,
       this.height = 100.0,
       this.width = 500.0});
 
@@ -191,17 +199,20 @@ class TopRectangle extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      color: Colors.white,
+      color: Colors.black,
       child: child,
     );
   }
+}
+
+void _logOut() async {
+  AuthService().signOut();
 }
 
 class SettingRec extends StatelessWidget {
   final Color? color;
   final double width;
   final double height;
-  // final borderWidth;
   final Widget child;
   const SettingRec(
       {super.key,
@@ -219,4 +230,13 @@ class SettingRec extends StatelessWidget {
       child: child,
     );
   }
+}
+
+void funcOpenMailComposer() async {
+  final mailtoLink = Mailto(
+    to: ['info@zipgameday.com'],
+    subject: 'New Driver',
+    body: '',
+  );
+  await launchUrlString('$mailtoLink');
 }

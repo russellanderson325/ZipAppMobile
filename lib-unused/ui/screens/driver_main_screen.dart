@@ -8,21 +8,17 @@ import 'package:zipapp/business/user.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
-// import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-// import 'package:url_launcher/url_launcher.dart';
 import 'package:zipapp/models/driver.dart';
 import 'package:zipapp/models/request.dart';
 import 'package:zipapp/ui/screens/previous_driver_trips.dart';
 import 'dart:io';
-import 'package:zipapp/ui/screens/main_screen.dart';
 import '../../models/user.dart';
-// import 'package:unicorndial/unicorndial.dart';
-import 'package:zipapp/CustomIcons/my_flutter_app_icons.dart';
+import '../../CustomIcons/my_flutter_app_icons.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:zipapp/ui/screens/stripe_connect_screen.dart';
-import 'package:zipapp/ui/screens/driver_settings_screen.dart';
-import 'package:zipapp/ui/screens/earnings_screen.dart';
+import 'stripe_connect_screen.dart';
+import 'driver_settings_screen.dart';
+import 'earnings_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 
@@ -31,7 +27,7 @@ enum DriverBottomSheetStatus { closed, confirmation, searching, rideDetails }
 class DriverMainScreen extends StatefulWidget {
   const DriverMainScreen({super.key});
   @override
-  _DriverMainScreenState createState() => _DriverMainScreenState();
+  State<DriverMainScreen> createState() => _DriverMainScreenState();
 }
 
 class _DriverMainScreenState extends State<DriverMainScreen> {
@@ -102,99 +98,99 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
     );
   }
 
-  void _overrideAlert(BuildContext context, String displayText) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: const Text(
-            "Driver Notification",
-            style: TextStyle(color: Color.fromRGBO(255, 242, 0, 1.0)),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  displayText,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(255, 242, 0, 1.0),
-                    decoration: TextDecoration.none,
-                    fontSize: 18.0,
-                    fontFamily: "Bebas",
-                    fontWeight: FontWeight.w600,
-                  ),
-                  softWrap: true,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
+  // void _overrideAlert(BuildContext context, String displayText) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       // return object of type Dialog
+  //       return AlertDialog(
+  //         title: const Text(
+  //           "Driver Notification",
+  //           style: TextStyle(color: Color.fromRGBO(255, 242, 0, 1.0)),
+  //         ),
+  //         content: SingleChildScrollView(
+  //           child: ListBody(
+  //             children: <Widget>[
+  //               Text(
+  //                 displayText,
+  //                 style: const TextStyle(
+  //                   color: Color.fromRGBO(255, 242, 0, 1.0),
+  //                   decoration: TextDecoration.none,
+  //                   fontSize: 18.0,
+  //                   fontFamily: "Bebas",
+  //                   fontWeight: FontWeight.w600,
+  //                 ),
+  //                 softWrap: true,
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           // usually buttons at the bottom of the dialog
 
-            TextButton(
-                child: const Text("OVERRIDE",
-                    style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w700)),
-                onPressed: () async =>
-                    {Navigator.of(context).pop(), _overrideDriver()}),
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-          backgroundColor: Colors.black,
-        );
-      },
-    );
-  }
+  //           TextButton(
+  //               child: const Text("OVERRIDE",
+  //                   style: TextStyle(
+  //                       color: Colors.red,
+  //                       fontSize: 22.0,
+  //                       fontWeight: FontWeight.w700)),
+  //               onPressed: () async =>
+  //                   {Navigator.of(context).pop(), _overrideDriver()}),
+  //           TextButton(
+  //             child: const Text("Close"),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           )
+  //         ],
+  //         backgroundColor: Colors.black,
+  //       );
+  //     },
+  //   );
+  // }
 
-  void _driverAlert(BuildContext context, String displayText, bool override) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: const Text(
-            "Driver Notification",
-            style: TextStyle(color: Color.fromRGBO(255, 242, 0, 1.0)),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  displayText,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(255, 242, 0, 1.0),
-                    decoration: TextDecoration.none,
-                    fontSize: 18.0,
-                    fontFamily: "OpenSans",
-                    fontWeight: FontWeight.w600,
-                  ),
-                  softWrap: true,
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
+  // void _driverAlert(BuildContext context, String displayText, bool override) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       // return object of type Dialog
+  //       return AlertDialog(
+  //         title: const Text(
+  //           "Driver Notification",
+  //           style: TextStyle(color: Color.fromRGBO(255, 242, 0, 1.0)),
+  //         ),
+  //         content: SingleChildScrollView(
+  //           child: ListBody(
+  //             children: <Widget>[
+  //               Text(
+  //                 displayText,
+  //                 style: const TextStyle(
+  //                   color: Color.fromRGBO(255, 242, 0, 1.0),
+  //                   decoration: TextDecoration.none,
+  //                   fontSize: 18.0,
+  //                   fontFamily: "OpenSans",
+  //                   fontWeight: FontWeight.w600,
+  //                 ),
+  //                 softWrap: true,
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           // usually buttons at the bottom of the dialog
 
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-          backgroundColor: Colors.black,
-        );
-      },
-    );
-  }
+  //           TextButton(
+  //             child: const Text("Close"),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //         backgroundColor: Colors.black,
+  //       );
+  //     },
+  //   );
+  // }
 
   // void _showVehicle(BuildContext context) {
   //   // flutter defined function
@@ -691,11 +687,11 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
         ));
   }
 
-  void _overrideDriver() async {
-    String result = await driverService.overrideClockIn();
-    _driverAlert(context, result, false);
-    driverService.startDriving();
-  }
+  // void _overrideDriver() async {
+  //   String result = await driverService.overrideClockIn();
+  //   _driverAlert(context, result, false);
+  //   driverService.startDriving();
+  // }
 
 /*
   Changes the background of the screen.
@@ -862,10 +858,6 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
               setState(() {
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MainScreen()));
               });
             },
             activeColor: Colors.green[400],
@@ -921,9 +913,9 @@ class MapScreen extends State<TheMap> {
   final Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   // PolylinePoints polylinePoints = PolylinePoints();
-  Completer<GoogleMapController> _controller = Completer();
+  final Completer<GoogleMapController> _controller = Completer();
   late BitmapDescriptor _sourceIcon;
-  late BitmapDescriptor _destinationIcon;
+  // late BitmapDescriptor _destinationIcon;
 
   @override
   void initState() {
@@ -963,9 +955,9 @@ class MapScreen extends State<TheMap> {
     _sourceIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(devicePixelRatio: 4.5),
         'assets/golf_cart.png');
-    _destinationIcon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(devicePixelRatio: 4.5),
-        'assets/golf_cart.png');
+    // _destinationIcon = await BitmapDescriptor.fromAssetImage(
+    //     const ImageConfiguration(devicePixelRatio: 4.5),
+    //     'assets/golf_cart.png');
   }
 
   void _getDriverLocation() async {

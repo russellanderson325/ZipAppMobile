@@ -1,12 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+
 import 'package:zipapp/constants/zip_colors.dart';
-// import 'package:zip/ui/widgets/custom_flat_button.dart';
-// import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
-// import 'package:zip/business/auth.dart';
-// import 'package:zip/ui/widgets/custom_gplus_fb_btn.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 import 'package:zipapp/ui/widgets/create_account_drawer.dart';
 import 'package:zipapp/ui/widgets/sign_in_drawer.dart';
@@ -71,18 +66,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     _buildCarouselItem('Enjoy your ride', 1),
     _buildCarouselItem('Cheer on your team', 2)
   ];
-
-  // void authLogin(Future<FirebaseUser> userFuture, BuildContext context) {
-  //   userFuture.then((user) {
-  //     if (user != null) {
-  //       Navigator.of(context).pushNamed("/main");
-  //     } else {
-  //       _scaffoldKey.currentState.showSnackBar(SnackBar(
-  //         content: Text("Login Failed"),
-  //       ));
-  //     }
-  //   });
-  // }
 
   @override
   void initState() {
