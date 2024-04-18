@@ -84,7 +84,7 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
             const SizedBox(height: 260),
             TextButton.icon(
               onPressed: () {
-                if (status != "CANCELED" || status != "ENDED") {
+                if (status != "CANCELED" && status != "ENDED") {
                   ride?.cancelRide();
                 } else {
                   Navigator.pop(context);
@@ -92,7 +92,7 @@ class VehicleRideStatusConfirmationScreenState extends State<VehicleRideStatusCo
               },
               icon: const Icon(LucideIcons.trash),
               style: ZipDesign.redButtonStyle,
-              label: Text((status != "CANCELED" || status != "ENDED") ? 'Cancel Ride' : 'Close')
+              label: Text((status != "CANCELED" && status != "ENDED") ? 'Cancel Ride' : 'Close')
             ),
             const SizedBox(height: 5),
           ],

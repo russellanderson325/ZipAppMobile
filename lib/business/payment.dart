@@ -170,13 +170,13 @@ class Payment {
     // return doc;
   }
 
-/*  Future<void> collectTips(docID) async {
+Future<void> collectTips(docID) async {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     await FirebaseFirestore.instance
         .collection("stripe_customers")
-        .doc(firebaseUser.uid)
-        .collection()
-  }*/
+        .doc(firebaseUser?.uid)
+        .get();
+  }
 
 //Add Payment method to user
   Future<void> setPaymentMethodID(paymentmethod) async {
@@ -230,17 +230,17 @@ class Payment {
     return paymentsMethods.snapshots();
   }
 
-  /*Stream<DocumentSnapshot> getRefund(docId) {
+  Stream<DocumentSnapshot> getRefund(docId) {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     DocumentReference doc = FirebaseFirestore.instance
         .collection("stripe_customers")
-        .doc(firebaseUser.uid)
+        .doc(firebaseUser?.uid)
         .collection('payments')
         .doc(docId)
         .collection('refund')
         .doc("refund_doc");
     return doc.snapshots();
-  }*/
+  }
 
   /*_loadingDialog(BuildContext context) async {
     showCupertinoDialog(
@@ -252,51 +252,51 @@ class Payment {
     );
   }
 */
-//   Future<DocumentSnapshot?> checkPaymentAdded() async {
-//     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
-//     if (kDebugMode) {
-//       print("card document id: $cardDocumentID");
-//     }
-//     var cardID = cardDocumentID.id;
-//     if (kDebugMode) {
-//       print("card id: $cardID");
-//     }
-//     DocumentSnapshot? docReference;
-//     if (kDebugMode) {
-//       print("payment doc reference: $docReference");
-//     }
-//     while (docReference == null) {
-//       //print("TEST3: ${docReference.data()}");
-//       await FirebaseFirestore.instance
-//           .collection("stripe_customers")
-//           .doc(firebaseUser?.uid)
-//           .collection('payment_methods')
-//           .doc(cardID)
-//           .collection('payment')
-//           .doc('valid_check')
-//           .get()
-//           .then((DocumentSnapshot documentSnapshot) {
-//         if (documentSnapshot.exists) {
-//           if (kDebugMode) {
-//             print("payment snapshot exists");
-//           }
-//           docReference = documentSnapshot;
-//           if (kDebugMode) {
-//             print("payment doc reference: ${docReference?.data()}");
-//           }
-//         } else {
-//           if (kDebugMode) {
-//             print("payment snapshot not found");
-//           }
-//           docReference = null;
-//         }
-//       });
-//       // print("TEST4: ${docReference.data()}");
-//     }
-//     //Navigator.of(context).pop();
-//     if (kDebugMode) {
-//       print("payment doc reference.data: ${docReference?.data()}");
-//     }
-//     return docReference;
-//   }
+  Future<DocumentSnapshot?> checkPaymentAdded() async {
+    var firebaseUser = auth.FirebaseAuth.instance.currentUser;
+    if (kDebugMode) {
+      print("card document id: $cardDocumentID");
+    }
+    var cardID = cardDocumentID.id;
+    if (kDebugMode) {
+      print("card id: $cardID");
+    }
+    DocumentSnapshot? docReference;
+    if (kDebugMode) {
+      print("payment doc reference: $docReference");
+    }
+    while (docReference == null) {
+      //print("TEST3: ${docReference.data()}");
+      await FirebaseFirestore.instance
+          .collection("stripe_customers")
+          .doc(firebaseUser?.uid)
+          .collection('payment_methods')
+          .doc(cardID)
+          .collection('payment')
+          .doc('valid_check')
+          .get()
+          .then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot.exists) {
+          if (kDebugMode) {
+            print("payment snapshot exists");
+          }
+          docReference = documentSnapshot;
+          if (kDebugMode) {
+            print("payment doc reference: ${docReference?.data()}");
+          }
+        } else {
+          if (kDebugMode) {
+            print("payment snapshot not found");
+          }
+          docReference = null;
+        }
+      });
+      // print("TEST4: ${docReference.data()}");
+    }
+    //Navigator.of(context).pop();
+    if (kDebugMode) {
+      print("payment doc reference.data: ${docReference?.data()}");
+    }
+    return docReference;
+  }
 }
