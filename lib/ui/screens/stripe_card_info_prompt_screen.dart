@@ -34,25 +34,32 @@ class StripeCardInfoPromptScreenState extends State<StripeCardInfoPromptScreen> 
               children: [
                 const CardField(
                   cursorColor: Color.fromARGB(255, 54, 54, 54),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Card Information',
+                  ),
+                  // Enabling more fields
+                  enablePostalCode: true,  // Enable if you need to collect postal code
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
                 Visibility(
                   child: (statusMessage != "loading" ? Text(
                     statusMessage,
                     style: const TextStyle(color: Colors.red),
                   ) : 
                   const SizedBox(
-                      width: 20,
-                      height: 20,
+                      width: 22,
+                      height: 22,
                       child: CircularProgressIndicator(
                         color: Colors.black,
                       ),
                     )
                   ),
                 ),
+                // const SizedBox(height: 10),
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () {
