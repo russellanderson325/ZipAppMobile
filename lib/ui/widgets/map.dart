@@ -3,23 +3,21 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place_plus/google_place_plus.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/ride.dart';
 import 'package:zipapp/business/user.dart';
-
 import 'package:zipapp/constants/keys.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/models/rides.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/services/position_service.dart';
-import 'package:zipapp/ui/screens/search_screen.dart';
-import 'package:zipapp/ui/screens/vehicle_ride_status_confirmation_screen.dart';
-import 'package:zipapp/ui/screens/vehicles_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/search_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/vehicle_ride_status_confirmation_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/vehicles_screen.dart';
 import 'package:zipapp/ui/widgets/message_overlay.dart';
 
 class MapWidget extends StatefulWidget {

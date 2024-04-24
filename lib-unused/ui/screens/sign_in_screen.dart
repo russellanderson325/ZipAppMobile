@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 import 'package:zipapp/business/auth.dart';
 import 'package:flutter/services.dart';
-import 'package:zipapp/CustomIcons/custom_icons_icons.dart';
+import '../../CustomIcons/custom_icons_icons.dart';
 import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/main.dart';
 import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
-import 'package:zipapp/ui/widgets/custom_text_field.dart';
+import '../widgets/custom_text_field.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

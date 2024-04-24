@@ -7,7 +7,7 @@ import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/widgets/payment_list_item.dart';
 import 'package:zipapp/ui/widgets/payment_methods_list.dart';
 import 'package:zipapp/ui/screens/stripe_card_info_prompt_screen.dart';
-import 'package:zipapp/ui/screens/default_tip_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/default_tip_screen.dart';
 import 'package:zipapp/business/user.dart';
 
 class PaymentsScreen extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zipapp/business/drivers.dart';
 import 'package:zipapp/business/location.dart';
 import 'package:zipapp/business/user.dart';
-import 'package:zipapp/ui/screens/rider_main_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/foundation.dart';
-// import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:zipapp/models/user.dart';
@@ -101,9 +100,9 @@ class AuthService {
   void addUser(User user) async {
     DocumentSnapshot doc = await _db.collection('users').doc(user.uid).get();
     if (doc.exists) {
-      print("user ${user.firstName} ${user.email} already exists");
+      // print("user ${user.firstName} ${user.email} already exists");
     } else {
-      print("user ${user.firstName} ${user.email} added");
+      // print("user ${user.firstName} ${user.email} added");
       _db.doc("users/${user.uid}").set(user.toJson());
     }
   }
@@ -132,7 +131,7 @@ class AuthService {
         'phone': phone,
       });
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 

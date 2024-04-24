@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/auth.dart';
-import 'package:zipapp/business/current_user.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/driver/driver_portal_screen.dart';
-import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_portal_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/edit_account_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
-import 'package:zipapp/ui/screens/rider_main_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
 import 'package:zipapp/ui/screens/terms_screen.dart';
 import 'package:zipapp/ui/widgets/underline_textbox.dart';
@@ -23,7 +22,6 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  final CurrentUserService currentUserService = CurrentUserService();
   final UserService userService = UserService();
 
   late String firstName;

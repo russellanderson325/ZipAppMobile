@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-// import 'package:geoflutterfire/geoflutterfire.dart';
 
 class SafetyFeaturesScreen extends StatefulWidget {
   const SafetyFeaturesScreen({super.key});

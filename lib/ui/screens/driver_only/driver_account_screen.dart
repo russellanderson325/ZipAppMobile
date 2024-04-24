@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:zipapp/business/auth.dart';
-import 'package:zipapp/business/current_user.dart';
 import 'package:zipapp/business/user.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
-import 'package:zipapp/ui/screens/driver/driver_verification_screen.dart';
+import 'package:zipapp/ui/screens/driver_only/driver_verification_screen.dart';
 import 'package:zipapp/ui/screens/edit_account_screen.dart';
 import 'package:zipapp/ui/screens/privacy_policy_screen.dart';
-import 'package:zipapp/ui/screens/rider_main_screen.dart';
+import 'package:zipapp/ui/screens/rider_only/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
 import 'package:zipapp/ui/screens/terms_screen.dart';
 import 'package:zipapp/ui/widgets/underline_textbox.dart';
@@ -22,7 +21,6 @@ class DriverAccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<DriverAccountScreen> {
-  final CurrentUserService currentUserService = CurrentUserService();
   final UserService userService = UserService();
 
   late String firstName;
@@ -54,20 +52,20 @@ class _AccountScreenState extends State<DriverAccountScreen> {
               Center(
                 child: userService.user.profilePictureURL != ""
                     ? CircleAvatar(
-                  radius: 48,
-                  backgroundImage:
-                  NetworkImage(userService.user.profilePictureURL),
-                )
+                        radius: 48,
+                        backgroundImage:
+                            NetworkImage(userService.user.profilePictureURL),
+                      )
                     : CircleAvatar(
-                  radius: 48,
-                  backgroundColor: ZipColors.zipYellow,
-                  foregroundColor: Colors.black,
-                  child: Text(
-                    firstName[0].toUpperCase() +
-                        lastName[0].toUpperCase(),
-                    style: ZipDesign.pageTitleText,
-                  ),
-                ),
+                        radius: 48,
+                        backgroundColor: ZipColors.zipYellow,
+                        foregroundColor: Colors.black,
+                        child: Text(
+                          firstName[0].toUpperCase() +
+                              lastName[0].toUpperCase(),
+                          style: ZipDesign.pageTitleText,
+                        ),
+                      ),
               ),
               const SizedBox(height: 16),
               Center(
@@ -111,14 +109,14 @@ class _AccountScreenState extends State<DriverAccountScreen> {
                                     shape: MaterialStateProperty.all(
                                         RoundedRectangleBorder(
                                             borderRadius:
-                                            BorderRadius.circular(8))),
+                                                BorderRadius.circular(8))),
                                     padding: MaterialStateProperty.all(
                                         const EdgeInsets.all(0)),
                                     iconColor:
-                                    MaterialStateProperty.all(Colors.black),
+                                        MaterialStateProperty.all(Colors.black),
                                     iconSize: MaterialStateProperty.all(16),
                                     foregroundColor:
-                                    MaterialStateProperty.all(Colors.black),
+                                        MaterialStateProperty.all(Colors.black),
                                     backgroundColor: MaterialStateProperty.all(
                                         ZipColors.zipYellow),
                                     textStyle: MaterialStateProperty.all(
@@ -156,10 +154,10 @@ class _AccountScreenState extends State<DriverAccountScreen> {
                               padding: MaterialStateProperty.all(
                                   const EdgeInsets.all(0)),
                               iconColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               iconSize: MaterialStateProperty.all(16),
                               foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               textStyle: MaterialStateProperty.all(
                                   ZipDesign.labelText),
                             ))),
@@ -180,10 +178,10 @@ class _AccountScreenState extends State<DriverAccountScreen> {
                               padding: MaterialStateProperty.all(
                                   const EdgeInsets.all(0)),
                               iconColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               iconSize: MaterialStateProperty.all(16),
                               foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               textStyle: MaterialStateProperty.all(
                                   ZipDesign.labelText),
                             ))),
@@ -196,7 +194,7 @@ class _AccountScreenState extends State<DriverAccountScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                    const PrivacyPolicyScreen()),
+                                        const PrivacyPolicyScreen()),
                               );
                             },
                             icon: const Icon(LucideIcons.lock),
@@ -205,10 +203,10 @@ class _AccountScreenState extends State<DriverAccountScreen> {
                               padding: MaterialStateProperty.all(
                                   const EdgeInsets.all(0)),
                               iconColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               iconSize: MaterialStateProperty.all(16),
                               foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               textStyle: MaterialStateProperty.all(
                                   ZipDesign.labelText),
                             ))),
@@ -225,10 +223,10 @@ class _AccountScreenState extends State<DriverAccountScreen> {
                               padding: MaterialStateProperty.all(
                                   const EdgeInsets.all(0)),
                               iconColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               iconSize: MaterialStateProperty.all(16),
                               foregroundColor:
-                              MaterialStateProperty.all(Colors.black),
+                                  MaterialStateProperty.all(Colors.black),
                               textStyle: MaterialStateProperty.all(
                                   ZipDesign.labelText),
                             ))),
@@ -270,7 +268,7 @@ class _AccountScreenState extends State<DriverAccountScreen> {
           }
         },
         icon:
-        Icon(widget.driver ? LucideIcons.personStanding : LucideIcons.bus),
+            Icon(widget.driver ? LucideIcons.personStanding : LucideIcons.bus),
         label: Text(
             widget.driver ? 'Use our Rider Program' : 'Log In as a Driver'),
         style: ButtonStyle(

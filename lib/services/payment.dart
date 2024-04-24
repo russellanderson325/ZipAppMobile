@@ -316,7 +316,7 @@ class Payment {
         Stripe.publishableKey = "pk_live_2bHAGSfue3vfL7ZKKBUisTjT001a503e1U";
       }
       // Prepare payment method details
-      PaymentIntent paymentIntent = await Stripe.instance.confirmPayment(
+      PaymentIntent _ = await Stripe.instance.confirmPayment(
         paymentIntentClientSecret: clientSecret, 
         data: const PaymentMethodParams.card(
           paymentMethodData: PaymentMethodData(),
