@@ -450,11 +450,11 @@ class MapWidgetSampleState extends State<MapWidget> {
             _moveCamera(
               latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015, value.result!.geometry!.location!.lng!)
             );
-            if (result.distanceValue != null) {
+            if (result.totalDistanceValue != null) {
               // Show the vehicle request screen only if the distance value is not null
               VehiclesScreenState.showVehiclesScreen(
                 context, 
-                result.distanceValue!.toDouble(), 
+                result.totalDistanceValue!.toDouble(), 
                 value.result!.geometry!.location!.lat!, 
                 value.result!.geometry!.location!.lng!,
                 _resetMarkers,
@@ -534,17 +534,20 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   Future<PolylineResult> _updatePolylines() async {
     if (markers.length > 1) {
+      PolylineRequest polylineRequest = PolylineRequest(
+        origin: PointLatLng(markers.first.position.latitude, markers.first.position.longitude),
+        destination: PointLatLng(markers.last.position.latitude, markers.last.position.longitude),
+        mode: TravelMode.driving,
+      );
+
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        Keys.map,
-        PointLatLng(
-            markers.first.position.latitude, markers.first.position.longitude),
-        PointLatLng(
-            markers.last.position.latitude, markers.last.position.longitude),
+        request: polylineRequest,
+        googleApiKey: Keys.map,
       );
 
       if (result.points.isNotEmpty) {
         List<LatLng> polylineCoordinates = [];
-        result.points.forEach((PointLatLng point) {
+        result.points.map((PointLatLng point) {
           polylineCoordinates.add(LatLng(point.latitude, point.longitude));
         });
         Polyline polyline = Polyline(
