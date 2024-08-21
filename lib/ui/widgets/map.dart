@@ -42,6 +42,7 @@ class MapWidgetSampleState extends State<MapWidget> {
   Map<String, bool> driverStates = {
     'isWorking': false,
     'onBreak': false,
+    'isLoadingDriverStatus': true,
   };
   DateTime lastClockInButtonPress = DateTime(0);
   DateTime lastClockOutButtonPress = DateTime(0);
@@ -94,36 +95,53 @@ class MapWidgetSampleState extends State<MapWidget> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
     return Column(
       key: Key(iterateKey.toString()),
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        widget.driver ? driverBox(width, height) : (userService.isRiding() ? currentRide(width, height) : searchBox(width, height)),
+        buildTopBar(),
         Expanded(
-          child: userLatLng == null
-              ? const Center(child: CircularProgressIndicator())
-              : GoogleMap(
-                  myLocationEnabled: true,
-                  compassEnabled: true,
-                  initialCameraPosition:
-                      CameraPosition(target: userLatLng!, zoom: 17.5),
-                  mapToolbarEnabled: false,
-                  markers: markers.toSet(),
-                  myLocationButtonEnabled: false,
-                  onMapCreated: (GoogleMapController controller) {
-                    if (!_controller.isCompleted) {
-                      _controller.complete(controller);
-                    }
-                    controller.setMapStyle(mapTheme);
-                  },
-                  polylines: polylines.toSet(),
-                  zoomControlsEnabled: false,
-                ),
+          child: buildMap(),
         ),
       ],
+    );
+  }
+
+  Widget buildTopBar() {
+    if (widget.driver) {
+      if (driverStates['isLoadingDriverStatus'] ?? false) {
+        return const SizedBox(
+          height: 68,
+          child: Center(
+            child: CircularProgressIndicator(
+              color: Colors.black,
+            ),
+          ),
+        );
+      } else {
+        return driverBox(MediaQuery.of(context).size.width, 68);
+      }
+    } else {
+      return userService.isRiding() ? currentRide(MediaQuery.of(context).size.width, 68) : searchBox(MediaQuery.of(context).size.width, 68);
+    }
+  }
+
+  Widget buildMap() {
+    return userLatLng == null ? const Center(child: CircularProgressIndicator(
+      color: Colors.black,
+    )) : GoogleMap(
+      myLocationEnabled: true,
+      compassEnabled: true,
+      initialCameraPosition: CameraPosition(target: userLatLng!, zoom: 17.5),
+      mapToolbarEnabled: false,
+      markers: markers.toSet(),
+      myLocationButtonEnabled: false,
+      onMapCreated: (GoogleMapController controller) {
+        _controller.complete(controller);
+        controller.setMapStyle(mapTheme);
+      },
+      polylines: polylines.toSet(),
+      zoomControlsEnabled: false,
     );
   }
 
@@ -135,6 +153,10 @@ class MapWidgetSampleState extends State<MapWidget> {
       return;
     }
     lastClockInButtonPress = DateTime.now();
+
+    setState(() {
+      driverStates['isLoadingDriverStatus'] = true;
+    });
 
     // Clock in the driver
     Map<String, dynamic> response = await driverService.clockIn();
@@ -152,6 +174,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     setState(() {
       driverStates['isOnBreak'] = false;
       driverStates['isWorking'] = true;
+      driverStates['isLoadingDriverStatus'] = false;
     });
   }
 
@@ -161,6 +184,10 @@ class MapWidgetSampleState extends State<MapWidget> {
       return;
     }
     lastClockOutButtonPress = DateTime.now();
+
+    setState(() {
+      driverStates['isLoadingDriverStatus'] = true;
+    });
 
     var response = await driverService.clockOut();
     if (!response['success']) {
@@ -173,6 +200,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     setState(() {
       driverStates['isOnBreak'] = false;
       driverStates['isWorking'] = false;
+      driverStates['isLoadingDriverStatus'] = false;
     });
   }
 
@@ -182,6 +210,10 @@ class MapWidgetSampleState extends State<MapWidget> {
       return;
     }
     lastStartBreakButtonPress = DateTime.now();
+
+    setState(() {
+      driverStates['isLoadingDriverStatus'] = true;
+    });
 
     var response = await driverService.startBreak();
     if (!response['success']) {
@@ -194,6 +226,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     setState(() {
       driverStates['isOnBreak'] = true;
       driverStates['isWorking'] = true;
+      driverStates['isLoadingDriverStatus'] = false;
     });
   }
 
@@ -203,6 +236,10 @@ class MapWidgetSampleState extends State<MapWidget> {
       return;
     }
     lastEndBreakButtonPress = DateTime.now();
+
+    setState(() {
+      driverStates['isLoadingDriverStatus'] = true;
+    });
 
     var response = await driverService.endBreak();
     if (!response['success']) {
@@ -215,6 +252,7 @@ class MapWidgetSampleState extends State<MapWidget> {
     setState(() {
       driverStates['isOnBreak'] = false;
       driverStates['isWorking'] = true;
+      driverStates['isLoadingDriverStatus'] = false;
     });
   }
 
@@ -223,7 +261,11 @@ class MapWidgetSampleState extends State<MapWidget> {
     Map<String, bool> states = await driverService.getDriverStates();
     // Once the data is available, then update the state synchronously.
     setState(() {
-      driverStates = states;
+      driverStates = {
+        'isWorking': states['isWorking']!,
+        'isOnBreak': states['isOnBreak']!,
+        'isLoadingDriverStatus': false,
+      };
     });
   }
 
@@ -260,9 +302,9 @@ class MapWidgetSampleState extends State<MapWidget> {
       width: screenWidth,
       height: 68,
       child: Container(
-        decoration: const BoxDecoration(
-          color: ZipColors.primaryBackground,
-        ),
+        // decoration: const BoxDecoration(
+        //   color: ZipColors.primaryBackground,
+        // ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: driverStates['isWorking']!
             ? Row(
@@ -313,7 +355,7 @@ class MapWidgetSampleState extends State<MapWidget> {
                         backgroundColor:
                             MaterialStateProperty.all(ZipColors.zipYellow),
                         textStyle:
-                            MaterialStateProperty.all(ZipDesign.labelText),
+                            MaterialStateProperty.all(ZipDesign.labelText),   
                       ),
                     ),
                   ),
