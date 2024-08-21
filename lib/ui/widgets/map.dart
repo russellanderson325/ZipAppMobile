@@ -505,7 +505,7 @@ class MapWidgetSampleState extends State<MapWidget> {
 
       if (result.points.isNotEmpty) {
         List<LatLng> polylineCoordinates = [];
-        result.points.map((PointLatLng point) {
+        result.points.forEach((PointLatLng point) {
           polylineCoordinates.add(LatLng(point.latitude, point.longitude));
         });
         Polyline polyline = Polyline(
