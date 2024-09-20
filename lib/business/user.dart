@@ -15,7 +15,6 @@ class UserService {
   late StreamSubscription userSub;
   late User user;
 
-
   factory UserService() {
     return _instance;
   }
@@ -39,7 +38,6 @@ class UserService {
     });
 
     // Start listening for ride updates
-    
   }
 
   void endRide() {
@@ -54,7 +52,6 @@ class UserService {
     });
 
     // Reset the map
-
   }
 
   bool isRiding() {

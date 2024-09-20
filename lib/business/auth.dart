@@ -97,7 +97,7 @@ class AuthService {
     return _auth.signOut();
   }
 
-  void addUser(User user) async {
+  Future<void> addUser(User user) async {
     DocumentSnapshot doc = await _db.collection('users').doc(user.uid).get();
     if (doc.exists) {
       // print("user ${user.firstName} ${user.email} already exists");
