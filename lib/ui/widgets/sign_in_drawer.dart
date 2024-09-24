@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -112,12 +113,25 @@ class _SignInDrawerState extends State<SignInDrawer> {
         SystemChannels.textInput.invokeMethod('TextInput.hide');
         await auth.signIn(email, password);
       } catch (e) {
-        String exception = auth.getExceptionText(e as PlatformException);
+        String exception = auth.getExceptionText(e as Exception);
         _showErrorAlert(
           title: "Login failed",
           content: exception,
+          onPressed: () {},
         );
       }
+    } else if (!Validator.validateEmail(email!)) {
+      _showErrorAlert(
+        title: "Invalid Email",
+        content: "Please enter a valid email address.",
+        onPressed: () {},
+      );
+    } else if (!Validator.validatePassword(password!)) {
+      _showErrorAlert(
+        title: "Invalid Password",
+        content: "Password must be at least 6 characters long.",
+        onPressed: () {},
+      );
     }
   }
 
@@ -133,7 +147,11 @@ class _SignInDrawerState extends State<SignInDrawer> {
           onPressed: onPressed,
         );
       },
-    );
+    ).then((value) {
+      if (value != null && value) {
+        Navigator.of(context).pop(); // Dismiss the dialog
+      }
+    });
   }
 
   Widget _buildCreateAccountButton() {
