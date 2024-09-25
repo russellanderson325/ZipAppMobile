@@ -178,16 +178,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _cycleCarousel() {
-    setState(() {
-      _index = (_index + 1) % 3;
-    });
+    if (mounted) {
+      setState(() {
+        _index = (_index + 1) % 3;
+      });
+    }
   }
 
   void hideDrawers() {
-    setState(() {
-      showCreateAccountDrawer = false;
-      showSignInDrawer = false;
-    });
+    if (mounted) {
+      setState(() {
+        showCreateAccountDrawer = false;
+        showSignInDrawer = false;
+      });
+    }
   }
 
   void showCreateAccount() {
