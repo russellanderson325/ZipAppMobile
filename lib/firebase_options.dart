@@ -70,8 +70,10 @@ class DefaultFirebaseOptions {
     projectId: 'zipgameday-6ef28',
     databaseURL: 'https://zipgameday-6ef28.firebaseio.com',
     storageBucket: 'zipgameday-6ef28.appspot.com',
-    androidClientId: '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
-    iosClientId: '174497811264-3tu3dvmfhvn2tnjrrhd9mudevu9fbjdo.apps.googleusercontent.com',
+    androidClientId:
+        '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
+    iosClientId:
+        '174497811264-3tu3dvmfhvn2tnjrrhd9mudevu9fbjdo.apps.googleusercontent.com',
     iosBundleId: 'com.example.zipapp',
   );
 
@@ -82,8 +84,10 @@ class DefaultFirebaseOptions {
     projectId: 'zipgameday-6ef28',
     databaseURL: 'https://zipgameday-6ef28.firebaseio.com',
     storageBucket: 'zipgameday-6ef28.appspot.com',
-    androidClientId: '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
-    iosClientId: '174497811264-7q3mjjvh23vn85g43a7dhk6kgf34fnqc.apps.googleusercontent.com',
+    androidClientId:
+        '174497811264-kie6152gc4vvs3lphjk9m0970ku3cp4m.apps.googleusercontent.com',
+    iosClientId:
+        '174497811264-7q3mjjvh23vn85g43a7dhk6kgf34fnqc.apps.googleusercontent.com',
     iosBundleId: 'com.example.zipapp.RunnerTests',
   );
 }
