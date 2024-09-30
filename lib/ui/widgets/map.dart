@@ -42,6 +42,7 @@ class MapWidgetSampleState extends State<MapWidget> {
   Map<String, bool> driverStates = {
     'isWorking': false,
     'onBreak': false,
+    'isLoadingDriverStatus': true,
   };
   DateTime lastClockInButtonPress = DateTime(0);
   DateTime lastClockOutButtonPress = DateTime(0);
@@ -66,20 +67,23 @@ class MapWidgetSampleState extends State<MapWidget> {
 
     if (mounted) {
       positionService.getPosition().then((value) {
-        setState(() {
-          userLatLng = LatLng(value.latitude, value.longitude);
-          // if (userService.isRiding()) {
-          //   markers.add(Marker(
-          //     markerId: const MarkerId("userPosition"),
-          //     position: userLatLng!,
-          //     infoWindow: const InfoWindow(title: "You are here"),
-          //   ));
-          // }
-        });
+        if (mounted) {
+          setState(() {
+            userLatLng = LatLng(value.latitude, value.longitude);
+            // if (userService.isRiding()) {
+            //   markers.add(Marker(
+            //     markerId: const MarkerId("userPosition"),
+            //     position: userLatLng!,
+            //     infoWindow: const InfoWindow(title: "You are here"),
+            //   ));
+            // }
+          });
+        }
         // Update the driver status
         updateDriverStatus().then((value) async {
           if (userService.user.isRiding) {
-            Map<String, dynamic>? destinationAddress = await rideService.fetchRideDestination(userService.user.currentRideId);
+            Map<String, dynamic>? destinationAddress = await rideService
+                .fetchRideDestination(userService.user.currentRideId);
             GeoPoint destinationGeoPoint = destinationAddress?['geopoint'];
 
             double lat = destinationGeoPoint.latitude;
@@ -88,53 +92,82 @@ class MapWidgetSampleState extends State<MapWidget> {
           }
         });
       });
-
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
     return Column(
       key: Key(iterateKey.toString()),
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        widget.driver ? driverBox(width, height) : (userService.isRiding() ? currentRide(width, height) : searchBox(width, height)),
+        buildTopBar(),
         Expanded(
-          child: userLatLng == null
-              ? const Center(child: CircularProgressIndicator())
-              : GoogleMap(
-                  myLocationEnabled: true,
-                  compassEnabled: true,
-                  initialCameraPosition:
-                      CameraPosition(target: userLatLng!, zoom: 17.5),
-                  mapToolbarEnabled: false,
-                  markers: markers.toSet(),
-                  myLocationButtonEnabled: false,
-                  onMapCreated: (GoogleMapController controller) {
-                    if (!_controller.isCompleted) {
-                      _controller.complete(controller);
-                    }
-                    controller.setMapStyle(mapTheme);
-                  },
-                  polylines: polylines.toSet(),
-                  zoomControlsEnabled: false,
-                ),
+          child: buildMap(),
         ),
       ],
     );
+  }
+
+  Widget buildTopBar() {
+    if (widget.driver) {
+      if (driverStates['isLoadingDriverStatus'] ?? false) {
+        return const SizedBox(
+          height: 68,
+          child: Center(
+            child: CircularProgressIndicator(
+              color: Colors.black,
+            ),
+          ),
+        );
+      } else {
+        return driverBox(MediaQuery.of(context).size.width, 68);
+      }
+    } else {
+      return userService.isRiding()
+          ? currentRide(MediaQuery.of(context).size.width, 68)
+          : searchBox(MediaQuery.of(context).size.width, 68);
+    }
+  }
+
+  Widget buildMap() {
+    return userLatLng == null
+        ? const Center(
+            child: CircularProgressIndicator(
+            color: Colors.black,
+          ))
+        : GoogleMap(
+            myLocationEnabled: true,
+            compassEnabled: true,
+            initialCameraPosition:
+                CameraPosition(target: userLatLng!, zoom: 17.5),
+            mapToolbarEnabled: false,
+            markers: markers.toSet(),
+            myLocationButtonEnabled: false,
+            onMapCreated: (GoogleMapController controller) {
+              if (!_controller.isCompleted) _controller.complete(controller);
+              controller.setMapStyle(mapTheme);
+            },
+            polylines: polylines.toSet(),
+            zoomControlsEnabled: false,
+          );
   }
 
   //driver code
   void clockIn() async {
     // Prevent the user from spamming the clock in button
     if (DateTime.now().difference(lastClockInButtonPress).inSeconds < 5) {
-      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
+      if (mounted)
+        MessageOverlay.angryMessage(
+            context, "Please wait a few seconds before trying again.");
       return;
     }
     lastClockInButtonPress = DateTime.now();
+    if (mounted) {
+      setState(() {
+        driverStates['isLoadingDriverStatus'] = true;
+      });
+    }
 
     // Clock in the driver
     Map<String, dynamic> response = await driverService.clockIn();
@@ -149,18 +182,28 @@ class MapWidgetSampleState extends State<MapWidget> {
     driverService.startDriving();
 
     // Update the UI
-    setState(() {
-      driverStates['isOnBreak'] = false;
-      driverStates['isWorking'] = true;
-    });
+    if (mounted) {
+      setState(() {
+        driverStates['isOnBreak'] = false;
+        driverStates['isWorking'] = true;
+        driverStates['isLoadingDriverStatus'] = false;
+      });
+    }
   }
 
   void clockOut() async {
     if (DateTime.now().difference(lastClockOutButtonPress).inSeconds < 5) {
-      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
+      if (mounted)
+        MessageOverlay.angryMessage(
+            context, "Please wait a few seconds before trying again.");
       return;
     }
     lastClockOutButtonPress = DateTime.now();
+    if (mounted) {
+      setState(() {
+        driverStates['isLoadingDriverStatus'] = true;
+      });
+    }
 
     var response = await driverService.clockOut();
     if (!response['success']) {
@@ -169,19 +212,28 @@ class MapWidgetSampleState extends State<MapWidget> {
     }
 
     driverService.stopDriving();
-
-    setState(() {
-      driverStates['isOnBreak'] = false;
-      driverStates['isWorking'] = false;
-    });
+    if (mounted) {
+      setState(() {
+        driverStates['isOnBreak'] = false;
+        driverStates['isWorking'] = false;
+        driverStates['isLoadingDriverStatus'] = false;
+      });
+    }
   }
 
   void startBreak() async {
     if (DateTime.now().difference(lastStartBreakButtonPress).inSeconds < 5) {
-      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
+      if (mounted)
+        MessageOverlay.angryMessage(
+            context, "Please wait a few seconds before trying again.");
       return;
     }
     lastStartBreakButtonPress = DateTime.now();
+    if (mounted) {
+      setState(() {
+        driverStates['isLoadingDriverStatus'] = true;
+      });
+    }
 
     var response = await driverService.startBreak();
     if (!response['success']) {
@@ -190,19 +242,29 @@ class MapWidgetSampleState extends State<MapWidget> {
     }
 
     driverService.stopDriving();
-
-    setState(() {
-      driverStates['isOnBreak'] = true;
-      driverStates['isWorking'] = true;
-    });
+    if (mounted) {
+      setState(() {
+        driverStates['isOnBreak'] = true;
+        driverStates['isWorking'] = true;
+        driverStates['isLoadingDriverStatus'] = false;
+      });
+    }
   }
 
   void endBreak() async {
     if (DateTime.now().difference(lastEndBreakButtonPress).inSeconds < 5) {
-      if (mounted) MessageOverlay.angryMessage(context, "Please wait a few seconds before trying again.");
+      if (mounted)
+        MessageOverlay.angryMessage(
+            context, "Please wait a few seconds before trying again.");
       return;
     }
     lastEndBreakButtonPress = DateTime.now();
+
+    if (mounted) {
+      setState(() {
+        driverStates['isLoadingDriverStatus'] = true;
+      });
+    }
 
     var response = await driverService.endBreak();
     if (!response['success']) {
@@ -211,11 +273,13 @@ class MapWidgetSampleState extends State<MapWidget> {
     }
 
     driverService.startDriving();
-
-    setState(() {
-      driverStates['isOnBreak'] = false;
-      driverStates['isWorking'] = true;
-    });
+    if (mounted) {
+      setState(() {
+        driverStates['isOnBreak'] = false;
+        driverStates['isWorking'] = true;
+        driverStates['isLoadingDriverStatus'] = false;
+      });
+    }
   }
 
   Future<void> updateDriverStatus() async {
@@ -223,16 +287,21 @@ class MapWidgetSampleState extends State<MapWidget> {
     Map<String, bool> states = await driverService.getDriverStates();
     // Once the data is available, then update the state synchronously.
     setState(() {
-      driverStates = states;
+      driverStates = {
+        'isWorking': states['isWorking']!,
+        'isOnBreak': states['isOnBreak']!,
+        'isLoadingDriverStatus': false,
+      };
     });
   }
 
   Future<void> updateUI(User user) async {
-    setState(() {
-      iterateKey++;
-    });
+    if (mounted) {
+      setState(() {
+        iterateKey++;
+      });
+    }
   }
-
 
   SizedBox currentRide(double screenWidth, double screenHeight) {
     return SizedBox(
@@ -246,7 +315,9 @@ class MapWidgetSampleState extends State<MapWidget> {
         child: TextButton(
           onPressed: () {
             // Bring up the vehicle ride status confirmation screen
-            VehicleRideStatusConfirmationScreenState.showVehicleRequestAwaitingConfirmationScreen(context, rideService, _resetMarkers);
+            VehicleRideStatusConfirmationScreenState
+                .showVehicleRequestAwaitingConfirmationScreen(
+                    context, rideService, _resetMarkers);
           },
           style: ZipDesign.yellowButtonStyle,
           child: const Text('View Active Ride'),
@@ -260,9 +331,9 @@ class MapWidgetSampleState extends State<MapWidget> {
       width: screenWidth,
       height: 68,
       child: Container(
-        decoration: const BoxDecoration(
-          color: ZipColors.primaryBackground,
-        ),
+        // decoration: const BoxDecoration(
+        //   color: ZipColors.primaryBackground,
+        // ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: driverStates['isWorking']!
             ? Row(
@@ -340,7 +411,6 @@ class MapWidgetSampleState extends State<MapWidget> {
   }
 
   //rider code
-  
 
   SizedBox searchBox(double screenWidth, double screenHeight) {
     return SizedBox(
@@ -398,12 +468,15 @@ class MapWidgetSampleState extends State<MapWidget> {
     GooglePlace googlePlace = GooglePlace(Keys.map);
     await googlePlace.details.get(searchResult.placeId).then(
       (value) async {
-        if (value != null && value.result != null && value.result!.geometry != null && value.result!.geometry!.location != null) {
-          setState(() {
-            searchLatLng = LatLng(value.result!.geometry!.location!.lat!,
-                value.result!.geometry!.location!.lng!);
-          });
+        if (value != null &&
+            value.result != null &&
+            value.result!.geometry != null &&
+            value.result!.geometry!.location != null) {
           if (mounted) {
+            setState(() {
+              searchLatLng = LatLng(value.result!.geometry!.location!.lat!,
+                  value.result!.geometry!.location!.lng!);
+            });
             PolylineResult result = await _addSearchResult(searchResult);
             _moveCamera(
               latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015, value.result!.geometry!.location!.lng!)
@@ -413,7 +486,7 @@ class MapWidgetSampleState extends State<MapWidget> {
               VehiclesScreenState.showVehiclesScreen(
                 context, 
                 result.totalDistanceValue!.toDouble(), 
-                value.result!.geometry!.location!.lat!, 
+                value.result!.geometry!.location!.lat!,
                 value.result!.geometry!.location!.lng!,
                 _resetMarkers,
               );
@@ -441,19 +514,20 @@ class MapWidgetSampleState extends State<MapWidget> {
     if (mounted) {
       // Assuming you have a function to create and add a marker based on latitude and longitude
       await _addLatLngAsSearchResult(latitude, longitude);
-      _moveCamera(
-        latlng: LatLng(latitude - 0.0015, longitude)
-      );
+      _moveCamera(latlng: LatLng(latitude - 0.0015, longitude));
     }
   }
 
-  Future<PolylineResult> _addLatLngAsSearchResult(double latitude, double longitude) async {
+  Future<PolylineResult> _addLatLngAsSearchResult(
+      double latitude, double longitude) async {
     searchLatLng = LatLng(latitude, longitude);
-    LocalSearchResult searchResult = LocalSearchResult(name: "Custom Location", placeId: "custom");
+    LocalSearchResult searchResult =
+        LocalSearchResult(name: "Custom Location", placeId: "custom");
     return await _addSearchResult(searchResult);
   }
 
-  Future<PolylineResult> _addSearchResult(LocalSearchResult searchResult) async {
+  Future<PolylineResult> _addSearchResult(
+      LocalSearchResult searchResult) async {
     _resetMarkers();
     markers.add(Marker(
       markerId: const MarkerId("userPosition"),
@@ -478,7 +552,8 @@ class MapWidgetSampleState extends State<MapWidget> {
   void _moveCamera({latlng, zoom = 17}) async {
     latlng ??= userLatLng!;
     final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: latlng, zoom: zoom.toDouble())));
+    await controller.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: latlng, zoom: zoom.toDouble())));
   }
 
   void _resetMarkers() {
@@ -505,7 +580,7 @@ class MapWidgetSampleState extends State<MapWidget> {
 
       if (result.points.isNotEmpty) {
         List<LatLng> polylineCoordinates = [];
-        result.points.forEach((PointLatLng point) {
+        result.points.map((PointLatLng point) {
           polylineCoordinates.add(LatLng(point.latitude, point.longitude));
         });
         Polyline polyline = Polyline(

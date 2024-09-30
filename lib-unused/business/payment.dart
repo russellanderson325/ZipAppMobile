@@ -170,13 +170,13 @@ class Payment {
     // return doc;
   }
 
-/*  Future<void> collectTips(docID) async {
+Future<void> collectTips(docID) async {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     await FirebaseFirestore.instance
         .collection("stripe_customers")
-        .doc(firebaseUser.uid)
-        .collection()
-  }*/
+        .doc(firebaseUser?.uid)
+        .get();
+  }
 
 //Add Payment method to user
   Future<void> setPaymentMethodID(paymentmethod) async {
@@ -230,17 +230,17 @@ class Payment {
     return paymentsMethods.snapshots();
   }
 
-  /*Stream<DocumentSnapshot> getRefund(docId) {
+  Stream<DocumentSnapshot> getRefund(docId) {
     var firebaseUser = auth.FirebaseAuth.instance.currentUser;
     DocumentReference doc = FirebaseFirestore.instance
         .collection("stripe_customers")
-        .doc(firebaseUser.uid)
+        .doc(firebaseUser?.uid)
         .collection('payments')
         .doc(docId)
         .collection('refund')
         .doc("refund_doc");
     return doc.snapshots();
-  }*/
+  }
 
   /*_loadingDialog(BuildContext context) async {
     showCupertinoDialog(

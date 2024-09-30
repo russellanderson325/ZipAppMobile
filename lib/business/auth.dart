@@ -97,7 +97,7 @@ class AuthService {
     return _auth.signOut();
   }
 
-  void addUser(User user) async {
+  Future<void> addUser(User user) async {
     DocumentSnapshot doc = await _db.collection('users').doc(user.uid).get();
     if (doc.exists) {
       // print("user ${user.firstName} ${user.email} already exists");
@@ -140,16 +140,25 @@ class AuthService {
   }
 
   String getExceptionText(Exception e) {
-    if (e is PlatformException) {
-      switch (e.message) {
-        case 'There is no user record corresponding to this identifier. The user may have been deleted.':
+    if (e is auth.FirebaseAuthException) {
+      print("FROM FIREBASE ${e.code}");
+      switch (e.code) {
+        case 'invalid-email':
+          return 'Invalid email address.';
+        case 'user-disabled':
+          return 'User account is disabled.';
+        case 'user-not-found':
           return 'User with this e-mail not found.';
-        case 'The password is invalid or the user does not have a password.':
+        case 'wrong-password':
           return 'Invalid password.';
-        case 'A network error (such as timeout, interrupted connection or unreachable host) has occurred.':
+        case 'too-many-requests':
+          return 'Too many requests to login. Please try again later.';
+        case 'network-request-failed':
           return 'No internet connection.';
-        case 'The email address is already in use by another account.':
+        case 'email-already-in-use':
           return 'Email address is already taken.';
+        case 'weak-password':
+          return 'Password is too weak.';
         default:
           return 'Unknown error occured.';
       }

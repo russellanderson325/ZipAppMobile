@@ -145,8 +145,8 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
       try {
         /// Hides native keyboard
         SystemChannels.textInput.invokeMethod('TextInput.hide');
-        await auth.signUp(email, password).then((uid) {
-          auth.addUser(User(
+        await auth.signUp(email, password).then((uid) async {
+          await auth.addUser(User(
             uid: uid,
             email: email,
             firstName: firstname,
