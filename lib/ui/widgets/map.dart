@@ -479,13 +479,13 @@ class MapWidgetSampleState extends State<MapWidget> {
             });
             PolylineResult result = await _addSearchResult(searchResult);
             _moveCamera(
-                latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015,
-                    value.result!.geometry!.location!.lng!));
+              latlng: LatLng(value.result!.geometry!.location!.lat! - 0.0015, value.result!.geometry!.location!.lng!)
+            );
             if (result.totalDistanceValue != null) {
               // Show the vehicle request screen only if the distance value is not null
               VehiclesScreenState.showVehiclesScreen(
-                context,
-                result.totalDistanceValue!.toDouble(),
+                context, 
+                result.totalDistanceValue!.toDouble(), 
                 value.result!.geometry!.location!.lat!,
                 value.result!.geometry!.location!.lng!,
                 _resetMarkers,
@@ -568,10 +568,8 @@ class MapWidgetSampleState extends State<MapWidget> {
   Future<PolylineResult> _updatePolylines() async {
     if (markers.length > 1) {
       PolylineRequest polylineRequest = PolylineRequest(
-        origin: PointLatLng(
-            markers.first.position.latitude, markers.first.position.longitude),
-        destination: PointLatLng(
-            markers.last.position.latitude, markers.last.position.longitude),
+        origin: PointLatLng(markers.first.position.latitude, markers.first.position.longitude),
+        destination: PointLatLng(markers.last.position.latitude, markers.last.position.longitude),
         mode: TravelMode.driving,
       );
 
