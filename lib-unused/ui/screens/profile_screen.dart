@@ -248,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (kDebugMode) {
           print("Error when editing profile information: $e");
         }
-        String exception = auth.getExceptionText(e as PlatformException);
+        String exception = auth.getExceptionText(e as Exception);
         _showErrorAlert(
           title: "Edit profile failed",
           content: exception,
