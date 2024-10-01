@@ -218,7 +218,7 @@ class SignInScreenState extends State<SignInScreen> {
             .signIn(email, password)
             .then((uid) => Navigator.of(context!).pop());
       } catch (e) {
-        String exception = auth.getExceptionText(e as PlatformException);
+        String exception = auth.getExceptionText(e as Exception);
         _showErrorAlert(
           title: "Login failed",
           content: exception,
@@ -300,7 +300,7 @@ class SignInScreenState extends State<SignInScreen> {
                         await auth.sendResetPassword(_forgotPass.text);
                       } catch (e) {
                         String exception =
-                            auth.getExceptionText(e as PlatformException);
+                            auth.getExceptionText(e as Exception);
                         _showErrorAlert(
                           title: "Error sending reset password email",
                           content: exception,

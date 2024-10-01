@@ -160,7 +160,7 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
         });
         await auth.signIn(email, password);
       } catch (e) {
-        String exception = auth.getExceptionText(e as PlatformException);
+        String exception = auth.getExceptionText(e as Exception);
         print('The error is $exception');
       }
     }
