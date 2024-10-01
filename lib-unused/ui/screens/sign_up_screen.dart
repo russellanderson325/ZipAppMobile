@@ -262,7 +262,7 @@ class SignUpScreenState extends State<SignUpScreen> {
           onBackPress();
         });
       } catch (e) {
-        String exception = auth.getExceptionText(e as PlatformException);
+        String exception = auth.getExceptionText(e as Exception);
         _showErrorAlert(
           title: "Signup failed",
           content: exception,
