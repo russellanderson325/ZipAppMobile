@@ -7,6 +7,7 @@ import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/models/user.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
+import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 import 'package:zipapp/ui/widgets/custom_flat_button.dart';
 
 class CreateAccountDrawer extends StatefulWidget {
@@ -160,9 +161,63 @@ class _CreateAccountDrawerState extends State<CreateAccountDrawer> {
         });
         await auth.signIn(email, password);
       } catch (e) {
-        String exception = auth.getExceptionText(e as PlatformException);
+        String exception = auth.getExceptionText(e as Exception);
+        _showErrorAlert(
+          title: "Error",
+          content: "$exception",
+          onPressed: () {},
+        );
         print('The error is $exception');
       }
+    } else if (!Validator.validateEmail(email!)) {
+      _showErrorAlert(
+        title: "Invalid Email",
+        content: "Please enter a valid email address.",
+        onPressed: () {},
+      );
+    } else if (!Validator.validatePassword(password!)) {
+      _showErrorAlert(
+        title: "Invalid Password",
+        content: "Password must be at least 6 characters long.",
+        onPressed: () {},
+      );
+    } else if (!Validator.validateNumber(number)) {
+      _showErrorAlert(
+        title: "Invalid Number",
+        content: "Please enter a vaild phone number.",
+        onPressed: () {},
+      );
+    } else if (!Validator.validateName(firstname)) {
+      _showErrorAlert(
+        title: "Invalid First name",
+        content: "Please enter a vaild first name.",
+        onPressed: () {},
+      );
+    } else if (!Validator.validateName(lastname)) {
+      _showErrorAlert(
+        title: "Invalid First name",
+        content: "Please enter a vaild first name.",
+        onPressed: () {},
+      );
     }
+  }
+
+  void _showErrorAlert(
+      {String? title, String? content, VoidCallback? onPressed}) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return CustomAlertDialog(
+          content: content,
+          title: title,
+          onPressed: onPressed,
+        );
+      },
+    ).then((value) {
+      if (value != null && value) {
+        Navigator.of(context).pop(); // Dismiss the dialog
+      }
+    });
   }
 }
