@@ -93,7 +93,6 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                     ),
                   );
                 } else {
-                  print("FAILED");
                   _showErrorAlert(
                     title: "Invalid Email",
                     content: "Please enter a valid email address.",
