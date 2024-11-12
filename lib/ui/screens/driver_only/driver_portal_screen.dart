@@ -9,6 +9,7 @@ import 'package:zipapp/constants/zip_colors.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver_only/driver_main_screen.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
+import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 
 enum RequestStatus { unsubmitted, submitted, denied, approved }
 
@@ -288,11 +289,22 @@ class _DriverPortalState extends State<DriverPortal> {
   }
 
   bool _validatePassword() {
+    print("HERE I AM ");
     bool local = Validator.validatePassword(driverPasswordController.text) &&
         driverPasswordController.text == confirmDriverPasswordController.text;
-    setState(() {
-      validDriverPasswords = local;
-    });
+    if (local) {
+      print("Worked");
+      setState(() {
+        validDriverPasswords = local;
+      });
+    } else {
+      print("FAILED");
+      _showErrorAlert(
+        title: "Invalid Email",
+        content: "Please enter a valid email address.",
+        onPressed: () {},
+      );
+    }
     return local;
   }
 
@@ -517,5 +529,24 @@ class _DriverPortalState extends State<DriverPortal> {
         Validator.validateName(lastNameController.text) &&
         frontImageAdded &&
         rearImageAdded;
+  }
+
+  void _showErrorAlert(
+      {String? title, String? content, VoidCallback? onPressed}) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return CustomAlertDialog(
+          content: content,
+          title: title,
+          onPressed: onPressed,
+        );
+      },
+    ).then((value) {
+      if (value != null && value) {
+        Navigator.of(context).pop(); // Dismiss the dialog
+      }
+    });
   }
 }
