@@ -292,7 +292,6 @@ class _DriverPortalState extends State<DriverPortal> {
     bool local = Validator.validatePassword(driverPasswordController.text) &&
         driverPasswordController.text == confirmDriverPasswordController.text;
     if (local) {
-      print("Worked");
       setState(() {
         validDriverPasswords = local;
       });
