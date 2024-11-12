@@ -297,7 +297,6 @@ class _DriverPortalState extends State<DriverPortal> {
         validDriverPasswords = local;
       });
     } else {
-      print("FAILED");
       _showErrorAlert(
         title: "Invalid Email",
         content: "Please enter a valid email address.",
