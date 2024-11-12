@@ -12,6 +12,7 @@ import 'package:zipapp/ui/screens/rider_only/rider_main_screen.dart';
 import 'package:zipapp/ui/screens/safety_screen.dart';
 import 'package:zipapp/ui/screens/terms_screen.dart';
 import 'package:zipapp/ui/widgets/underline_textbox.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AccountScreen extends StatefulWidget {
   final bool driver;
@@ -20,6 +21,8 @@ class AccountScreen extends StatefulWidget {
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
+
+final Uri _url = Uri.parse('https://zipgameday.com');
 
 class _AccountScreenState extends State<AccountScreen> {
   final UserService userService = UserService();
@@ -215,6 +218,26 @@ class _AccountScreenState extends State<AccountScreen> {
                                   ZipDesign.labelText),
                             ))),
                     const SizedBox(height: 16),
+                    Align(
+                        alignment: Alignment.topLeft,
+                        child: TextButton.icon(
+                            onPressed: () {
+                              _launchUrl();
+                            },
+                            icon: const Icon(LucideIcons.badgeHelp),
+                            label: const Text('Help Center'),
+                            style: ButtonStyle(
+                              padding: MaterialStateProperty.all(
+                                  const EdgeInsets.all(0)),
+                              iconColor:
+                                  MaterialStateProperty.all(Colors.black),
+                              iconSize: MaterialStateProperty.all(16),
+                              foregroundColor:
+                                  MaterialStateProperty.all(Colors.black),
+                              textStyle: MaterialStateProperty.all(
+                                  ZipDesign.labelText),
+                            ))),
+                    const SizedBox(height: 16),
                     swapRiderOrDriver(),
                     const SizedBox(height: 16),
                     Align(
@@ -299,5 +322,11 @@ class _AccountScreenState extends State<AccountScreen> {
   void _logOut() async {
     AuthService().signOut();
     Navigator.of(context).pushNamed("/root");
+  }
+
+  Future<void> _launchUrl() async {
+    if (!await launchUrl(_url)) {
+      throw Exception('Could not launch $_url');
+    }
   }
 }

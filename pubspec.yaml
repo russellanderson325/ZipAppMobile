@@ -35,7 +35,7 @@ dependencies:
   percent_indicator: ^4.2.3
   shared_preferences: ^2.2.2
   strings: ^3.0.0
-  url_launcher: ^6.2.4
+  url_launcher: ^6.3.1
   webview_flutter: ^4.4.4
   dotted_border: ^2.1.0
 
