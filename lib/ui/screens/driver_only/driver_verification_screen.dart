@@ -5,6 +5,7 @@ import 'package:zipapp/business/validator.dart';
 import 'package:zipapp/constants/zip_design.dart';
 import 'package:zipapp/ui/screens/driver_only/driver_main_screen.dart';
 import 'package:zipapp/ui/widgets/authentication_drawer_widgets.dart';
+import 'package:zipapp/ui/widgets/custom_alert_dialog.dart';
 
 class DriverVerificationScreen extends StatefulWidget {
   const DriverVerificationScreen({super.key});
@@ -91,6 +92,12 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
                       builder: (context) => const DriverMainScreen(),
                     ),
                   );
+                } else {
+                  _showErrorAlert(
+                    title: "Invalid Email",
+                    content: "Please enter a valid email address.",
+                    onPressed: () {},
+                  );
                 }
               },
               style: ZipDesign.yellowButtonStyle,
@@ -100,5 +107,24 @@ class _DriverVerificationScreenState extends State<DriverVerificationScreen> {
         ),
       ),
     );
+  }
+
+  void _showErrorAlert(
+      {String? title, String? content, VoidCallback? onPressed}) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return CustomAlertDialog(
+          content: content,
+          title: title,
+          onPressed: onPressed,
+        );
+      },
+    ).then((value) {
+      if (value != null && value) {
+        Navigator.of(context).pop(); // Dismiss the dialog
+      }
+    });
   }
 }
